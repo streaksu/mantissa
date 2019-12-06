@@ -35,6 +35,8 @@ private slots:
 
     void on_newTabButton_clicked();
 
+    void on_settingsButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     void setWindowStuff();

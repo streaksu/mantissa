@@ -45,14 +45,20 @@
        <item>
         <widget class="QPushButton" name="backButton">
          <property name="text">
-          <string>&lt;</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="back"/>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="forwardButton">
          <property name="text">
-          <string>&gt;</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="next"/>
          </property>
         </widget>
        </item>
@@ -66,7 +72,20 @@
        <item>
         <widget class="QPushButton" name="newTabButton">
          <property name="text">
-          <string>New Tab</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="list-add"/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="settingsButton">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="settings"/>
          </property>
         </widget>
        </item>

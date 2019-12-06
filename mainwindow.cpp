@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "globals.h"
+#include "settings.h"
 
 #include <QWebEngineView>
 
@@ -9,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose);
     ui->navigationTabs->clear();
     on_newTabButton_clicked();
 }
@@ -89,7 +91,7 @@ void MainWindow::on_urlBar_returnPressed()
 
 void MainWindow::on_newTabButton_clicked()
 {
-    newTab(QUrl(HOMEPAGE));
+    newTab(QUrl(getHomepage()));
 }
 
 void MainWindow::newTab(const QUrl &page)
@@ -141,4 +143,10 @@ void MainWindow::setWindowStuff(QWebEngineView *webview) {
     ui->urlBar->setText(webview->url().toString());
     ui->urlBar->setCursorPosition(0);
     setWindowTitle(webview->url().toString() + " - " + PROJECTNAME);
+}
+
+void MainWindow::on_settingsButton_clicked()
+{
+    auto set = new Settings;
+    set->show();
 }

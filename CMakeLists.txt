@@ -27,6 +27,9 @@ add_executable(mantissa
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    settings.cpp
+    settings.h
+    settings.ui
 )
 
 target_link_libraries(
