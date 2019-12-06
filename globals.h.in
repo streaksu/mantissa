@@ -1,0 +1,9 @@
+#ifndef GLOBALS_H
+#define GLOBALS_H
+
+#define PROJECTNAME    "@CMAKE_PROJECT_NAME@"
+#define PROJECTVERSION "@CMAKE_PROJECT_VERSION@"
+#define PROJECTLICENSE "@CMAKE_PROJECT_LICENSE@"
+#define HOMEPAGE       "https://google.com"
+
+#endif // GLOBALS_H
