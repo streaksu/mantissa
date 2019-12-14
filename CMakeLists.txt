@@ -21,15 +21,23 @@ configure_file(
 )
 
 add_executable(mantissa
+    backend/webview.cpp
+    backend/webview.h
+
+    frontend/about.cpp
+    frontend/about.h
+    frontend/about.ui
+    frontend/mainwindow.cpp
+    frontend/mainwindow.h
+    frontend/mainwindow.ui
+    frontend/settings.cpp
+    frontend/settings.h
+    frontend/settings.ui
+
+    resources/resources.qrc
+
     globals.h.in
-    ${CMAKE_CURRENT_BINARY_DIR}/globals.h
     main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    settings.cpp
-    settings.h
-    settings.ui
 )
 
 target_link_libraries(

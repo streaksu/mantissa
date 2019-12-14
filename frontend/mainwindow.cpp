@@ -1,9 +1,8 @@
-#include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "frontend/mainwindow.h"
+
+#include "ui_mainwindow.h"
 #include "globals.h"
 #include "settings.h"
-
-#include <QWebEngineView>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -12,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     ui->navigationTabs->clear();
-    on_newTabButton_clicked();
+    newTab(QUrl(getHomepage()));
 }
 
 MainWindow::~MainWindow()
@@ -94,9 +93,9 @@ void MainWindow::on_newTabButton_clicked()
     newTab(QUrl(getHomepage()));
 }
 
-void MainWindow::newTab(const QUrl &page)
+WebView *MainWindow::newTab(const QUrl &page)
 {
-    auto webview = new QWebEngineView;
+    auto webview = new WebView(this);
     webview->setUrl(page);
 
     connect(
@@ -130,7 +129,10 @@ void MainWindow::newTab(const QUrl &page)
         SLOT(currentChanged(int))
     );
 
-    ui->navigationTabs->addTab(webview, "New tab");
+    int index = ui->navigationTabs->addTab(webview, "New tab");
+    ui->navigationTabs->setCurrentIndex(index);
+
+    return webview;
 }
 
 void MainWindow::setWindowStuff()
@@ -142,7 +144,7 @@ void MainWindow::setWindowStuff()
 void MainWindow::setWindowStuff(QWebEngineView *webview) {
     ui->urlBar->setText(webview->url().toString());
     ui->urlBar->setCursorPosition(0);
-    setWindowTitle(webview->url().toString() + " - " + PROJECTNAME);
+    setWindowTitle(webview->title() + " - " + PROJECTNAME);
 }
 
 void MainWindow::on_settingsButton_clicked()

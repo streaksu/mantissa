@@ -1,11 +1,13 @@
-#include "mainwindow.h"
-
+#include "frontend/mainwindow.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    a.setWindowIcon(QIcon(":/images/logo.png"));
+
+    auto w = new MainWindow;
+    w->show();
+
     return a.exec();
 }
