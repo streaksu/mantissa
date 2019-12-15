@@ -5,6 +5,7 @@
 #include <QSettings>
 
 QString getHomepage();
+bool getAddblock();
 
 namespace Ui {
 class Settings;
@@ -19,8 +20,9 @@ public:
     ~Settings();
 
 private slots:
-    void on_saveButton_clicked();
     void on_aboutButton_clicked();
+    void on_closeButton_clicked();
+    void on_saveButton_clicked();
 
 private:
     QSettings    *settings;

@@ -14,30 +14,31 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Dependencies.
 find_package(Qt5 REQUIRED COMPONENTS Widgets WebEngine WebEngineWidgets)
 
-# Configure header.
+# Configure header and desktop entry.
 configure_file(
-    ${PROJECT_SOURCE_DIR}/globals.h.in
+    ${PROJECT_SOURCE_DIR}/source/globals.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/globals.h
 )
 
-add_executable(mantissa
-    backend/webview.cpp
-    backend/webview.h
+# Executable and link targets.
+include_directories(${PROJECT_SOURCE_DIR}/source)
 
-    frontend/about.cpp
-    frontend/about.h
-    frontend/about.ui
-    frontend/mainwindow.cpp
-    frontend/mainwindow.h
-    frontend/mainwindow.ui
-    frontend/settings.cpp
-    frontend/settings.h
-    frontend/settings.ui
+add_executable(mantissa
+    source/backend/webview.cpp
+    source/backend/webview.h
+    source/frontend/about.cpp
+    source/frontend/about.h
+    source/frontend/about.ui
+    source/frontend/mainwindow.cpp
+    source/frontend/mainwindow.h
+    source/frontend/mainwindow.ui
+    source/frontend/settings.cpp
+    source/frontend/settings.h
+    source/frontend/settings.ui
+    source/globals.h.in
+    source/main.cpp
 
     resources/resources.qrc
-
-    globals.h.in
-    main.cpp
 )
 
 target_link_libraries(

@@ -10,9 +10,9 @@ About::About(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(QString(PROJECTNAME) + " - About");
-    ui->nameLabel->setText(PROJECTNAME);
-    ui->versionLabel->setText(PROJECTVERSION);
-    ui->licenseLabel->setText(PROJECTLICENSE);
+
+    ui->nameLabel->setText(QString("<b>") + PROJECTNAME + "</b> version <b>" + PROJECTVERSION + "</b>");
+    ui->licenseLabel->setText(QString("Distributed under the <b>") + PROJECTLICENSE "</b> license");
 }
 
 About::~About()
@@ -20,7 +20,7 @@ About::~About()
     delete ui;
 }
 
-void About::on_pushButton_clicked()
+void About::on_closeButton_clicked()
 {
     close();
 }

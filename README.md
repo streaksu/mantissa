@@ -1,4 +1,7 @@
 # Mantissa
+
+![forthebadge](https://forthebadge.com/images/badges/contains-cat-gifs.svg)
+
 A Qt based browser made with love.
 
 ## Dependencies:
@@ -18,11 +21,11 @@ Install the following:
 `pkg install cmake qt5-buildtools qt5-webengine`
 
 ## Build instructions.
-Inside the cloned git repository:
+Inside the cloned git repository for a release build:
 
 ```bash
-mkdir build && cd build
-cmake ../
-make
-sudo make install
+mkdir build && cd build              # Make build dir.
+cmake -DCMAKE_BUILD_TYPE=Release ../ # Configure,
+make -jN                             # Number of threads wanted to use.
+sudo make install/strip              # Install the stripped version.
 ```

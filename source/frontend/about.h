@@ -16,7 +16,7 @@ public:
     ~About();
 
 private slots:
-    void on_pushButton_clicked();
+    void on_closeButton_clicked();
 
 private:
     Ui::About *ui;

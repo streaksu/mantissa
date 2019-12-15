@@ -16,17 +16,21 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="general">
-      <property name="text">
-       <string>&lt;b&gt;General settings&lt;/b&gt;</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::RichText</enum>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="general">
+        <property name="text">
+         <string>&lt;b&gt;General settings&lt;/b&gt;</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="homepage">
         <property name="text">
@@ -40,11 +44,36 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="addblock">
+        <property name="text">
+         <string>Enable Addblocker</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="addblockCheck">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
        <widget class="QPushButton" name="aboutButton">
         <property name="text">
          <string>About</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="closeButton">
+        <property name="text">
+         <string>Close</string>
         </property>
        </widget>
       </item>
