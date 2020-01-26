@@ -29,3 +29,11 @@ cmake -DCMAKE_BUILD_TYPE=Release ../ # Configure,
 make -jN                             # Number of threads wanted to use.
 sudo make install/strip              # Install the stripped version.
 ```
+
+To install the desktop entries on a POSIX system:
+
+```bash
+sudo ./install-desktop-entry.sh
+```
+
+Such a solution for a windows or another non POSIX systems does not exist yet.

@@ -20,7 +20,8 @@ About::~About()
     delete ui;
 }
 
-void About::on_closeButton_clicked()
+void About::on_buttonBox_clicked(QAbstractButton *button)
 {
+    (void)button;
     close();
 }

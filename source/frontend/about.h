@@ -2,6 +2,7 @@
 #define ABOUT_H
 
 #include <QMainWindow>
+#include <QAbstractButton>
 
 namespace Ui {
 class About;
@@ -16,7 +17,7 @@ public:
     ~About();
 
 private slots:
-    void on_closeButton_clicked();
+    void on_buttonBox_clicked(QAbstractButton *button);
 
 private:
     Ui::About *ui;
