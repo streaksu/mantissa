@@ -3,9 +3,11 @@
 
 #include <QMainWindow>
 #include <QSettings>
+#include <QAbstractButton>
 
 QString getHomepage();
-bool getAddblock();
+bool getAdblock();
+int getCookiePolicy();
 
 namespace Ui {
 class Settings;
@@ -21,8 +23,7 @@ public:
 
 private slots:
     void on_aboutButton_clicked();
-    void on_closeButton_clicked();
-    void on_saveButton_clicked();
+    void on_buttonBox_clicked(QAbstractButton *button);
 
 private:
     QSettings    *settings;

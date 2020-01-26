@@ -6,8 +6,9 @@
 #include <QSettings>
 #include <QUrl>
 
-#define HOMEPAGE_KEY "homepage"
-#define ADDBLOCK_KEY "addblock"
+#define HOMEPAGE_KEY     "homepage"
+#define ADBLOCK_KEY     "adblock"
+#define COOKIEPOLICY_KEY "cookiepolicy"
 
 QString getHomepage()
 {
@@ -17,11 +18,20 @@ QString getHomepage()
      return homepage;
 }
 
-bool getAddblock() {
+bool getAdblock()
+{
     auto settings = new QSettings(PROJECTNAME);
-    auto addblocker = settings->value(ADDBLOCK_KEY).toBool();
+    auto addblocker = settings->value(ADBLOCK_KEY).toBool();
     delete settings;
     return addblocker;
+}
+
+int getCookiePolicy()
+{
+    auto settings = new QSettings(PROJECTNAME);
+    auto policy = settings->value(COOKIEPOLICY_KEY).toInt();
+    delete settings;
+    return policy;
 }
 
 Settings::Settings(QWidget *parent) :
@@ -34,7 +44,11 @@ Settings::Settings(QWidget *parent) :
     setWindowTitle(QString(PROJECTNAME) + " - Settings");
 
     ui->homepageBar->setText(getHomepage());
-    ui->addblockCheck->setCheckState(getAddblock() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    ui->adblockCheck->setCheckState(getAdblock() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    ui->cookiePolicyBox->addItems(
+        (QStringList() << "Never save cookies" << "Save persistent cookies" << "Force persistent cookies")
+    );
+    ui->cookiePolicyBox->setCurrentIndex(getCookiePolicy());
 }
 
 Settings::~Settings()
@@ -49,14 +63,13 @@ void Settings::on_aboutButton_clicked()
     about->show();
 }
 
-void Settings::on_closeButton_clicked()
+void Settings::on_buttonBox_clicked(QAbstractButton *button)
 {
-    close();
-}
+    if (button == ui->buttonBox->button(QDialogButtonBox::Save)) {
+        settings->setValue(HOMEPAGE_KEY,     QUrl::fromUserInput(ui->homepageBar->text()).toString());
+        settings->setValue(ADBLOCK_KEY,      ui->adblockCheck->checkState() == Qt::CheckState::Checked);
+        settings->setValue(COOKIEPOLICY_KEY, ui->cookiePolicyBox->currentIndex());
+    }
 
-void Settings::on_saveButton_clicked()
-{
-    settings->setValue(HOMEPAGE_KEY, QUrl::fromUserInput(ui->homepageBar->text()).toString());
-    settings->setValue(ADDBLOCK_KEY, ui->addblockCheck->checkState() == Qt::CheckState::Checked);
     close();
 }

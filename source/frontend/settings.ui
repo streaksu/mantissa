@@ -46,14 +46,14 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QLabel" name="addblock">
+       <widget class="QLabel" name="adblock">
         <property name="text">
-         <string>Enable Addblocker</string>
+         <string>Enable Adblocker</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="addblockCheck">
+       <widget class="QCheckBox" name="adblockCheck">
         <property name="text">
          <string/>
         </property>
@@ -64,23 +64,37 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
+       <widget class="QLabel" name="cookiepolicy">
+        <property name="text">
+         <string>Cookie policy</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cookiePolicyBox"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
        <widget class="QPushButton" name="aboutButton">
         <property name="text">
          <string>About</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="closeButton">
-        <property name="text">
-         <string>Close</string>
+        <property name="icon">
+         <iconset theme="help-about">
+          <normaloff>.</normaloff>.</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="saveButton">
-        <property name="text">
-         <string>Save</string>
+       <widget class="QDialogButtonBox" name="buttonBox">
+        <property name="standardButtons">
+         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+        </property>
+        <property name="centerButtons">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
