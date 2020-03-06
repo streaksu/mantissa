@@ -1,0 +1,5 @@
+module globals;
+
+immutable PROJECTNAME = "@NAME@";
+immutable PROJECTVERSION = "@VERSION@";
+immutable PROJECTLICENSE = "@LICENSE@";

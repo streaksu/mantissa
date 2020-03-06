@@ -2,38 +2,28 @@
 
 ![forthebadge](https://forthebadge.com/images/badges/contains-cat-gifs.svg)
 
-A Qt based browser made with love.
+A GTK+ based browser written in D and made with love.
 
-## Dependencies:
-### Debian & Ubuntu
-On Debian and Ubuntu, mantissa depends on the following packages:
+## Dependencies
 
-`sudo apt install build-essential cmake qtbase5-dev qt5-default qtwebengine5-dev`
+Mantissa needs in order to run the following:
 
-#### Void Linux
-Install the following:
+- GTK+ 3 and the gtkd library.
+- The webkit2gtk library.
 
-`sudo xbps-install -S gcc make cmake qt5-webengine-devel qt5-webchannel-devel qt5-declarative-devel qt5-location-devel`
+In order to build from source, development versions of those packages are
+needed, the meson build system and a D compiler.
 
-#### FreeBSD
-Install the following:
+## Building
 
-`pkg install cmake qt5-buildtools qt5-webengine`
+The project uses meson as build system, instructions on how to build meson
+projects can be found in [here](https://mesonbuild.com/Running-Meson.html).
 
-## Build instructions.
-Inside the cloned git repository for a release build:
-
+A flatpak configuration is also available, the commands go as such:
 ```bash
-mkdir build && cd build              # Make build dir.
-cmake -DCMAKE_BUILD_TYPE=Release ../ # Configure,
-make -jN                             # Number of threads wanted to use.
-sudo make install/strip              # Install the stripped version.
+flatpak install flathub org.gnome.Sdk//3.30
+flatpak install flathub org.gnome.Platform//3.30
+flatpak-builder --install flatpak-builder flatpak.yaml
 ```
 
-To install the desktop entries on a POSIX system:
-
-```bash
-sudo ./install-desktop-entry.sh
-```
-
-Such a solution for a windows or another non POSIX systems does not exist yet.
+Then, to run the application one can do `flatpak run com.streaksu.Mantissa`.
