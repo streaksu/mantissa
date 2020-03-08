@@ -3,25 +3,24 @@ module frontend.browser;
 import std.functional: toDelegate;
 import gtk.MainWindow;
 import gtk.HeaderBar;
-import gtk.ToolButton;
+import gtk.Button;
 import gtk.Entry;
 import gtk.Notebook;
 import gtk.Label;
 import gtk.Widget;
-import frontend.icons;
-import frontend.settingsmenu;
+import frontend.preferences;
 import backend.webview;
 
 private immutable WIN_WIDTH = 1600;
 private immutable WIN_HEIGHT = 900;
 
 class Browser : MainWindow {
-    ToolButton previousPage;
-    ToolButton nextPage;
-    ToolButton refresh;
+    Button previousPage;
+    Button nextPage;
+    Button refresh;
     Entry urlBar;
-    ToolButton addTab;
-    SettingsMenu settings;
+    Button addTab;
+    Button preferences;
     Notebook tabs;
 
     this(string homepage) {
@@ -30,12 +29,12 @@ class Browser : MainWindow {
         this.setDefaultSize(WIN_WIDTH, WIN_HEIGHT);
 
         // Initialize buttons.
-        this.previousPage = new ToolButton(ICON_PREVIOUS);
-        this.nextPage = new ToolButton(ICON_NEXT);
-        this.refresh = new ToolButton(ICON_REFRESH);
+        this.previousPage = new Button(StockID.GO_BACK, true);
+        this.nextPage = new Button(StockID.GO_FORWARD, true);
+        this.refresh = new Button(StockID.REFRESH, true);
         this.urlBar = new Entry();
-        this.addTab = new ToolButton(ICON_ADD);
-        this.settings = new SettingsMenu();
+        this.addTab = new Button(StockID.ADD, true);
+        this.preferences = new Button(StockID.PREFERENCES, true);
 
         this.previousPage.addOnClicked(toDelegate(&(this.previousSignal)));
         this.nextPage.addOnClicked(toDelegate(&(this.nextSignal)));
@@ -43,6 +42,7 @@ class Browser : MainWindow {
         this.urlBar.setWidthChars(100);
         this.urlBar.addOnActivate(toDelegate(&(this.urlBarEnterSignal)));
         this.addTab.addOnClicked(toDelegate(&(this.newTabSignal)));
+        this.preferences.addOnClicked(toDelegate(&(this.settingsSignal)));
 
         // Set the header and pack the buttons.
         auto header = new HeaderBar();
@@ -50,7 +50,7 @@ class Browser : MainWindow {
         header.packStart(this.nextPage);
         header.packStart(this.refresh);
         header.setCustomTitle(this.urlBar);
-        header.packEnd(this.settings);
+        header.packEnd(this.preferences);
         header.packEnd(this.addTab);
         header.setShowCloseButton(true);
 
@@ -83,17 +83,17 @@ class Browser : MainWindow {
         this.tabs.setShowTabs(index != 0);
     }
 
-    private void previousSignal(ToolButton b) {
+    private void previousSignal(Button b) {
         auto widget = getCurrentWebview();
         widget.goBack();
     }
 
-    private void nextSignal(ToolButton b) {
+    private void nextSignal(Button b) {
         auto widget = getCurrentWebview();
         widget.goForward();
     }
 
-    private void refreshSignal(ToolButton b) {
+    private void refreshSignal(Button b) {
         auto widget = getCurrentWebview();
         auto uri = widget.getUri();
         widget.loadUri(uri);
@@ -105,8 +105,12 @@ class Browser : MainWindow {
         widget.loadUri(request);
     }
 
-    private void newTabSignal(ToolButton b) {
-        newTab("https://dlang.org");
+    private void newTabSignal(Button b) {
+        newTab("https://google.com");
+    }
+
+    private void settingsSignal(Button b) {
+        auto p = new Preferences();
     }
 
     private void tabChangedSignal(Widget contents, uint index, Notebook book) {
