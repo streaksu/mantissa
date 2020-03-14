@@ -18,13 +18,3 @@ needed, the meson build system and a D compiler.
 
 The project uses meson as build system, instructions on how to build meson
 projects can be found in [here](https://mesonbuild.com/Running-Meson.html).
-
-A flatpak configuration is also available, the commands go as such:
-```bash
-cd flatpak
-flatpak install flathub org.gnome.Sdk//3.30
-flatpak install flathub org.gnome.Platform//3.30
-flatpak-builder --install flatpak-builder flatpak.yaml
-```
-
-Then, to run the application one can do `flatpak run com.streaksu.Mantissa`.

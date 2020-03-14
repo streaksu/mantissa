@@ -106,7 +106,7 @@ class Browser : MainWindow {
     }
 
     private void newTabSignal(Button b) {
-        newTab("https://google.com");
+        newTab(HOMEPAGE);
     }
 
     private void settingsSignal(Button b) {
