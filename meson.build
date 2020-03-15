@@ -32,3 +32,11 @@ install_data(
     rename: 'mantissa.desktop',
     install_dir : '/usr/local/share/applications'
 )
+
+install_data(
+    sources: 'resources/schema.xml',
+    rename: 'org.streaksu.Mantissa.gschema.xml',
+    install_dir: '/usr/local/share/glib-2.0/schemas'
+)
+
+meson.add_install_script('resources/install.sh')

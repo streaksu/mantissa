@@ -5,18 +5,18 @@ import gtk.Widget;
 import gobject.Signals;
 import backend.webviewsettings;
 
-extern (C) GtkWidget* webkit_web_view_new();
-extern (C) void webkit_web_view_load_uri(GtkWidget*, immutable(char)*);
-extern (C) char* webkit_web_view_get_uri(GtkWidget*);
-extern (C) char* webkit_web_view_get_title(GtkWidget*);
-extern (C) bool webkit_web_view_can_go_back(GtkWidget*);
-extern (C) bool webkit_web_view_can_go_forward(GtkWidget*);
-extern (C) WebkitSettings webkit_web_view_get_settings(GtkWidget*);
-extern (C) void webkit_web_view_set_settings(GtkWidget*, WebkitSettings);
+private extern (C) GtkWidget* webkit_web_view_new();
+private extern (C) void webkit_web_view_load_uri(GtkWidget*, immutable(char)*);
+private extern (C) char* webkit_web_view_get_uri(GtkWidget*);
+private extern (C) char* webkit_web_view_get_title(GtkWidget*);
+private extern (C) bool webkit_web_view_can_go_back(GtkWidget*);
+private extern (C) bool webkit_web_view_can_go_forward(GtkWidget*);
+private extern (C) WebkitSettings webkit_web_view_get_settings(GtkWidget*);
+private extern (C) void webkit_web_view_set_settings(GtkWidget*, WebkitSettings);
 
-extern (C) void webkit_web_view_go_back(GtkWidget*);
-extern (C) void webkit_web_view_go_forward(GtkWidget*);
-extern (C) void webkit_web_view_reload(GtkWidget*);
+private extern (C) void webkit_web_view_go_back(GtkWidget*);
+private extern (C) void webkit_web_view_go_forward(GtkWidget*);
+private extern (C) void webkit_web_view_reload(GtkWidget*);
 
 class Webview : Widget {
     private GtkWidget* webview;

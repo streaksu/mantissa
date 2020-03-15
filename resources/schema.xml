@@ -1,0 +1,46 @@
+<schemalist>
+  <schema path="/org/streaksu/Mantissa/" id="org.streaksu.Mantissa">
+    <key type="b" name="smooth-scrolling">
+      <default>true</default>
+      <summary>Enable smooth scrolling</summary>
+      <description>
+        This key determines whether webkit will
+        enable smooth scrolling support, which
+        can end up being resource intensive.
+      </description>
+    </key>
+    <key type="b" name="page-cache">
+      <default>true</default>
+      <summary>Enable webpage caching</summary>
+      <description>
+        This key determines whether webkit will
+        enable page caching, which can end up
+        being resource intensive.
+      </description>
+    </key>
+    <key type="b" name="javascript">
+      <default>true</default>
+      <summary>Enable javascript support</summary>
+      <description>
+        This key determines whether webkit will
+        enable javascript support.
+      </description>
+    </key>
+    <key type="b" name="mediasource">
+      <default>true</default>
+      <summary>Enable Media source</summary>
+      <description>
+        This key determines whether webkit will
+        enable media source, needed for video content.
+      </description>
+    </key>
+    <key type="s" name="homepage">
+      <default>'https://dlang.org'</default>
+      <summary>Homepage</summary>
+      <description>
+        This key determines which web will be
+        opened for new tabs and startup.
+      </description>
+    </key>
+  </schema>
+</schemalist>

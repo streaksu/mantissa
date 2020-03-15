@@ -2,11 +2,11 @@ module backend.webviewsettings;
 
 alias WebkitSettings = void*;
 
-extern (C) WebkitSettings webkit_settings_new();
-extern (C) void webkit_settings_set_enable_smooth_scrolling(WebkitSettings view, bool set);
-extern (C) void webkit_settings_set_enable_page_cache(WebkitSettings view, bool set);
-extern (C) void webkit_settings_set_enable_javascript(WebkitSettings view, bool set);
-extern (C) void webkit_settings_set_enable_mediasource(WebkitSettings view, bool set);
+private extern (C) WebkitSettings webkit_settings_new();
+private extern (C) void webkit_settings_set_enable_smooth_scrolling(WebkitSettings, bool);
+private extern (C) void webkit_settings_set_enable_page_cache(WebkitSettings, bool);
+private extern (C) void webkit_settings_set_enable_javascript(WebkitSettings, bool);
+private extern (C) void webkit_settings_set_enable_mediasource(WebkitSettings, bool);
 
 class WebviewSettings {
     private WebkitSettings backend;
