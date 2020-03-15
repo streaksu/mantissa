@@ -5,6 +5,7 @@ webkit = dependency('webkit2gtk-4.0')
 
 source = files(
     'source/backend/webview.d',
+    'source/backend/webviewsettings.d',
     'source/frontend/browser.d',
     'source/frontend/preferences.d',
     'source/main.d'

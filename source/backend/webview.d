@@ -3,59 +3,41 @@ module backend.webview;
 import std.string;
 import gtk.Widget;
 import gobject.Signals;
-import frontend.preferences;
-
-alias WebkitSettings = void*;
+import backend.webviewsettings;
 
 extern (C) GtkWidget* webkit_web_view_new();
-extern (C) void webkit_web_view_load_uri(GtkWidget* view, immutable(char)* uri);
-extern (C) char* webkit_web_view_get_uri(GtkWidget* view);
-extern (C) bool webkit_web_view_can_go_back(GtkWidget *view);
-extern (C) bool webkit_web_view_can_go_forward(GtkWidget *view);
-extern (C) void webkit_web_view_go_back(GtkWidget *view);
-extern (C) void webkit_web_view_go_forward(GtkWidget *view);
-extern (C) char* webkit_web_view_get_title(GtkWidget* view);
-extern (C) WebkitSettings webkit_web_view_get_settings(GtkWidget* view);
-extern (C) void webkit_web_view_set_settings(GtkWidget* view, WebkitSettings settings);
-extern (C) void webkit_settings_set_enable_smooth_scrolling(WebkitSettings view, bool set);
-extern (C) void webkit_settings_set_enable_page_cache(WebkitSettings view, bool set);
-extern (C) void webkit_settings_set_enable_javascript(WebkitSettings view, bool set);
+extern (C) void webkit_web_view_load_uri(GtkWidget*, immutable(char)*);
+extern (C) char* webkit_web_view_get_uri(GtkWidget*);
+extern (C) char* webkit_web_view_get_title(GtkWidget*);
+extern (C) bool webkit_web_view_can_go_back(GtkWidget*);
+extern (C) bool webkit_web_view_can_go_forward(GtkWidget*);
+extern (C) WebkitSettings webkit_web_view_get_settings(GtkWidget*);
+extern (C) void webkit_web_view_set_settings(GtkWidget*, WebkitSettings);
+
+extern (C) void webkit_web_view_go_back(GtkWidget*);
+extern (C) void webkit_web_view_go_forward(GtkWidget*);
+extern (C) void webkit_web_view_reload(GtkWidget*);
 
 class Webview : Widget {
-    GtkWidget* webview;
+    private GtkWidget* webview;
 
-    this() {
-        // Init the webview.
-        this.webview = webkit_web_view_new();
-        super(this.webview);
+    @property auto uri() { return cast(string)fromStringz(webkit_web_view_get_uri(this.webview)); }
+    @property auto title() { return cast(string)fromStringz(webkit_web_view_get_title(this.webview)); }
+    @property auto canGoBack() { return webkit_web_view_can_go_back(this.webview); }
+    @property auto canGoForward() { return webkit_web_view_can_go_forward(this.webview); }
+    @property auto settings() { return new WebviewSettings(webkit_web_view_get_settings(this.webview)); }
 
-        // Enable settings depending on preferences.
-        auto s = webkit_web_view_get_settings(this.webview);
-        webkit_settings_set_enable_smooth_scrolling(s, SMOOTH_SCROLLING);
-        webkit_settings_set_enable_page_cache(s, PAGE_CACHE);
-        webkit_settings_set_enable_javascript(s, JAVASCRIPT);
-        webkit_web_view_set_settings(this.webview, s);
-    }
+    @property void uri(string uri) { webkit_web_view_load_uri(this.webview, toStringz(uri)); }
+    @property void settings(WebviewSettings s) { webkit_web_view_set_settings(this.webview, s.settings); }
 
     this(GtkWidget* webview, bool ownedRef = false) {
         this.webview = webview;
         super(this.webview, ownedRef);
     }
 
-    void loadUri(string uri) {
-        webkit_web_view_load_uri(this.webview, toStringz(uri));
-    }
-
-    string getUri() {
-        return cast(string)fromStringz(webkit_web_view_get_uri(this.webview));
-    }
-
-    bool canGoBack() {
-        return webkit_web_view_can_go_back(this.webview);
-    }
-
-    bool canGoForward() {
-        return webkit_web_view_can_go_forward(this.webview);
+    this() {
+        this.webview = webkit_web_view_new();
+        super(this.webview);
     }
 
     void goBack() {
@@ -66,8 +48,8 @@ class Webview : Widget {
         webkit_web_view_go_forward(this.webview);
     }
 
-    string getTitle() {
-        return cast(string)fromStringz(webkit_web_view_get_title(this.webview));
+    void reload() {
+        webkit_web_view_reload(this.webview);
     }
 
     void addOnUriChange(void delegate(Webview) dlg) {

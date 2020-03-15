@@ -15,12 +15,14 @@ private immutable CLOSE_SIGNAL = 1;
 shared bool SMOOTH_SCROLLING;
 shared bool PAGE_CACHE;
 shared bool JAVASCRIPT;
+shared bool MEDIASOURCE;
 shared string HOMEPAGE;
 
 shared static this() {
     SMOOTH_SCROLLING = true;
     PAGE_CACHE = true;
     JAVASCRIPT = true;
+    MEDIASOURCE = true;
     HOMEPAGE = "https://dlang.org";
 }
 
@@ -28,6 +30,7 @@ class Preferences : Dialog {
     CheckButton smoothScrolling;
     CheckButton pageCache;
     CheckButton javascript;
+    CheckButton mediaSource;
     Entry homepage;
 
     this() {
@@ -39,12 +42,14 @@ class Preferences : Dialog {
         this.smoothScrolling = new CheckButton("Enable smooth scrolling");
         this.pageCache = new CheckButton("Enable page caching");
         this.javascript = new CheckButton("Enable javascript");
+        this.mediaSource = new CheckButton("Enable Media Source");
         this.homepage = new Entry();
 
         // Set current values.
         this.smoothScrolling.setActive(SMOOTH_SCROLLING);
         this.pageCache.setActive(PAGE_CACHE);
         this.javascript.setActive(JAVASCRIPT);
+        this.mediaSource.setActive(MEDIASOURCE);
         this.homepage.setText(HOMEPAGE);
 
         // Add items to boxes.
@@ -53,6 +58,7 @@ class Preferences : Dialog {
         vbox.add(this.smoothScrolling);
         vbox.add(this.pageCache);
         vbox.add(this.javascript);
+        vbox.add(this.mediaSource);
         vbox.add(new Label("Homepage"));
         vbox.add(this.homepage);
 

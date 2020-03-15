@@ -10,6 +10,7 @@ import gtk.Label;
 import gtk.Widget;
 import frontend.preferences;
 import backend.webview;
+import backend.webviewsettings;
 
 private immutable WIN_WIDTH = 1600;
 private immutable WIN_HEIGHT = 900;
@@ -72,10 +73,17 @@ class Browser : MainWindow {
 
     void newTab(string url) {
         auto content = new Webview();
+        auto contentSettings = new WebviewSettings();
         auto tabTitle = new Label("");
         auto index = this.tabs.appendPage(content, tabTitle);
 
-        content.loadUri(url);
+        contentSettings.smoothScrolling = SMOOTH_SCROLLING;
+        contentSettings.pageCache = PAGE_CACHE;
+        contentSettings.javascript = JAVASCRIPT;
+        contentSettings.mediasource = MEDIASOURCE;
+
+        content.uri = url;
+        content.settings = contentSettings;
         content.addOnUriChange(toDelegate(&(this.uriChangedSignal)));
 
         this.tabs.showAll(); // We need the item to be visible for switching.
@@ -95,14 +103,13 @@ class Browser : MainWindow {
 
     private void refreshSignal(Button b) {
         auto widget = getCurrentWebview();
-        auto uri = widget.getUri();
-        widget.loadUri(uri);
+        widget.reload();
     }
 
     private void urlBarEnterSignal(Entry entry) {
         auto request = entry.getText();
         auto widget = getCurrentWebview();
-        widget.loadUri(request);
+        widget.uri = request;
     }
 
     private void newTabSignal(Button b) {
@@ -114,19 +121,18 @@ class Browser : MainWindow {
     }
 
     private void tabChangedSignal(Widget contents, uint index, Notebook book) {
-        auto uri = (cast(Webview)contents).getUri();
+        auto uri = (cast(Webview)contents).uri;
         this.urlBar.setText(uri);
         this.urlBar.showAll();
     }
 
     private void uriChangedSignal(Webview sender) {
-        auto title = sender.getTitle();
-        this.tabs.setTabLabelText(sender, title);
+        this.tabs.setTabLabelText(sender, sender.title);
 
         if (getCurrentWebview() == sender) {
-            this.urlBar.setText(sender.getUri());
-            this.previousPage.setSensitive(sender.canGoBack());
-            this.nextPage.setSensitive(sender.canGoForward());
+            this.urlBar.setText(sender.uri);
+            this.previousPage.setSensitive(sender.canGoBack);
+            this.nextPage.setSensitive(sender.canGoForward);
         }
     }
 }
