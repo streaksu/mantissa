@@ -5,7 +5,7 @@ import gtk.Dialog;
 import gtk.CheckButton;
 import gtk.Entry;
 import gtk.Label;
-import gio.Settings;
+import settings;
 
 private immutable WIN_WIDTH = 800;
 private immutable WIN_HEIGHT = 450;
@@ -13,35 +13,12 @@ private immutable WIN_HEIGHT = 450;
 private immutable SAVE_SIGNAL = 0;
 private immutable CLOSE_SIGNAL = 1;
 
-private immutable SCHEMA_ID = "org.streaksu.Mantissa";
-private immutable SMOOTH_SCROLLING_KEY = "smooth-scrolling";
-private immutable PAGE_CACHE_KEY = "page-cache";
-private immutable JAVASCRIPT_KEY = "javascript";
-private immutable MEDIASOURCE_KEY = "mediasource";
-private immutable HOMEPAGE_KEY = "homepage";
-
-shared bool SMOOTH_SCROLLING;
-shared bool PAGE_CACHE;
-shared bool JAVASCRIPT;
-shared bool MEDIASOURCE;
-shared string HOMEPAGE;
-
-shared static this() {
-    auto s = new Settings(SCHEMA_ID);
-
-    SMOOTH_SCROLLING = s.getBoolean(SMOOTH_SCROLLING_KEY);
-    PAGE_CACHE = s.getBoolean(PAGE_CACHE_KEY);
-    JAVASCRIPT = s.getBoolean(JAVASCRIPT_KEY);
-    MEDIASOURCE = s.getBoolean(MEDIASOURCE_KEY);
-    HOMEPAGE = s.getString(HOMEPAGE_KEY);
-}
-
 class Preferences : Dialog {
-    CheckButton smoothScrolling;
-    CheckButton pageCache;
-    CheckButton javascript;
-    CheckButton mediaSource;
-    Entry homepage;
+    private CheckButton smoothScrolling;
+    private CheckButton pageCache;
+    private CheckButton javascript;
+    private CheckButton mediaSource;
+    private Entry homepage;
 
     this() {
         // Init ourselves first.
@@ -82,18 +59,12 @@ class Preferences : Dialog {
     private void saveCloseSignal(int signal, Dialog dialog) {
         switch (signal) {
             case SAVE_SIGNAL:
-                auto s = new Settings(SCHEMA_ID);
-                s.setBoolean(SMOOTH_SCROLLING_KEY, this.smoothScrolling.getActive());
-                s.setBoolean(PAGE_CACHE_KEY, this.pageCache.getActive());
-                s.setBoolean(JAVASCRIPT_KEY, this.javascript.getActive());
-                s.setBoolean(MEDIASOURCE_KEY, this.mediaSource.getActive());
-                s.setString(HOMEPAGE_KEY, this.homepage.getText());
-
-                SMOOTH_SCROLLING = s.getBoolean(SMOOTH_SCROLLING_KEY);
-                PAGE_CACHE = s.getBoolean(PAGE_CACHE_KEY);
-                JAVASCRIPT = s.getBoolean(JAVASCRIPT_KEY);
-                MEDIASOURCE = s.getBoolean(MEDIASOURCE_KEY);
-                HOMEPAGE = s.getString(HOMEPAGE_KEY);
+                SMOOTH_SCROLLING = this.smoothScrolling.getActive();
+                PAGE_CACHE = this.pageCache.getActive();
+                JAVASCRIPT = this.javascript.getActive();
+                MEDIASOURCE = this.mediaSource.getActive();
+                HOMEPAGE = this.homepage.getText();
+                saveSettings();
                 break;
             case CLOSE_SIGNAL:
                 this.close();

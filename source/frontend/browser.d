@@ -8,6 +8,7 @@ import gtk.Entry;
 import gtk.Notebook;
 import gtk.Label;
 import gtk.Widget;
+import settings;
 import frontend.preferences;
 import backend.webview;
 import backend.webviewsettings;
@@ -16,13 +17,13 @@ private immutable WIN_WIDTH = 1600;
 private immutable WIN_HEIGHT = 900;
 
 class Browser : MainWindow {
-    Button previousPage;
-    Button nextPage;
-    Button refresh;
-    Entry urlBar;
-    Button addTab;
-    Button preferences;
-    Notebook tabs;
+    private Button previousPage;
+    private Button nextPage;
+    private Button refresh;
+    private Entry urlBar;
+    private Button addTab;
+    private Button preferences;
+    private Notebook tabs;
 
     this(string homepage) {
         // Init ourselves.
@@ -107,9 +108,8 @@ class Browser : MainWindow {
     }
 
     private void urlBarEnterSignal(Entry entry) {
-        auto request = entry.getText();
         auto widget = getCurrentWebview();
-        widget.uri = request;
+        widget.uri = entry.getText();
     }
 
     private void newTabSignal(Button b) {
