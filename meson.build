@@ -3,7 +3,7 @@ project('mantissa', 'd', version: '0.0.1', license: 'BSL-1.0')
 # Locations.
 prefix = get_option('prefix')
 datadir = join_paths(prefix, get_option('datadir'))
-icon_install = join_paths(datadir, 'icons')
+icon_install = join_paths(datadir, 'icons/hicolor/scalable/apps')
 desktop_install = join_paths(datadir, 'applications')
 schema_install = join_paths(datadir, 'glib-2.0/schemas')
 
@@ -32,12 +32,12 @@ e = executable(
 )
 
 # Auxiliary files and their installation (logo, desktop, etc).
-icon = 'resources/logo.png'
-desktop = 'resources/mantissa.desktop'
+desktop = 'resources/entry.desktop'
+icon = 'resources/icon.png'
 schema = 'resources/schema.xml'
 
-install_data(sources: icon, install_dir: icon_install)
-install_data(sources: desktop, install_dir: desktop_install)
+install_data(sources: desktop, rename: 'mantissa.desktop', install_dir: desktop_install)
+install_data(sources: icon, rename: 'mantissa.png', install_dir: icon_install)
 install_data(sources: schema, rename: 'org.streaksu.Mantissa.gschema.xml', install_dir: schema_install)
 
 meson.add_install_script('postinstall.py')
