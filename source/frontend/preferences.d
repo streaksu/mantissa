@@ -23,7 +23,7 @@ class Preferences : Dialog {
     private CheckButton smoothScrolling;
     private CheckButton pageCache;
     private CheckButton javascript;
-    private CheckButton mediaSource;
+    private CheckButton siteSpecificQuirks;
     private Entry homepage;
 
     this() {
@@ -35,14 +35,14 @@ class Preferences : Dialog {
         this.smoothScrolling = new CheckButton("Enable smooth scrolling");
         this.pageCache = new CheckButton("Enable page caching");
         this.javascript = new CheckButton("Enable javascript");
-        this.mediaSource = new CheckButton("Enable Media Source");
+        this.siteSpecificQuirks = new CheckButton("Enable site specific quirks");
         this.homepage = new Entry();
 
         // Set current values.
         this.smoothScrolling.setActive(SMOOTH_SCROLLING);
         this.pageCache.setActive(PAGE_CACHE);
         this.javascript.setActive(JAVASCRIPT);
-        this.mediaSource.setActive(MEDIASOURCE);
+        this.siteSpecificQuirks.setActive(SITEQUIRKS);
         this.homepage.setText(HOMEPAGE);
 
         // Add items to boxes.
@@ -52,7 +52,7 @@ class Preferences : Dialog {
         packBox(engine, this.smoothScrolling);
         packBox(engine, this.pageCache);
         packBox(engine, this.javascript);
-        packBox(engine, this.mediaSource);
+        packBox(engine, this.siteSpecificQuirks);
         tabs.appendPage(engine, new Label("Engine"));
 
         auto browsing = new VBox(false, 10);
@@ -72,7 +72,7 @@ class Preferences : Dialog {
                 SMOOTH_SCROLLING = this.smoothScrolling.getActive();
                 PAGE_CACHE = this.pageCache.getActive();
                 JAVASCRIPT = this.javascript.getActive();
-                MEDIASOURCE = this.mediaSource.getActive();
+                SITEQUIRKS = this.siteSpecificQuirks.getActive();
                 HOMEPAGE = this.homepage.getText();
                 saveSettings();
                 break;

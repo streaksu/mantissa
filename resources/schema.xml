@@ -26,12 +26,14 @@
         enable javascript support.
       </description>
     </key>
-    <key type="b" name="mediasource">
+    <key type="b" name="site-quirks">
       <default>true</default>
-      <summary>Enable Media source</summary>
+      <summary>Enable site specific quirks</summary>
       <description>
         This key determines whether webkit will
-        enable media source, needed for video content.
+        enable site specific quirks, that can enhance
+        the experience on given sites in exchange of non
+        standard behaviour.
       </description>
     </key>
     <key type="s" name="homepage">

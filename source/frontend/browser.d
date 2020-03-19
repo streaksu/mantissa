@@ -81,7 +81,7 @@ class Browser : MainWindow {
         contentSettings.smoothScrolling = SMOOTH_SCROLLING;
         contentSettings.pageCache = PAGE_CACHE;
         contentSettings.javascript = JAVASCRIPT;
-        contentSettings.mediasource = MEDIASOURCE;
+        contentSettings.siteSpecificQuirks = SITEQUIRKS;
 
         content.uri = url;
         content.settings = contentSettings;
