@@ -5,13 +5,19 @@ import gtk.Dialog;
 import gtk.CheckButton;
 import gtk.Entry;
 import gtk.Label;
+import gtk.Notebook;
+import gtk.VBox;
+import gtk.Widget;
 import settings;
 
-private immutable WIN_WIDTH = 800;
-private immutable WIN_HEIGHT = 450;
+private immutable WIN_WIDTH = 500;
+private immutable WIN_HEIGHT = 600;
 
-private immutable SAVE_SIGNAL = 0;
-private immutable CLOSE_SIGNAL = 1;
+private immutable CLOSE_SIGNAL = -4;
+
+private void packBox(VBox box, Widget widget) {
+    box.packStart(widget, false, false, 0);
+}
 
 class Preferences : Dialog {
     private CheckButton smoothScrolling;
@@ -40,34 +46,35 @@ class Preferences : Dialog {
         this.homepage.setText(HOMEPAGE);
 
         // Add items to boxes.
-        auto vbox = this.getContentArea();
-        vbox.add(new Label("Engine settings"));
-        vbox.add(this.smoothScrolling);
-        vbox.add(this.pageCache);
-        vbox.add(this.javascript);
-        vbox.add(this.mediaSource);
-        vbox.add(new Label("Homepage"));
-        vbox.add(this.homepage);
+        auto tabs = new Notebook();
 
-        // Add the buttons and show all.
-        this.addButton(StockID.SAVE, SAVE_SIGNAL);
-        this.addButton(StockID.CLOSE, CLOSE_SIGNAL);
+        auto engine = new VBox(false, 10);
+        packBox(engine, this.smoothScrolling);
+        packBox(engine, this.pageCache);
+        packBox(engine, this.javascript);
+        packBox(engine, this.mediaSource);
+        tabs.appendPage(engine, new Label("Engine"));
+
+        auto browsing = new VBox(false, 10);
+        packBox(browsing, new Label("Homepage"));
+        packBox(browsing, this.homepage);
+        tabs.appendPage(browsing, new Label("Browsing"));
+
+        // Add the tabs and response and show all.
+        this.getContentArea().packStart(tabs, true, true, 0);
         this.addOnResponse(toDelegate(&(this.saveCloseSignal)));
         this.showAll();
     }
 
     private void saveCloseSignal(int signal, Dialog dialog) {
         switch (signal) {
-            case SAVE_SIGNAL:
+            case CLOSE_SIGNAL:
                 SMOOTH_SCROLLING = this.smoothScrolling.getActive();
                 PAGE_CACHE = this.pageCache.getActive();
                 JAVASCRIPT = this.javascript.getActive();
                 MEDIASOURCE = this.mediaSource.getActive();
                 HOMEPAGE = this.homepage.getText();
                 saveSettings();
-                break;
-            case CLOSE_SIGNAL:
-                this.close();
                 break;
             default:
                 break;
