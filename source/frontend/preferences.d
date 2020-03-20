@@ -25,6 +25,7 @@ class Preferences : Dialog {
     private CheckButton javascript;
     private CheckButton siteSpecificQuirks;
     private Entry homepage;
+    private CheckButton useHeaderBar;
 
     this() {
         // Init ourselves first.
@@ -37,6 +38,7 @@ class Preferences : Dialog {
         this.javascript = new CheckButton("Enable javascript");
         this.siteSpecificQuirks = new CheckButton("Enable site specific quirks");
         this.homepage = new Entry();
+        this.useHeaderBar = new CheckButton("Use GTK+'s header bar for the UI");
 
         // Set current values.
         this.smoothScrolling.setActive(SMOOTH_SCROLLING);
@@ -44,6 +46,7 @@ class Preferences : Dialog {
         this.javascript.setActive(JAVASCRIPT);
         this.siteSpecificQuirks.setActive(SITEQUIRKS);
         this.homepage.setText(HOMEPAGE);
+        this.useHeaderBar.setActive(HEADERBAR);
 
         // Add items to boxes.
         auto tabs = new Notebook();
@@ -60,8 +63,14 @@ class Preferences : Dialog {
         packBox(browsing, this.homepage);
         tabs.appendPage(browsing, new Label("Browsing"));
 
+        auto appearance = new VBox(false, 10);
+        packBox(appearance, this.useHeaderBar);
+        tabs.appendPage(appearance, new Label("Appearance"));
+
         // Add the tabs and response and show all.
-        this.getContentArea().packStart(tabs, true, true, 0);
+        auto content = this.getContentArea();
+        content.packStart(tabs, true, true, 0);
+        content.add(new Label("Settings will be applied next restart"));
         this.addOnResponse(toDelegate(&(this.saveCloseSignal)));
         this.showAll();
     }
@@ -74,6 +83,7 @@ class Preferences : Dialog {
                 JAVASCRIPT = this.javascript.getActive();
                 SITEQUIRKS = this.siteSpecificQuirks.getActive();
                 HOMEPAGE = this.homepage.getText();
+                HEADERBAR = this.useHeaderBar.getActive();
                 saveSettings();
                 break;
             default:

@@ -8,6 +8,9 @@ import gtk.Entry;
 import gtk.Notebook;
 import gtk.Label;
 import gtk.Widget;
+import gtk.VBox;
+import gtk.HBox;
+import globals;
 import settings;
 import frontend.about;
 import frontend.preferences;
@@ -29,7 +32,7 @@ class Browser : MainWindow {
 
     this(string homepage) {
         // Init ourselves.
-        super("");
+        super(PROGRAM_NAME);
         this.setDefaultSize(WIN_WIDTH, WIN_HEIGHT);
 
         // Initialize buttons.
@@ -50,25 +53,47 @@ class Browser : MainWindow {
         this.about.addOnClicked(toDelegate(&(this.aboutSignal)));
         this.preferences.addOnClicked(toDelegate(&(this.preferencesSignal)));
 
-        // Set the header and pack the buttons.
-        auto header = new HeaderBar();
-        header.packStart(this.previousPage);
-        header.packStart(this.nextPage);
-        header.packStart(this.refresh);
-        header.setCustomTitle(this.urlBar);
-        header.packEnd(this.preferences);
-        header.packEnd(this.about);
-        header.packEnd(this.addTab);
-        header.setShowCloseButton(true);
-
         // Create tabs.
         this.tabs = new Notebook();
         this.tabs.addOnSwitchPage(toDelegate(&(this.tabChangedSignal)));
         this.newTab(homepage);
 
+        // Depending on the user, use the header bar or an extra bar.
+        if (HEADERBAR) {
+            auto header = new HeaderBar();
+            header.packStart(this.previousPage);
+            header.packStart(this.nextPage);
+            header.packStart(this.refresh);
+            header.setCustomTitle(this.urlBar);
+            header.packEnd(this.preferences);
+            header.packEnd(this.about);
+            header.packEnd(this.addTab);
+            header.setShowCloseButton(true);
+
+            this.setTitlebar(header);
+            this.add(this.tabs);
+        } else {
+            auto toolbar = new HBox(false, 10);
+            toolbar.setMarginTop(10);
+            toolbar.setMarginBottom(10);
+            toolbar.setMarginLeft(10);
+            toolbar.setMarginRight(10);
+            toolbar.packStart(this.previousPage, false, true, 0);
+            toolbar.packStart(this.nextPage, false, true, 0);
+            toolbar.packStart(this.refresh, false, true, 0);
+            toolbar.setCenterWidget(this.urlBar);
+            toolbar.packEnd(this.preferences, false, true, 0);
+            toolbar.packEnd(this.about, false, true, 0);
+            toolbar.packEnd(this.addTab, false, true, 0);
+
+            auto windowBox = new VBox(false, 0);
+            windowBox.packStart(toolbar, false, true, 0);
+            windowBox.packStart(this.tabs, true, true, 0);
+
+            this.add(windowBox);
+        }
+
         // Add the items and show.
-        this.setTitlebar(header);
-        this.add(this.tabs);
         this.showAll();
     }
 
