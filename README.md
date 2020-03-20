@@ -18,3 +18,13 @@ needed, the meson build system and a D compiler.
 
 The project uses meson as build system, instructions on how to build meson
 projects can be found in [here](https://mesonbuild.com/Running-Meson.html).
+
+A quick sumary would be:
+
+```bash
+git clone https://github.com/streaksu/mantissa
+cd mantissa
+meson build --buildtype=release && cd build
+ninja
+sudo ninja install
+```

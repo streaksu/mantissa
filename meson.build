@@ -1,4 +1,4 @@
-project('mantissa', 'd', version: '0.0.1', license: 'BSL-1.0')
+project('mantissa', 'd', version: '1.0.0', license: 'BSL-1.0')
 
 # Locations.
 prefix = get_option('prefix')
