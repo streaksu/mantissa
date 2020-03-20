@@ -1,8 +1,7 @@
 module preferences;
 
 import gio.Settings;
-
-private immutable SCHEMA_ID = "org.streaksu.Mantissa";
+import globals;
 
 private immutable SMOOTH_SCROLLING_KEY = "smooth-scrolling";
 private immutable PAGE_CACHE_KEY = "page-cache";
@@ -17,7 +16,7 @@ shared bool SITEQUIRKS;
 shared string HOMEPAGE;
 
 shared static this() {
-    auto s = new Settings(SCHEMA_ID);
+    auto s = new Settings(GSCHEMA_NAME);
 
     SMOOTH_SCROLLING = s.getBoolean(SMOOTH_SCROLLING_KEY);
     PAGE_CACHE = s.getBoolean(PAGE_CACHE_KEY);
@@ -27,7 +26,7 @@ shared static this() {
 }
 
 void saveSettings() {
-    auto s = new Settings(SCHEMA_ID);
+    auto s = new Settings(GSCHEMA_NAME);
 
     s.setBoolean(SMOOTH_SCROLLING_KEY, SMOOTH_SCROLLING);
     s.setBoolean(PAGE_CACHE_KEY, PAGE_CACHE);

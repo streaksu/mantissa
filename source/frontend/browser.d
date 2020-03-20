@@ -9,6 +9,7 @@ import gtk.Notebook;
 import gtk.Label;
 import gtk.Widget;
 import settings;
+import frontend.about;
 import frontend.preferences;
 import backend.webview;
 import backend.webviewsettings;
@@ -22,6 +23,7 @@ class Browser : MainWindow {
     private Button refresh;
     private Entry urlBar;
     private Button addTab;
+    private Button about;
     private Button preferences;
     private Notebook tabs;
 
@@ -36,6 +38,7 @@ class Browser : MainWindow {
         this.refresh = new Button(StockID.REFRESH, true);
         this.urlBar = new Entry();
         this.addTab = new Button(StockID.ADD, true);
+        this.about = new Button(StockID.ABOUT, true);
         this.preferences = new Button(StockID.PREFERENCES, true);
 
         this.previousPage.addOnClicked(toDelegate(&(this.previousSignal)));
@@ -44,7 +47,8 @@ class Browser : MainWindow {
         this.urlBar.setWidthChars(100);
         this.urlBar.addOnActivate(toDelegate(&(this.urlBarEnterSignal)));
         this.addTab.addOnClicked(toDelegate(&(this.newTabSignal)));
-        this.preferences.addOnClicked(toDelegate(&(this.settingsSignal)));
+        this.about.addOnClicked(toDelegate(&(this.aboutSignal)));
+        this.preferences.addOnClicked(toDelegate(&(this.preferencesSignal)));
 
         // Set the header and pack the buttons.
         auto header = new HeaderBar();
@@ -53,6 +57,7 @@ class Browser : MainWindow {
         header.packStart(this.refresh);
         header.setCustomTitle(this.urlBar);
         header.packEnd(this.preferences);
+        header.packEnd(this.about);
         header.packEnd(this.addTab);
         header.setShowCloseButton(true);
 
@@ -75,8 +80,6 @@ class Browser : MainWindow {
     void newTab(string url) {
         auto content = new Webview();
         auto contentSettings = new WebviewSettings();
-        auto tabTitle = new Label("");
-        auto index = this.tabs.appendPage(content, tabTitle);
 
         contentSettings.smoothScrolling = SMOOTH_SCROLLING;
         contentSettings.pageCache = PAGE_CACHE;
@@ -87,6 +90,7 @@ class Browser : MainWindow {
         content.settings = contentSettings;
         content.addOnUriChange(toDelegate(&(this.uriChangedSignal)));
 
+        auto index = this.tabs.appendPage(content, new Label(""));
         this.tabs.showAll(); // We need the item to be visible for switching.
         this.tabs.setCurrentPage(index);
         this.tabs.setShowTabs(index != 0);
@@ -116,7 +120,11 @@ class Browser : MainWindow {
         newTab(HOMEPAGE);
     }
 
-    private void settingsSignal(Button b) {
+    private void aboutSignal(Button b) {
+        auto a = new About();
+    }
+
+    private void preferencesSignal(Button b) {
         auto p = new Preferences();
     }
 
