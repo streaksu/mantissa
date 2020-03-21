@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Mantissa
-Comment=A minimalistic, simple GTK+ based browser.
+Comment=A minimalistic, simple GTK based browser.
 GenericName=Web Browser
 Exec=mantissa
 Icon=mantissa
