@@ -14,6 +14,7 @@ import globals;
 import settings;
 import frontend.about;
 import frontend.preferences;
+import backend.url;
 import backend.webview;
 import backend.webviewsettings;
 
@@ -138,7 +139,7 @@ class Browser : MainWindow {
 
     private void urlBarEnterSignal(Entry entry) {
         auto widget = getCurrentWebview();
-        widget.uri = entry.getText();
+        widget.uri = urlFromUserInput(entry.getText());
     }
 
     private void newTabSignal(Button b) {

@@ -9,6 +9,7 @@ import gtk.Notebook;
 import gtk.VBox;
 import gtk.Widget;
 import settings;
+import backend.url;
 
 private immutable WIN_WIDTH = 500;
 private immutable WIN_HEIGHT = 600;
@@ -82,7 +83,7 @@ class Preferences : Dialog {
                 PAGE_CACHE = this.pageCache.getActive();
                 JAVASCRIPT = this.javascript.getActive();
                 SITEQUIRKS = this.siteSpecificQuirks.getActive();
-                HOMEPAGE = this.homepage.getText();
+                HOMEPAGE = urlFromUserInput(this.homepage.getText());
                 HEADERBAR = this.useHeaderBar.getActive();
                 saveSettings();
                 break;

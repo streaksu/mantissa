@@ -35,6 +35,7 @@ configure_file(
 
 source = [
     meson.current_build_dir() + '/globals.d',
+    'source/backend/url.d',
     'source/backend/webview.d',
     'source/backend/webviewsettings.d',
     'source/frontend/about.d',
