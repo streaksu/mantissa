@@ -1,6 +1,7 @@
 module frontend.browser;
 
 import std.functional: toDelegate;
+import gtk.Main;
 import gtk.MainWindow;
 import gtk.HeaderBar;
 import gtk.Button;
@@ -135,6 +136,10 @@ class Browser : MainWindow {
     
     private void closeTabSignal(Button b) {
         this.tabs.detachTab(this.tabClose[b]);
+        
+        if (this.tabs.getNPages() == 0) {
+            Main.quit();
+        }
     }
 
     private void previousSignal(Button b) {
@@ -162,11 +167,11 @@ class Browser : MainWindow {
     }
 
     private void aboutSignal(Button b) {
-        auto a = new About();
+        new About();
     }
 
     private void preferencesSignal(Button b) {
-        auto p = new Preferences();
+        new Preferences();
     }
 
     private void tabChangedSignal(Widget contents, uint index, Notebook book) {
