@@ -30,13 +30,15 @@ class Browser : MainWindow {
     private Button about;
     private Button preferences;
     private Notebook tabs;
+    private Label[Webview] tabLabels;
+    private Webview[Button] tabClose;
 
     this(string homepage) {
         // Init ourselves.
         super(PROGRAM_NAME);
         this.setDefaultSize(WIN_WIDTH, WIN_HEIGHT);
 
-        // Initialize buttons.
+        // Initialize buttons and data.
         this.previousPage = new Button(StockID.GO_BACK, true);
         this.nextPage = new Button(StockID.GO_FORWARD, true);
         this.refresh = new Button(StockID.REFRESH, true);
@@ -44,6 +46,7 @@ class Browser : MainWindow {
         this.addTab = new Button(StockID.ADD, true);
         this.about = new Button(StockID.ABOUT, true);
         this.preferences = new Button(StockID.PREFERENCES, true);
+        this.tabs = new Notebook();
 
         this.previousPage.addOnClicked(toDelegate(&(this.previousSignal)));
         this.nextPage.addOnClicked(toDelegate(&(this.nextSignal)));
@@ -53,11 +56,7 @@ class Browser : MainWindow {
         this.addTab.addOnClicked(toDelegate(&(this.newTabSignal)));
         this.about.addOnClicked(toDelegate(&(this.aboutSignal)));
         this.preferences.addOnClicked(toDelegate(&(this.preferencesSignal)));
-
-        // Create tabs.
-        this.tabs = new Notebook();
         this.tabs.addOnSwitchPage(toDelegate(&(this.tabChangedSignal)));
-        this.newTab(homepage);
 
         // Depending on the user, use the header bar or an extra bar.
         if (HEADERBAR) {
@@ -94,16 +93,20 @@ class Browser : MainWindow {
             this.add(windowBox);
         }
 
-        // Add the items and show.
+        // Add a tab and show all.
+        this.newTab(homepage);
         this.showAll();
     }
 
-    Webview getCurrentWebview() {
+    private Webview getCurrentWebview() {
         auto current = this.tabs.getCurrentPage();
         return cast(Webview)(this.tabs.getNthPage(current));
     }
 
-    void newTab(string url) {
+    private void newTab(string url) {
+        auto title = new Label("");
+        auto button = new Button(StockID.CLOSE, true);
+        button.addOnClicked(toDelegate(&(this.closeTabSignal)));
         auto content = new Webview();
         auto contentSettings = new WebviewSettings();
 
@@ -116,10 +119,22 @@ class Browser : MainWindow {
         content.settings = contentSettings;
         content.addOnUriChange(toDelegate(&(this.uriChangedSignal)));
 
-        auto index = this.tabs.appendPage(content, new Label(""));
+        auto titleBox = new HBox(false, 10);
+        titleBox.packStart(title, false, false, 0);
+        titleBox.packEnd(button, false, false, 0);
+        this.tabLabels[content] = title;
+        this.tabClose[button] = content;
+        titleBox.showAll();
+
+        auto index = this.tabs.appendPage(content, titleBox);
         this.tabs.showAll(); // We need the item to be visible for switching.
         this.tabs.setCurrentPage(index);
+        this.tabs.setTabReorderable(content, true);
         this.tabs.setShowTabs(index != 0);
+    }
+    
+    private void closeTabSignal(Button b) {
+        this.tabs.detachTab(this.tabClose[b]);
     }
 
     private void previousSignal(Button b) {
@@ -161,7 +176,7 @@ class Browser : MainWindow {
     }
 
     private void uriChangedSignal(Webview sender) {
-        this.tabs.setTabLabelText(sender, sender.title);
+        tabLabels[sender].setText(sender.title);
 
         if (getCurrentWebview() == sender) {
             this.urlBar.setText(sender.uri);

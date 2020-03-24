@@ -5,9 +5,6 @@ import globals;
 
 class About : AboutDialog {
     this() {
-        // Init ourselves first.
-        super();
-
         // Work with the logo and program info.
         this.setLogoIconName(ICON_NAME);
         this.setProgramName(PROGRAM_NAME);

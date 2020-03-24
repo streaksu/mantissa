@@ -11,14 +11,7 @@ import gtk.Widget;
 import settings;
 import backend.url;
 
-private immutable WIN_WIDTH = 500;
-private immutable WIN_HEIGHT = 600;
-
 private immutable CLOSE_SIGNAL = -4;
-
-private void packBox(VBox box, Widget widget) {
-    box.packStart(widget, false, false, 0);
-}
 
 class Preferences : Dialog {
     private CheckButton smoothScrolling;
@@ -29,17 +22,13 @@ class Preferences : Dialog {
     private CheckButton useHeaderBar;
 
     this() {
-        // Init ourselves first.
-	    super();
-        this.setDefaultSize(WIN_WIDTH, WIN_HEIGHT);
-
         // Init the buttons and input boxes.
         this.smoothScrolling = new CheckButton("Enable smooth scrolling");
         this.pageCache = new CheckButton("Enable page caching");
         this.javascript = new CheckButton("Enable javascript");
         this.siteSpecificQuirks = new CheckButton("Enable site specific quirks");
         this.homepage = new Entry();
-        this.useHeaderBar = new CheckButton("Use GTK+'s header bar for the UI");
+        this.useHeaderBar = new CheckButton("Use GTK's header bar for the UI");
 
         // Set current values.
         this.smoothScrolling.setActive(SMOOTH_SCROLLING);
@@ -49,7 +38,7 @@ class Preferences : Dialog {
         this.homepage.setText(HOMEPAGE);
         this.useHeaderBar.setActive(HEADERBAR);
 
-        // Add items to boxes.
+        // Add items to the dialog.
         auto tabs = new Notebook();
 
         auto engine = new VBox(false, 10);
@@ -72,23 +61,23 @@ class Preferences : Dialog {
         auto content = this.getContentArea();
         content.packStart(tabs, true, true, 0);
         content.add(new Label("Settings will be applied next restart"));
-        this.addOnResponse(toDelegate(&(this.saveCloseSignal)));
+        this.addOnResponse(toDelegate(&(this.closeSignal)));
         this.showAll();
     }
+    
+    private void packBox(VBox box, Widget widget) {
+        box.packStart(widget, false, false, 0);
+    }
 
-    private void saveCloseSignal(int signal, Dialog dialog) {
-        switch (signal) {
-            case CLOSE_SIGNAL:
-                SMOOTH_SCROLLING = this.smoothScrolling.getActive();
-                PAGE_CACHE = this.pageCache.getActive();
-                JAVASCRIPT = this.javascript.getActive();
-                SITEQUIRKS = this.siteSpecificQuirks.getActive();
-                HOMEPAGE = urlFromUserInput(this.homepage.getText());
-                HEADERBAR = this.useHeaderBar.getActive();
-                saveSettings();
-                break;
-            default:
-                break;
+    private void closeSignal(int signal, Dialog dialog) {
+        if (signal == CLOSE_SIGNAL) {
+            SMOOTH_SCROLLING = this.smoothScrolling.getActive();
+            PAGE_CACHE = this.pageCache.getActive();
+            JAVASCRIPT = this.javascript.getActive();
+            SITEQUIRKS = this.siteSpecificQuirks.getActive();
+            HOMEPAGE = urlFromUserInput(this.homepage.getText());
+            HEADERBAR = this.useHeaderBar.getActive();
+            saveSettings();
         }
     }
 }

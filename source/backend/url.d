@@ -6,7 +6,7 @@ import std.file;
 private immutable NO_PROTOCOL = ctRegex!(r"^[a-zA-Z0-9\.]+[\.][a-zA-Z0-9]+$");
 
 string urlFromUserInput(string userURL) {
-    if (isFile(userURL) || isDir(userURL)) {
+    if (exists(userURL)) {
         return "file://" ~ userURL;
     } else if (matchAll(userURL, NO_PROTOCOL)) {
         return "https://" ~ userURL;

@@ -38,8 +38,7 @@ void main(string[] args) {
         exit(0);
     }
 
-    auto browser = new Browser(url);
-
-    // Run the application.
+    // Create browser window and run.
+    new Browser(url);
     Main.run();
 }
