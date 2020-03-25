@@ -1,4 +1,4 @@
-project('mantissa', 'd', version: '1.0.0', license: 'BSL-1.0')
+project('mantissa', 'd', version: '1.1.0', license: 'BSL-1.0')
 
 # Locations.
 prefix = get_option('prefix')
@@ -8,8 +8,8 @@ desktop_install = join_paths(datadir, 'applications')
 schema_install = join_paths(datadir, 'glib-2.0/schemas')
 
 # Dependencies.
-gtkd = dependency('gtkd-3')
-webkit = dependency('webkit2gtk-4.0')
+gtkd = dependency('gtkd-3', version: '>=3.9.0')
+webkit = dependency('webkit2gtk-4.0', version: '>=2.26.1')
 
 # Source files to compile and include directories.
 include = include_directories('source')
