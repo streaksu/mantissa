@@ -44,15 +44,16 @@ class Browser : MainWindow {
         this.nextPage = new Button(StockID.GO_FORWARD, true);
         this.refresh = new Button(StockID.REFRESH, true);
         this.urlBar = new Entry();
+        this.urlBar.setHexpand(true);
         this.addTab = new Button(StockID.ADD, true);
         this.about = new Button(StockID.ABOUT, true);
         this.preferences = new Button(StockID.PREFERENCES, true);
         this.tabs = new Notebook();
+        this.tabs.setScrollable(true);
 
         this.previousPage.addOnClicked(toDelegate(&(this.previousSignal)));
         this.nextPage.addOnClicked(toDelegate(&(this.nextSignal)));
         this.refresh.addOnClicked(toDelegate(&(this.refreshSignal)));
-        this.urlBar.setWidthChars(100);
         this.urlBar.addOnActivate(toDelegate(&(this.urlBarEnterSignal)));
         this.addTab.addOnClicked(toDelegate(&(this.newTabSignal)));
         this.about.addOnClicked(toDelegate(&(this.aboutSignal)));

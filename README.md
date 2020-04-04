@@ -19,8 +19,10 @@ The dependencies of the project are:
 - `gtk3`.
 - `gtkd`.
 - `webkit2gtk`.
-- A D compiler, like `ldc` or `dmd`.
-- `meson`.
+- Optional: Codecs for video like `gst-libav` for youtube.
+
+Aditionally, for building one will need a D compiler, like `ldc` or `dmd`, and
+`meson`.
 
 One can install them in an OS like void linux with:
 

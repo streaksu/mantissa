@@ -34,13 +34,13 @@ configure_file(
 )
 
 source = [
-    meson.current_build_dir() + '/globals.d',
     'source/backend/url.d',
     'source/backend/webview.d',
     'source/backend/webviewsettings.d',
     'source/frontend/about.d',
     'source/frontend/browser.d',
     'source/frontend/preferences.d',
+    meson.current_build_dir() + '/globals.d',
     'source/main.d',
     'source/settings.d'
 ]
