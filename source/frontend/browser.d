@@ -189,7 +189,7 @@ class Browser : MainWindow {
         this.urlBar.showAll();
     }
 
-    private void loadChangedSignal(Webview sender) {
+    private void loadChangedSignal(Webview sender, WebkitLoadEvent event) {
         tabLabels[sender].setText(sender.title);
 
         this.previousPage.setSensitive(sender.canGoBack);
@@ -201,12 +201,25 @@ class Browser : MainWindow {
 
         this.urlBar.setText(sender.uri);
 
+        final switch (event) {
+            case WebkitLoadEvent.Started:
+                this.urlBar.setProgressFraction(0.25);
+                break;
+            case WebkitLoadEvent.Redirected:
+                this.urlBar.setProgressFraction(0.5);
+                break;
+            case WebkitLoadEvent.Committed:
+                this.urlBar.setProgressFraction(0.75);
+                break;
+            case WebkitLoadEvent.Finished:
+                this.urlBar.setProgressFraction(0);
+                break;
+        }
+
         if (sender.isLoading) {
             this.refresh.setImage(new Image(StockID.STOP, GtkIconSize.BUTTON));
-            this.urlBar.setIconFromStock(GtkEntryIconPosition.PRIMARY, "gtk-network");
         } else {
             this.refresh.setImage(new Image(StockID.REFRESH, GtkIconSize.BUTTON));
-            this.urlBar.setIconFromStock(GtkEntryIconPosition.PRIMARY, "gtk-ok");
         }
     }
 }

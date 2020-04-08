@@ -19,6 +19,13 @@ extern (C) void webkit_web_view_go_forward(GtkWidget*);
 extern (C) void webkit_web_view_reload(GtkWidget*);
 extern (C) void webkit_web_view_stop_loading(GtkWidget*);
 
+enum WebkitLoadEvent {
+    Started,
+    Redirected,
+    Committed,
+    Finished
+}
+
 class Webview : Widget {
     private GtkWidget* webview;
 
@@ -80,7 +87,7 @@ class Webview : Widget {
         webkit_web_view_stop_loading(this.webview);
     }
 
-    void addOnLoadChanged(void delegate(Webview) dlg) {
+    void addOnLoadChanged(void delegate(Webview, WebkitLoadEvent) dlg) {
         Signals.connect(this, "load-changed", dlg);
     }
 }
