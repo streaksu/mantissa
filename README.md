@@ -24,12 +24,6 @@ The dependencies of the project are:
 Aditionally, for building one will need a D compiler, like `ldc` or `dmd`, and
 `meson`.
 
-One can install them in an OS like void linux with:
-
-```bash
-sudo xbps-install -S gtk3-devel gtkd-devel webkit2gtk-devel dmd meson
-```
-
 The project uses meson as build system, instructions on how to build meson
 projects can be found in [here](https://mesonbuild.com/Running-Meson.html).
 

@@ -34,9 +34,9 @@ configure_file(
 )
 
 source = [
+    'source/backend/webkit/webview.d',
+    'source/backend/webkit/webviewsettings.d',
     'source/backend/url.d',
-    'source/backend/webview.d',
-    'source/backend/webviewsettings.d',
     'source/frontend/about.d',
     'source/frontend/browser.d',
     'source/frontend/preferences.d',

@@ -13,7 +13,7 @@ void main(string[] args) {
     Main.init(args);
 
     // Set defaults and handle command line.
-    bool vers = false;
+    bool vers  = false;
     string url = HOMEPAGE;
     
     try {

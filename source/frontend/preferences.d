@@ -18,17 +18,17 @@ class Preferences : Dialog {
     private CheckButton pageCache;
     private CheckButton javascript;
     private CheckButton siteSpecificQuirks;
-    private Entry homepage;
+    private Entry       homepage;
     private CheckButton useHeaderBar;
 
     this() {
         // Init the buttons and input boxes.
-        this.smoothScrolling = new CheckButton("Enable smooth scrolling");
-        this.pageCache = new CheckButton("Enable page caching");
-        this.javascript = new CheckButton("Enable javascript");
+        this.smoothScrolling    = new CheckButton("Enable smooth scrolling");
+        this.pageCache          = new CheckButton("Enable page caching");
+        this.javascript         = new CheckButton("Enable javascript");
         this.siteSpecificQuirks = new CheckButton("Enable site specific quirks");
-        this.homepage = new Entry();
-        this.useHeaderBar = new CheckButton("Use GTK's header bar for the UI");
+        this.homepage           = new Entry();
+        this.useHeaderBar       = new CheckButton("Use GTK's header bar for the UI");
 
         // Set current values.
         this.smoothScrolling.setActive(SMOOTH_SCROLLING);
@@ -72,11 +72,11 @@ class Preferences : Dialog {
     private void closeSignal(int signal, Dialog dialog) {
         if (signal == CLOSE_SIGNAL) {
             SMOOTH_SCROLLING = this.smoothScrolling.getActive();
-            PAGE_CACHE = this.pageCache.getActive();
-            JAVASCRIPT = this.javascript.getActive();
-            SITEQUIRKS = this.siteSpecificQuirks.getActive();
-            HOMEPAGE = urlFromUserInput(this.homepage.getText());
-            HEADERBAR = this.useHeaderBar.getActive();
+            PAGE_CACHE       = this.pageCache.getActive();
+            JAVASCRIPT       = this.javascript.getActive();
+            SITEQUIRKS       = this.siteSpecificQuirks.getActive();
+            HOMEPAGE         = urlFromUserInput(this.homepage.getText());
+            HEADERBAR        = this.useHeaderBar.getActive();
             saveSettings();
         }
     }

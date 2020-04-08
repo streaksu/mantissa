@@ -11,27 +11,28 @@ import gtk.Label;
 import gtk.Widget;
 import gtk.VBox;
 import gtk.HBox;
+import gtk.Image;
 import globals;
 import settings;
 import frontend.about;
 import frontend.preferences;
 import backend.url;
-import backend.webview;
-import backend.webviewsettings;
+import backend.webkit.webview;
+import backend.webkit.webviewsettings;
 
 private immutable WIN_WIDTH = 1600;
 private immutable WIN_HEIGHT = 900;
 
 class Browser : MainWindow {
-    private Button previousPage;
-    private Button nextPage;
-    private Button refresh;
-    private Entry urlBar;
-    private Button addTab;
-    private Button about;
-    private Button preferences;
-    private Notebook tabs;
-    private Label[Webview] tabLabels;
+    private Button          previousPage;
+    private Button          nextPage;
+    private Button          refresh;
+    private Entry           urlBar;
+    private Button          addTab;
+    private Button          about;
+    private Button          preferences;
+    private Notebook        tabs;
+    private Label[Webview]  tabLabels;
     private Webview[Button] tabClose;
 
     this(string homepage) {
@@ -41,14 +42,15 @@ class Browser : MainWindow {
 
         // Initialize buttons and data.
         this.previousPage = new Button(StockID.GO_BACK, true);
-        this.nextPage = new Button(StockID.GO_FORWARD, true);
-        this.refresh = new Button(StockID.REFRESH, true);
-        this.urlBar = new Entry();
+        this.nextPage     = new Button(StockID.GO_FORWARD, true);
+        this.refresh      = new Button(StockID.REFRESH, true);
+        this.urlBar       = new Entry();
         this.urlBar.setHexpand(true);
-        this.addTab = new Button(StockID.ADD, true);
-        this.about = new Button(StockID.ABOUT, true);
+        this.urlBar.setPlaceholderText("Enter address");
+        this.addTab      = new Button(StockID.ADD, true);
+        this.about       = new Button(StockID.ABOUT, true);
         this.preferences = new Button(StockID.PREFERENCES, true);
-        this.tabs = new Notebook();
+        this.tabs        = new Notebook();
         this.tabs.setScrollable(true);
 
         this.previousPage.addOnClicked(toDelegate(&(this.previousSignal)));
@@ -106,26 +108,27 @@ class Browser : MainWindow {
     }
 
     private void newTab(string url) {
-        auto title = new Label("");
+        auto title  = new Label("");
         auto button = new Button(StockID.CLOSE, true);
         button.addOnClicked(toDelegate(&(this.closeTabSignal)));
-        auto content = new Webview();
+
+        auto content         = new Webview();
         auto contentSettings = new WebviewSettings();
 
-        contentSettings.smoothScrolling = SMOOTH_SCROLLING;
-        contentSettings.pageCache = PAGE_CACHE;
-        contentSettings.javascript = JAVASCRIPT;
+        contentSettings.smoothScrolling    = SMOOTH_SCROLLING;
+        contentSettings.pageCache          = PAGE_CACHE;
+        contentSettings.javascript         = JAVASCRIPT;
         contentSettings.siteSpecificQuirks = SITEQUIRKS;
 
-        content.uri = url;
+        content.uri      = url;
         content.settings = contentSettings;
-        content.addOnUriChange(toDelegate(&(this.uriChangedSignal)));
+        content.addOnLoadChanged(toDelegate(&(this.loadChangedSignal)));
 
         auto titleBox = new HBox(false, 10);
         titleBox.packStart(title, false, false, 0);
         titleBox.packEnd(button, false, false, 0);
         this.tabLabels[content] = title;
-        this.tabClose[button] = content;
+        this.tabClose[button]   = content;
         titleBox.showAll();
 
         auto index = this.tabs.appendPage(content, titleBox);
@@ -155,7 +158,12 @@ class Browser : MainWindow {
 
     private void refreshSignal(Button b) {
         auto widget = getCurrentWebview();
-        widget.reload();
+
+        if (widget.isLoading) {
+            widget.stopLoading();
+        } else {
+            widget.reload();
+        }
     }
 
     private void urlBarEnterSignal(Entry entry) {
@@ -181,13 +189,24 @@ class Browser : MainWindow {
         this.urlBar.showAll();
     }
 
-    private void uriChangedSignal(Webview sender) {
+    private void loadChangedSignal(Webview sender) {
         tabLabels[sender].setText(sender.title);
 
-        if (getCurrentWebview() == sender) {
-            this.urlBar.setText(sender.uri);
-            this.previousPage.setSensitive(sender.canGoBack);
-            this.nextPage.setSensitive(sender.canGoForward);
+        this.previousPage.setSensitive(sender.canGoBack);
+        this.nextPage.setSensitive(sender.canGoForward);
+
+        if (getCurrentWebview() != sender) {
+            return;
+        }
+
+        this.urlBar.setText(sender.uri);
+
+        if (sender.isLoading) {
+            this.refresh.setImage(new Image(StockID.STOP, GtkIconSize.BUTTON));
+            this.urlBar.setIconFromStock(GtkEntryIconPosition.PRIMARY, "gtk-network");
+        } else {
+            this.refresh.setImage(new Image(StockID.REFRESH, GtkIconSize.BUTTON));
+            this.urlBar.setIconFromStock(GtkEntryIconPosition.PRIMARY, "gtk-ok");
         }
     }
 }
