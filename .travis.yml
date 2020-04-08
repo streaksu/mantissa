@@ -1,0 +1,15 @@
+language: d
+
+d:
+  - dmd
+  - ldc
+
+before_install:
+  - sudo sed -i 's/xenial/eoan/g' /etc/apt/sources.list
+  - sudo apt-get update
+  - sudo apt-get -y install meson libwebkit2gtk-4.0-dev libgtkd-3-dev
+
+script:
+  - meson builddir
+  - ninja -C builddir
+  - ninja -C builddir test
