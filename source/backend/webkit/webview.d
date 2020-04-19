@@ -30,61 +30,61 @@ class Webview : Widget {
     private GtkWidget* webview;
 
     @property string uri() {
-        return cast(string)fromStringz(webkit_web_view_get_uri(this.webview));
+        return cast(string)fromStringz(webkit_web_view_get_uri(webview));
     }
 
     @property string title() {
-        return cast(string)fromStringz(webkit_web_view_get_title(this.webview));
+        return cast(string)fromStringz(webkit_web_view_get_title(webview));
     }
 
     @property bool canGoBack() {
-        return webkit_web_view_can_go_back(this.webview);
+        return webkit_web_view_can_go_back(webview);
     }
 
     @property bool canGoForward() {
-        return webkit_web_view_can_go_forward(this.webview);
+        return webkit_web_view_can_go_forward(webview);
     }
 
     @property WebviewSettings settings() {
-        return new WebviewSettings(webkit_web_view_get_settings(this.webview));
+        return new WebviewSettings(webkit_web_view_get_settings(webview));
     }
 
     @property double isLoading() {
-        return webkit_web_view_is_loading(this.webview);
+        return webkit_web_view_is_loading(webview);
     }
 
     @property void uri(string uri) {
-        webkit_web_view_load_uri(this.webview, toStringz(uri));
+        webkit_web_view_load_uri(webview, toStringz(uri));
     }
 
     @property void settings(WebviewSettings s) {
-        webkit_web_view_set_settings(this.webview, s.settings);
+        webkit_web_view_set_settings(webview, s.settings);
     }
 
     this(GtkWidget* webview, bool ownedRef = false) {
-        this.webview = webview;
-        super(this.webview, ownedRef);
+        webview = webview;
+        super(webview, ownedRef);
     }
 
     this() {
-        this.webview = webkit_web_view_new();
-        super(this.webview);
+        webview = webkit_web_view_new();
+        super(webview);
     }
 
     void goBack() {
-        webkit_web_view_go_back(this.webview);
+        webkit_web_view_go_back(webview);
     }
 
     void goForward() {
-        webkit_web_view_go_forward(this.webview);
+        webkit_web_view_go_forward(webview);
     }
 
     void reload() {
-        webkit_web_view_reload(this.webview);
+        webkit_web_view_reload(webview);
     }
     
     void stopLoading() {
-        webkit_web_view_stop_loading(this.webview);
+        webkit_web_view_stop_loading(webview);
     }
 
     void addOnLoadChanged(void delegate(Webview, WebkitLoadEvent) dlg) {

@@ -14,7 +14,8 @@ void main(string[] args) {
 
     // Set defaults and handle command line.
     bool vers  = false;
-    string url = HOMEPAGE;
+    auto settings = new BrowserSettings();
+    string url = settings.homepage;
     
     try {
         auto cml = getopt(
@@ -33,8 +34,8 @@ void main(string[] args) {
     }
 
     if (vers) {
-        writefln("%s %s", PROGRAM_NAME, PROGRAM_VERSION);
-        writefln("Distributed under the %s license", PROGRAM_LICENSE);
+        writefln("%s %s", programName, programVersion);
+        writefln("Distributed under the %s license", programLicense);
         exit(0);
     }
 

@@ -12,7 +12,6 @@ import gtk.Widget;
 import gtk.VBox;
 import gtk.HBox;
 import gtk.Image;
-import globals;
 import settings;
 import frontend.about;
 import frontend.preferences;
@@ -20,8 +19,8 @@ import backend.url;
 import backend.webkit.webview;
 import backend.webkit.webviewsettings;
 
-private immutable WIN_WIDTH = 1600;
-private immutable WIN_HEIGHT = 900;
+private immutable windowWidth  = 1600;
+private immutable windowHeight = 900;
 
 class Browser : MainWindow {
     private Button          previousPage;
@@ -37,111 +36,89 @@ class Browser : MainWindow {
 
     this(string homepage) {
         // Init ourselves.
-        super(PROGRAM_NAME);
-        this.setDefaultSize(WIN_WIDTH, WIN_HEIGHT);
+        super("");
+        setDefaultSize(windowWidth, windowHeight);
 
         // Initialize buttons and data.
-        this.previousPage = new Button(StockID.GO_BACK, true);
-        this.nextPage     = new Button(StockID.GO_FORWARD, true);
-        this.refresh      = new Button(StockID.REFRESH, true);
-        this.urlBar       = new Entry();
-        this.urlBar.setHexpand(true);
-        this.urlBar.setPlaceholderText("Enter address");
-        this.addTab      = new Button(StockID.ADD, true);
-        this.about       = new Button(StockID.ABOUT, true);
-        this.preferences = new Button(StockID.PREFERENCES, true);
-        this.tabs        = new Notebook();
-        this.tabs.setScrollable(true);
+        previousPage = new Button(StockID.GO_BACK, true);
+        nextPage     = new Button(StockID.GO_FORWARD, true);
+        refresh      = new Button(StockID.REFRESH, true);
+        urlBar       = new Entry();
+        urlBar.setHexpand(true);
+        urlBar.setPlaceholderText("Enter address");
+        addTab      = new Button(StockID.ADD, true);
+        about       = new Button(StockID.ABOUT, true);
+        preferences = new Button(StockID.PREFERENCES, true);
+        tabs        = new Notebook();
+        tabs.setScrollable(true);
 
-        this.previousPage.addOnClicked(toDelegate(&(this.previousSignal)));
-        this.nextPage.addOnClicked(toDelegate(&(this.nextSignal)));
-        this.refresh.addOnClicked(toDelegate(&(this.refreshSignal)));
-        this.urlBar.addOnActivate(toDelegate(&(this.urlBarEnterSignal)));
-        this.addTab.addOnClicked(toDelegate(&(this.newTabSignal)));
-        this.about.addOnClicked(toDelegate(&(this.aboutSignal)));
-        this.preferences.addOnClicked(toDelegate(&(this.preferencesSignal)));
-        this.tabs.addOnSwitchPage(toDelegate(&(this.tabChangedSignal)));
+        previousPage.addOnClicked(toDelegate(&previousSignal));
+        nextPage.addOnClicked(toDelegate(&nextSignal));
+        refresh.addOnClicked(toDelegate(&refreshSignal));
+        urlBar.addOnActivate(toDelegate(&urlBarEnterSignal));
+        addTab.addOnClicked(toDelegate(&newTabSignal));
+        about.addOnClicked(toDelegate(&aboutSignal));
+        preferences.addOnClicked(toDelegate(&preferencesSignal));
+        tabs.addOnSwitchPage(toDelegate(&tabChangedSignal));
 
-        // Depending on the user, use the header bar or an extra bar.
-        if (HEADERBAR) {
-            auto header = new HeaderBar();
-            header.packStart(this.previousPage);
-            header.packStart(this.nextPage);
-            header.packStart(this.refresh);
-            header.setCustomTitle(this.urlBar);
-            header.packEnd(this.preferences);
-            header.packEnd(this.about);
-            header.packEnd(this.addTab);
-            header.setShowCloseButton(true);
+        // Pack the header.
+        auto header = new HeaderBar();
+        header.packStart(previousPage);
+        header.packStart(nextPage);
+        header.packStart(refresh);
+        header.setCustomTitle(urlBar);
+        header.packEnd(preferences);
+        header.packEnd(about);
+        header.packEnd(addTab);
+        header.setShowCloseButton(true);
 
-            this.setTitlebar(header);
-            this.add(this.tabs);
-        } else {
-            auto toolbar = new HBox(false, 10);
-            toolbar.setMarginTop(10);
-            toolbar.setMarginBottom(10);
-            toolbar.setMarginLeft(10);
-            toolbar.setMarginRight(10);
-            toolbar.packStart(this.previousPage, false, true, 0);
-            toolbar.packStart(this.nextPage, false, true, 0);
-            toolbar.packStart(this.refresh, false, true, 0);
-            toolbar.setCenterWidget(this.urlBar);
-            toolbar.packEnd(this.preferences, false, true, 0);
-            toolbar.packEnd(this.about, false, true, 0);
-            toolbar.packEnd(this.addTab, false, true, 0);
-
-            auto windowBox = new VBox(false, 0);
-            windowBox.packStart(toolbar, false, true, 0);
-            windowBox.packStart(this.tabs, true, true, 0);
-
-            this.add(windowBox);
-        }
-
-        // Add a tab and show all.
-        this.newTab(homepage);
-        this.showAll();
+        // Pack header and final adjustements.
+        setTitlebar(header);
+        add(tabs);
+        newTab(homepage);
+        showAll();
     }
 
     private Webview getCurrentWebview() {
-        auto current = this.tabs.getCurrentPage();
-        return cast(Webview)(this.tabs.getNthPage(current));
+        auto current = tabs.getCurrentPage();
+        return cast(Webview)(tabs.getNthPage(current));
     }
 
     private void newTab(string url) {
         auto title  = new Label("");
         auto button = new Button(StockID.CLOSE, true);
-        button.addOnClicked(toDelegate(&(this.closeTabSignal)));
+        button.addOnClicked(toDelegate(&closeTabSignal));
 
         auto content         = new Webview();
         auto contentSettings = new WebviewSettings();
-
-        contentSettings.smoothScrolling    = SMOOTH_SCROLLING;
-        contentSettings.pageCache          = PAGE_CACHE;
-        contentSettings.javascript         = JAVASCRIPT;
-        contentSettings.siteSpecificQuirks = SITEQUIRKS;
+        auto settings        = new BrowserSettings();
+        contentSettings.smoothScrolling    = settings.smoothScrolling;
+        contentSettings.pageCache          = settings.pageCache;
+        contentSettings.javascript         = settings.javascript;
+        contentSettings.siteSpecificQuirks = settings.sitequirks;
 
         content.uri      = url;
         content.settings = contentSettings;
-        content.addOnLoadChanged(toDelegate(&(this.loadChangedSignal)));
+        content.addOnLoadChanged(toDelegate(&loadChangedSignal));
 
         auto titleBox = new HBox(false, 10);
         titleBox.packStart(title, false, false, 0);
         titleBox.packEnd(button, false, false, 0);
-        this.tabLabels[content] = title;
-        this.tabClose[button]   = content;
+        tabLabels[content] = title;
+        tabClose[button]   = content;
         titleBox.showAll();
 
-        auto index = this.tabs.appendPage(content, titleBox);
-        this.tabs.showAll(); // We need the item to be visible for switching.
-        this.tabs.setCurrentPage(index);
-        this.tabs.setTabReorderable(content, true);
-        this.tabs.setShowTabs(index != 0);
+        auto index = tabs.appendPage(content, titleBox);
+        tabs.showAll(); // We need the item to be visible for switching.
+        tabs.setCurrentPage(index);
+        tabs.setTabReorderable(content, true);
+        tabs.setShowTabs(index != 0);
     }
     
     private void closeTabSignal(Button b) {
-        this.tabs.detachTab(this.tabClose[b]);
+        tabs.detachTab(tabClose[b]);
         
-        if (this.tabs.getNPages() == 0) {
+        if (tabs.getNPages() == 0) {
             Main.quit();
         }
     }
@@ -172,7 +149,8 @@ class Browser : MainWindow {
     }
 
     private void newTabSignal(Button b) {
-        newTab(HOMEPAGE);
+        auto settings = new BrowserSettings();
+        newTab(settings.homepage);
     }
 
     private void aboutSignal(Button b) {
@@ -185,15 +163,15 @@ class Browser : MainWindow {
 
     private void tabChangedSignal(Widget contents, uint index, Notebook book) {
         auto uri = (cast(Webview)contents).uri;
-        this.urlBar.setText(uri);
-        this.urlBar.showAll();
+        urlBar.setText(uri);
+        urlBar.showAll();
     }
 
     private void loadChangedSignal(Webview sender, WebkitLoadEvent event) {
         tabLabels[sender].setText(sender.title);
 
-        this.previousPage.setSensitive(sender.canGoBack);
-        this.nextPage.setSensitive(sender.canGoForward);
+        previousPage.setSensitive(sender.canGoBack);
+        nextPage.setSensitive(sender.canGoForward);
 
         if (getCurrentWebview() != sender) {
             return;
@@ -203,23 +181,23 @@ class Browser : MainWindow {
 
         final switch (event) {
             case WebkitLoadEvent.Started:
-                this.urlBar.setProgressFraction(0.25);
+                urlBar.setProgressFraction(0.25);
                 break;
             case WebkitLoadEvent.Redirected:
-                this.urlBar.setProgressFraction(0.5);
+                urlBar.setProgressFraction(0.5);
                 break;
             case WebkitLoadEvent.Committed:
-                this.urlBar.setProgressFraction(0.75);
+                urlBar.setProgressFraction(0.75);
                 break;
             case WebkitLoadEvent.Finished:
-                this.urlBar.setProgressFraction(0);
+                urlBar.setProgressFraction(0);
                 break;
         }
 
         if (sender.isLoading) {
-            this.refresh.setImage(new Image(StockID.STOP, GtkIconSize.BUTTON));
+            refresh.setImage(new Image(StockID.STOP, GtkIconSize.BUTTON));
         } else {
-            this.refresh.setImage(new Image(StockID.REFRESH, GtkIconSize.BUTTON));
+            refresh.setImage(new Image(StockID.REFRESH, GtkIconSize.BUTTON));
         }
     }
 }

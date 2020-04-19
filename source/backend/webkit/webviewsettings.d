@@ -12,30 +12,30 @@ class WebviewSettings {
     private WebkitSettings backend;
 
     @property WebkitSettings settings() {
-        return this.backend;
+        return backend;
     }
 
     @property void smoothScrolling(bool set) {
-        webkit_settings_set_enable_smooth_scrolling(this.backend, set);
+        webkit_settings_set_enable_smooth_scrolling(backend, set);
     }
 
     @property void pageCache(bool set) {
-        webkit_settings_set_enable_page_cache(this.backend, set);
+        webkit_settings_set_enable_page_cache(backend, set);
     }
 
     @property void javascript(bool set) {
-        webkit_settings_set_enable_javascript(this.backend, set);
+        webkit_settings_set_enable_javascript(backend, set);
     }
 
     @property void siteSpecificQuirks(bool set) {
-        webkit_settings_set_enable_site_specific_quirks(this.backend, set);
+        webkit_settings_set_enable_site_specific_quirks(backend, set);
     }
 
     this(WebkitSettings s) {
-        this.backend = s;
+        backend = s;
     }
 
     this() {
-        this.backend = webkit_settings_new();
+        backend = webkit_settings_new();
     }
 }

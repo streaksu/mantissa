@@ -1,16 +1,15 @@
 module globals;
 
 import std.string;
-import gtk.c.types;
 
-immutable PROGRAM_NAME         = capitalize("@name@");
-immutable PROGRAM_VERSION      = "@version@";
-immutable PROGRAM_DESCRIPTION  = "@description@";
-immutable PROGRAM_COPYRIGHT    = "@copyright@";
-immutable PROGRAM_WEBSITE      = "@website@";
-immutable PROGRAM_AUTHORS      = splitLines("@authors@");
-immutable PROGRAM_ARTISTS      = splitLines("@artists@");
-immutable PROGRAM_LICENSE      = "@license@";
-immutable PROGRAM_LICENSE_LINK = "@license_link@";
-immutable ICON_NAME            = "@icon@";
-immutable GSCHEMA_NAME         = "@gschema@";
+immutable programName         = capitalize("@name@");
+immutable programVersion      = "@version@";
+immutable programDescription  = "@description@";
+immutable programCopyright    = "@copyright@";
+immutable programWebsite      = "@website@";
+immutable programAuthors      = splitLines("@authors@");
+immutable programArtists      = splitLines("@artists@");
+immutable programLicense      = "@license@";
+immutable programLicenseLink  = "@license_link@";
+immutable iconName            = "@icon@";
+immutable gschemaName         = "@gschema@";

@@ -44,14 +44,5 @@
         opened for new tabs and startup.
       </description>
     </key>
-    <key type="b" name="headerbar">
-      <default>true</default>
-      <summary>Use header bar</summary>
-      <description>
-        This key determines whether the UI will
-        use a GNOME 3 Headerbar or not, to suite
-        other applications on the user's system.
-      </description>
-    </key>
   </schema>
 </schemalist>
