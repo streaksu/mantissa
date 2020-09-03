@@ -10,27 +10,21 @@ private immutable sitequirksKey      = "site-quirks";
 private immutable homepageKey        = "homepage";
 
 class BrowserSettings {
-    bool   smoothScrolling;
-    bool   pageCache;
-    bool   javascript;
-    bool   sitequirks;
-    string homepage;
+    private Settings s;
+
+    @property bool   smoothScrolling() { return s.getBoolean(smoothScrollingKey); }
+    @property bool   pageCache()       { return s.getBoolean(pageCacheKey);       }
+    @property bool   javascript()      { return s.getBoolean(javascriptKey);      }
+    @property bool   sitequirks()      { return s.getBoolean(sitequirksKey);      }
+    @property string homepage()        { return s.getString(homepageKey);         }
+
+    @property void smoothScrolling(bool b) { s.setBoolean(smoothScrollingKey, b); }
+    @property void pageCache(bool b)       { s.setBoolean(pageCacheKey, b);       }
+    @property void javascript(bool b)      { s.setBoolean(javascriptKey, b);      }
+    @property void sitequirks(bool b)      { s.setBoolean(sitequirksKey, b);      }
+    @property void homepage(string d)      { s.setString(homepageKey, d);         }
 
     this() {
-        auto s = new Settings(gschemaName);
-        smoothScrolling = s.getBoolean(smoothScrollingKey);
-        pageCache       = s.getBoolean(pageCacheKey);
-        javascript      = s.getBoolean(javascriptKey);
-        sitequirks      = s.getBoolean(sitequirksKey);
-        homepage        = s.getString(homepageKey);
-    }
-
-    void save() {
-        auto s = new Settings(gschemaName);
-        s.setBoolean(smoothScrollingKey, smoothScrolling);
-        s.setBoolean(pageCacheKey, pageCache);
-        s.setBoolean(javascriptKey, javascript);
-        s.setBoolean(sitequirksKey, sitequirks);
-        s.setString(homepageKey, homepage);
+        s = new Settings(gschemaName);
     }
 }

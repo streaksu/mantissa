@@ -71,7 +71,6 @@ class Preferences : Dialog {
             settings.javascript      = javascript.getActive();
             settings.sitequirks      = siteSpecificQuirks.getActive();
             settings.homepage        = urlFromUserInput(homepage.getText());
-            settings.save();
         }
     }
 }

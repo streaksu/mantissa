@@ -5,6 +5,7 @@ d:
   - ldc
 
 before_install:
+  # We need fairly recent library versions.
   - sudo sed -i 's/xenial/eoan/g' /etc/apt/sources.list
   - sudo apt-get update
   - sudo apt-get -y install meson libwebkit2gtk-4.0-dev libgtkd-3-dev

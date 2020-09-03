@@ -16,7 +16,7 @@ void main(string[] args) {
     bool vers  = false;
     auto settings = new BrowserSettings();
     string url = settings.homepage;
-    
+
     try {
         auto cml = getopt(
             args,
