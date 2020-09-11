@@ -5,6 +5,10 @@ import gtk.Main;
 import gtk.MainWindow;
 import gtk.HeaderBar;
 import gtk.Button;
+import gtk.MenuButton;
+import gtk.Menu;
+import gtk.MenuItem;
+import globals;
 import gtk.Entry;
 import gtk.Notebook;
 import gtk.Label;
@@ -28,15 +32,14 @@ class Browser : MainWindow {
     private Button          refresh;
     private Entry           urlBar;
     private Button          addTab;
-    private Button          about;
-    private Button          preferences;
+    private MenuButton      extra;
     private Notebook        tabs;
     private Label[Webview]  tabLabels;
     private Webview[Button] tabClose;
 
     this(string homepage) {
         // Init ourselves.
-        super("");
+        super(programName);
         setDefaultSize(windowWidth, windowHeight);
 
         // Initialize buttons and data.
@@ -47,8 +50,15 @@ class Browser : MainWindow {
         urlBar.setHexpand(true);
         urlBar.setPlaceholderText("Enter address");
         addTab      = new Button(StockID.ADD, true);
-        about       = new Button(StockID.ABOUT, true);
-        preferences = new Button(StockID.PREFERENCES, true);
+        extra = new MenuButton();
+        auto m = new Menu();
+        auto x = new MenuItem(toDelegate(&aboutSignal), "About " ~ programName);
+        auto y = new MenuItem(toDelegate(&preferencesSignal), "Preferences");
+        m.attach(y, 0, 1, 0, 1);
+        m.attach(x, 0, 1, 2, 3);
+        extra.setPopup(m);
+        m.showAll();
+        extra.showAll();
         tabs        = new Notebook();
         tabs.setScrollable(true);
 
@@ -57,8 +67,6 @@ class Browser : MainWindow {
         refresh.addOnClicked(toDelegate(&refreshSignal));
         urlBar.addOnActivate(toDelegate(&urlBarEnterSignal));
         addTab.addOnClicked(toDelegate(&newTabSignal));
-        about.addOnClicked(toDelegate(&aboutSignal));
-        preferences.addOnClicked(toDelegate(&preferencesSignal));
         tabs.addOnSwitchPage(toDelegate(&tabChangedSignal));
 
         // Pack the header.
@@ -67,8 +75,7 @@ class Browser : MainWindow {
         header.packStart(nextPage);
         header.packStart(refresh);
         header.setCustomTitle(urlBar);
-        header.packEnd(preferences);
-        header.packEnd(about);
+        header.packEnd(extra);
         header.packEnd(addTab);
         header.setShowCloseButton(true);
 
@@ -117,9 +124,16 @@ class Browser : MainWindow {
     
     private void closeTabSignal(Button b) {
         tabs.detachTab(tabClose[b]);
-        
-        if (tabs.getNPages() == 0) {
-            Main.quit();
+
+        switch (tabs.getNPages()) {
+            case 1:
+                tabs.setShowTabs(false);
+                break;
+            case 0:
+                Main.quit();
+                break;
+            default:
+                break;
         }
     }
 
@@ -153,11 +167,11 @@ class Browser : MainWindow {
         newTab(settings.homepage);
     }
 
-    private void aboutSignal(Button b) {
+    private void aboutSignal(MenuItem b) {
         new About();
     }
 
-    private void preferencesSignal(Button b) {
+    private void preferencesSignal(MenuItem b) {
         new Preferences();
     }
 
