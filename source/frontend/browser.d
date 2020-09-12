@@ -86,12 +86,7 @@ class Browser : MainWindow {
         showAll();
     }
 
-    private Webview getCurrentWebview() {
-        auto current = tabs.getCurrentPage();
-        return cast(Webview)(tabs.getNthPage(current));
-    }
-
-    private void newTab(string url) {
+    void newTab(string url) {
         auto title  = new Label("");
         auto button = new Button(StockID.CLOSE, true);
         button.addOnClicked(toDelegate(&closeTabSignal));
@@ -120,6 +115,11 @@ class Browser : MainWindow {
         tabs.setCurrentPage(index);
         tabs.setTabReorderable(content, true);
         tabs.setShowTabs(index != 0);
+    }
+
+    private Webview getCurrentWebview() {
+        auto current = tabs.getCurrentPage();
+        return cast(Webview)(tabs.getNthPage(current));
     }
     
     private void closeTabSignal(Button b) {

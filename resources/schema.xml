@@ -1,5 +1,5 @@
 <schemalist>
-  <schema path="/org/streaksu/Mantissa/" id="org.streaksu.Mantissa">
+  <schema path="/org/streaksu/mantissa/" id="org.streaksu.mantissa">
     <key type="b" name="smooth-scrolling">
       <default>true</default>
       <summary>Enable smooth scrolling</summary>

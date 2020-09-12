@@ -1,45 +1,45 @@
 module main;
 
-import std.getopt;
-import std.stdio;
-import core.stdc.stdlib;
-import gtk.Main;
-import globals;
-import settings;
-import frontend.browser;
+import std.functional:   toDelegate;
+import gio.c.types:      GApplicationFlags;
+import gio.FileIF:       FileIF;
+import gio.Application:  gioApplication = Application;
+import gtk.Application:  gtkApplication = Application;
+import globals:          programID;
+import settings:         BrowserSettings;
+import frontend.browser: Browser;
+
+class MainApplication : gtkApplication {
+    private Browser mainWindow;
+
+    this() {
+        super(programID, GApplicationFlags.HANDLES_OPEN);
+        addOnActivate(toDelegate(&activate));
+        addOnOpen(toDelegate(&openTabs));
+    }
+
+    void activate(gioApplication app) {
+        auto settings = new BrowserSettings();
+        createOrTab(settings.homepage);
+    }
+
+    void openTabs(FileIF[] files, string, gioApplication app) {
+        foreach (file; files) {
+            createOrTab(file.getUri());
+        }
+    }
+
+    private void createOrTab(string uri) {
+        if (mainWindow is null) {
+            mainWindow = new Browser(uri);
+            addWindow(mainWindow);
+        } else {
+            mainWindow.newTab(uri);
+        }
+    }
+}
 
 void main(string[] args) {
-    // Init GTK.
-    Main.init(args);
-
-    // Set defaults and handle command line.
-    bool vers  = false;
-    auto settings = new BrowserSettings();
-    string url = settings.homepage;
-
-    try {
-        auto cml = getopt(
-            args,
-            "V|version", "Print the version and targets", &vers,
-            "u|url", "URL to open with the browser", &url
-        );
-
-        if (cml.helpWanted) {
-            defaultGetoptPrinter("Flags and options:", cml.options);
-            exit(0);
-        }
-    } catch (Exception e) {
-        writefln("ERROR: %s", e.msg);
-        exit(1);
-    }
-
-    if (vers) {
-        writefln("%s %s", programName, programVersion);
-        writefln("Distributed under the %s license", programLicense);
-        exit(0);
-    }
-
-    // Create browser window and run.
-    new Browser(url);
-    Main.run();
+    auto app = new MainApplication();
+    app.run(args);
 }

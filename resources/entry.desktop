@@ -1,9 +1,12 @@
 [Desktop Entry]
 Name=Mantissa
-Comment=A minimalistic, simple GTK based browser.
 GenericName=Web Browser
-Exec=mantissa
+Comment=A minimalistic, simple GTK based browser
+Keywords=web;browser;internet;
+Exec=mantissa %U
 Icon=mantissa
 Terminal=false
 Type=Application
 Categories=Network;WebBrowser;
+MimeType=text/html;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;application/x-mimearchive;
+StartupWMClass=Mantissa
