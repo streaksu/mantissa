@@ -40,7 +40,6 @@ source = [
     'source/backend/url.d',
     'source/frontend/about.d',
     'source/frontend/browser.d',
-    'source/frontend/preferences.d',
     meson.current_build_dir() + '/globals.d',
     'source/main.d',
     'source/settings.d'
@@ -60,7 +59,7 @@ desktop = 'resources/entry.desktop'
 icon    = 'resources/icon.png'
 schema  = 'resources/schema.xml'
 
-install_data(sources: desktop, rename: 'mantissa.desktop', install_dir: desktop_install)
+install_data(sources: desktop, rename: 'org.streaksu.mantissa.desktop', install_dir: desktop_install)
 install_data(sources: icon, rename: 'mantissa.png', install_dir: icon_install)
 install_data(sources: schema, rename: 'org.streaksu.mantissa.gschema.xml', install_dir: schema_install)
 

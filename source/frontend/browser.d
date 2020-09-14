@@ -1,73 +1,87 @@
 module frontend.browser;
 
-import std.functional: toDelegate;
-import gtk.Main;
-import gtk.MainWindow;
-import gtk.HeaderBar;
-import gtk.Button;
-import gtk.MenuButton;
-import gtk.Menu;
-import gtk.MenuItem;
-import globals;
-import gtk.Entry;
-import gtk.Notebook;
-import gtk.Label;
-import gtk.Widget;
-import gtk.VBox;
-import gtk.HBox;
-import gtk.Image;
-import settings;
-import frontend.about;
-import frontend.preferences;
-import backend.url;
-import backend.webkit.webview;
-import backend.webkit.webviewsettings;
+import std.functional:                 toDelegate;
+import gtk.Main:                       Main;
+import gtk.MainWindow:                 MainWindow;
+import gtk.HeaderBar:                  HeaderBar;
+import gtk.Button:                     Button;
+import globals:                        programName;
+import gtk.Entry:                      Entry;
+import gtk.Notebook:                   Notebook;
+import gtk.Label:                      Label;
+import gtk.Widget:                     Widget;
+import gtk.VBox:                       VBox;
+import gtk.HBox:                       HBox;
+import gtk.CheckButton:                CheckButton;
+import gtk.Image:                      StockID, GtkIconSize, Image;
+import settings:                       BrowserSettings;
+import frontend.about:                 About;
+import backend.url:                    urlFromUserInput;
+import backend.webkit.webview:         WebkitLoadEvent, Webview;
+import backend.webkit.webviewsettings: WebviewSettings;
 
 private immutable windowWidth  = 1366;
 private immutable windowHeight = 768;
 
 class Browser : MainWindow {
-    private Button          previousPage;
-    private Button          nextPage;
-    private Button          refresh;
-    private Entry           urlBar;
-    private Button          addTab;
-    private MenuButton      extra;
-    private Notebook        tabs;
+    private BrowserSettings settings;
+
+    private Button   previousPage;
+    private Button   nextPage;
+    private Button   refresh;
+    private Entry    urlBar;
+    private Button   addTab;
+    private Button   extra;
+    private HBox     mainBox;
+    private Notebook tabs;
+    private VBox     extraBox;
+
+    private CheckButton smoothScrolling;
+    private CheckButton pageCache;
+    private CheckButton javascript;
+    private CheckButton sitequirks;
+    private Entry       homepage;
+    private Button      about;
+
     private Label[Webview]  tabLabels;
     private Webview[Button] tabClose;
 
-    this(string homepage) {
+    this(string openurl) {
         // Init ourselves.
         super(programName);
         setDefaultSize(windowWidth, windowHeight);
 
+        // Create a settings registry.
+        settings = new BrowserSettings();
+
         // Initialize buttons and data.
-        previousPage = new Button(StockID.GO_BACK, true);
-        nextPage     = new Button(StockID.GO_FORWARD, true);
-        refresh      = new Button(StockID.REFRESH, true);
+        previousPage = new Button("go-previous",  GtkIconSize.BUTTON);
+        nextPage     = new Button("go-next",      GtkIconSize.BUTTON);
+        refresh      = new Button("view-refresh", GtkIconSize.BUTTON);
         urlBar       = new Entry();
-        urlBar.setHexpand(true);
-        urlBar.setPlaceholderText("Enter address");
-        addTab      = new Button(StockID.ADD, true);
-        extra = new MenuButton();
-        auto m = new Menu();
-        auto x = new MenuItem(toDelegate(&aboutSignal), "About " ~ programName);
-        auto y = new MenuItem(toDelegate(&preferencesSignal), "Preferences");
-        m.attach(y, 0, 1, 0, 1);
-        m.attach(x, 0, 1, 2, 3);
-        extra.setPopup(m);
-        m.showAll();
-        extra.showAll();
-        tabs        = new Notebook();
-        tabs.setScrollable(true);
+        addTab       = new Button("list-add",           GtkIconSize.BUTTON);
+        extra        = new Button("open-menu-symbolic", GtkIconSize.BUTTON);
+        mainBox      = new HBox(false, 0);
+        tabs         = new Notebook();
+        extraBox     = new VBox(false, 10);
+
+        smoothScrolling = new CheckButton("Enable Smooth Scrolling");
+        pageCache       = new CheckButton("Enable Page Cache");
+        javascript      = new CheckButton("Enable Javascript Support");
+        sitequirks      = new CheckButton("Enable Site-Specific Quirks");
+        homepage        = new Entry();
+        about           = new Button("About " ~ programName);
 
         previousPage.addOnClicked(toDelegate(&previousSignal));
         nextPage.addOnClicked(toDelegate(&nextSignal));
         refresh.addOnClicked(toDelegate(&refreshSignal));
         urlBar.addOnActivate(toDelegate(&urlBarEnterSignal));
+        urlBar.setHexpand(true);
         addTab.addOnClicked(toDelegate(&newTabSignal));
+        extra.addOnClicked(toDelegate(&extraSignal));
         tabs.addOnSwitchPage(toDelegate(&tabChangedSignal));
+        tabs.setScrollable(true);
+        about.addOnClicked(toDelegate(&aboutSignal));
 
         // Pack the header.
         auto header = new HeaderBar();
@@ -78,12 +92,31 @@ class Browser : MainWindow {
         header.packEnd(extra);
         header.packEnd(addTab);
         header.setShowCloseButton(true);
-
-        // Pack header and final adjustements.
         setTitlebar(header);
-        add(tabs);
-        newTab(homepage);
+
+        // Pack the main overlay.
+        mainBox.packStart(tabs,     true,  true,  0);
+        mainBox.packStart(extraBox, false, false, 0);
+        add(mainBox);
+
+        // Pack the extra pannel.
+        auto homePBox = new HBox(true, 5);
+        homePBox.packStart(new Label("Homepage"), false, false, 5);
+        homePBox.packStart(homepage,              false, false, 5);
+
+        extraBox.packStart(new Label("Engine settings"), false, false, 10);
+        extraBox.packStart(smoothScrolling,              false, false, 10);
+        extraBox.packStart(pageCache,                    false, false, 10);
+        extraBox.packStart(javascript,                   false, false, 10);
+        extraBox.packStart(sitequirks,                   false, false, 10);
+        extraBox.packStart(new Label("Browsing"),        false, false, 10);
+        extraBox.packStart(homePBox,                     false, false, 10);
+        extraBox.packStart(about,                        false, false, 10);
+
+        // Make new tab, show all.
+        newTab(openurl);
         showAll();
+        extraBox.hide();
     }
 
     void newTab(string url) {
@@ -121,7 +154,7 @@ class Browser : MainWindow {
         auto current = tabs.getCurrentPage();
         return cast(Webview)(tabs.getNthPage(current));
     }
-    
+
     private void closeTabSignal(Button b) {
         tabs.detachTab(tabClose[b]);
 
@@ -163,16 +196,28 @@ class Browser : MainWindow {
     }
 
     private void newTabSignal(Button b) {
-        auto settings = new BrowserSettings();
         newTab(settings.homepage);
     }
 
-    private void aboutSignal(MenuItem b) {
-        new About();
+    private void extraSignal(Button b) {
+        if (extraBox.isVisible()) {
+            settings.smoothScrolling = smoothScrolling.getActive();
+            settings.pageCache       = pageCache.getActive();
+            settings.javascript      = javascript.getActive();
+            settings.sitequirks      = sitequirks.getActive();
+            extraBox.hide();
+        } else {
+            smoothScrolling.setActive(settings.smoothScrolling);
+            pageCache.setActive(settings.pageCache);
+            javascript.setActive(settings.javascript);
+            sitequirks.setActive(settings.sitequirks);
+            homepage.setText(settings.homepage);
+            extraBox.show();
+        }
     }
 
-    private void preferencesSignal(MenuItem b) {
-        new Preferences();
+    private void aboutSignal(Button b) {
+        new About();
     }
 
     private void tabChangedSignal(Widget contents, uint index, Notebook book) {
