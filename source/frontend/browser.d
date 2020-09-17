@@ -1,7 +1,6 @@
 module frontend.browser;
 
 import std.functional:                 toDelegate;
-import gtk.Main:                       Main;
 import gtk.MainWindow:                 MainWindow;
 import gtk.HeaderBar:                  HeaderBar;
 import gtk.Button:                     Button;
@@ -13,11 +12,11 @@ import gtk.Widget:                     Widget;
 import gtk.VBox:                       VBox;
 import gtk.HBox:                       HBox;
 import gtk.CheckButton:                CheckButton;
-import gtk.Image:                      StockID, GtkIconSize, Image;
+import gtk.Image:                      GtkIconSize, Image;
 import settings:                       BrowserSettings;
 import frontend.about:                 About;
 import backend.url:                    urlFromUserInput;
-import backend.webkit.webview:         WebkitLoadEvent, Webview;
+import backend.webkit.webview:         LoadEvent, InsecureContentEvent, Webview;
 import backend.webkit.webviewsettings: WebviewSettings;
 
 private immutable windowWidth  = 1366;
@@ -41,6 +40,8 @@ class Browser : MainWindow {
     private CheckButton javascript;
     private CheckButton sitequirks;
     private Entry       homepage;
+    private CheckButton forceHTTPS;
+    private CheckButton insecureContent;
     private Button      about;
 
     private Label[Webview]  tabLabels;
@@ -70,6 +71,8 @@ class Browser : MainWindow {
         javascript      = new CheckButton("Enable Javascript Support");
         sitequirks      = new CheckButton("Enable Site-Specific Quirks");
         homepage        = new Entry();
+        forceHTTPS      = new CheckButton("Force HTTPS Navigation");
+        insecureContent = new CheckButton("Allow HTTP content on HTTPS sites");
         about           = new Button("About " ~ programName);
 
         previousPage.addOnClicked(toDelegate(&previousSignal));
@@ -94,12 +97,12 @@ class Browser : MainWindow {
         header.setShowCloseButton(true);
         setTitlebar(header);
 
-        // Pack the main overlay.
+        // Pack the main box.
         mainBox.packStart(tabs,     true,  true,  0);
         mainBox.packStart(extraBox, false, false, 0);
         add(mainBox);
 
-        // Pack the extra pannel.
+        // Pack the extra box.
         auto homePBox = new HBox(true, 5);
         homePBox.packStart(new Label("Homepage"), false, false, 5);
         homePBox.packStart(homepage,              false, false, 5);
@@ -111,6 +114,8 @@ class Browser : MainWindow {
         extraBox.packStart(sitequirks,                   false, false, 10);
         extraBox.packStart(new Label("Browsing"),        false, false, 10);
         extraBox.packStart(homePBox,                     false, false, 10);
+        extraBox.packStart(forceHTTPS,                   false, false, 10);
+        extraBox.packStart(insecureContent,              false, false, 10);
         extraBox.packStart(about,                        false, false, 10);
 
         // Make new tab, show all.
@@ -121,12 +126,13 @@ class Browser : MainWindow {
 
     void newTab(string url) {
         auto title  = new Label("");
-        auto button = new Button(StockID.CLOSE, true);
+        auto button = new Button("window-close", GtkIconSize.BUTTON);
         button.addOnClicked(toDelegate(&closeTabSignal));
 
         auto content         = new Webview();
         auto contentSettings = new WebviewSettings();
         auto settings        = new BrowserSettings();
+
         contentSettings.smoothScrolling    = settings.smoothScrolling;
         contentSettings.pageCache          = settings.pageCache;
         contentSettings.javascript         = settings.javascript;
@@ -135,6 +141,7 @@ class Browser : MainWindow {
         content.uri      = url;
         content.settings = contentSettings;
         content.addOnLoadChanged(toDelegate(&loadChangedSignal));
+        content.addOnInsecureContent(toDelegate(&insecureContentSignal));
 
         auto titleBox = new HBox(false, 10);
         titleBox.packStart(title, false, false, 0);
@@ -163,7 +170,7 @@ class Browser : MainWindow {
                 tabs.setShowTabs(false);
                 break;
             case 0:
-                Main.quit();
+                destroy();
                 break;
             default:
                 break;
@@ -205,6 +212,9 @@ class Browser : MainWindow {
             settings.pageCache       = pageCache.getActive();
             settings.javascript      = javascript.getActive();
             settings.sitequirks      = sitequirks.getActive();
+            settings.homepage        = homepage.getText();
+            settings.forceHTTPS      = forceHTTPS.getActive();
+            settings.insecureContent = insecureContent.getActive();
             extraBox.hide();
         } else {
             smoothScrolling.setActive(settings.smoothScrolling);
@@ -212,6 +222,8 @@ class Browser : MainWindow {
             javascript.setActive(settings.javascript);
             sitequirks.setActive(settings.sitequirks);
             homepage.setText(settings.homepage);
+            forceHTTPS.setActive(settings.forceHTTPS);
+            insecureContent.setActive(settings.insecureContent);
             extraBox.show();
         }
     }
@@ -226,7 +238,7 @@ class Browser : MainWindow {
         urlBar.showAll();
     }
 
-    private void loadChangedSignal(Webview sender, WebkitLoadEvent event) {
+    private void loadChangedSignal(Webview sender, LoadEvent event) {
         tabLabels[sender].setText(sender.title);
 
         previousPage.setSensitive(sender.canGoBack);
@@ -239,24 +251,58 @@ class Browser : MainWindow {
         this.urlBar.setText(sender.uri);
 
         final switch (event) {
-            case WebkitLoadEvent.Started:
+            case LoadEvent.Started:
                 urlBar.setProgressFraction(0.25);
                 break;
-            case WebkitLoadEvent.Redirected:
+            case LoadEvent.Redirected:
                 urlBar.setProgressFraction(0.5);
                 break;
-            case WebkitLoadEvent.Committed:
+            case LoadEvent.Committed:
                 urlBar.setProgressFraction(0.75);
+
+                // Check HTTPS if requested.
+                if (settings.forceHTTPS) {
+                    if (sender.getTLSInfo() == false) {
+                        sender.loadHTML("
+                            <!DOCTYPE html>
+                            <html>
+                                <head>
+                                    <title>Cancelled</title>
+                                </head>
+                                <body>
+                                    <p>Load was cancelled: TLS info says no HTML.</p>
+                                </body>
+                            </html>
+                        ");
+                    }
+                }
+
                 break;
-            case WebkitLoadEvent.Finished:
+            case LoadEvent.Finished:
                 urlBar.setProgressFraction(0);
                 break;
         }
 
         if (sender.isLoading) {
-            refresh.setImage(new Image(StockID.STOP, GtkIconSize.BUTTON));
+            refresh.setImage(new Image("process-stop", GtkIconSize.BUTTON));
         } else {
-            refresh.setImage(new Image(StockID.REFRESH, GtkIconSize.BUTTON));
+            refresh.setImage(new Image("view-refresh", GtkIconSize.BUTTON));
+        }
+    }
+
+    private void insecureContentSignal(Webview sender, InsecureContentEvent event) {
+        if (!settings.insecureContent) {
+            sender.loadHTML("
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Cancelled</title>
+                    </head>
+                    <body>
+                        <p>Load was cancelled: Insecure content on HTTPS</p>
+                    </body>
+                </html>
+            ");
         }
     }
 }

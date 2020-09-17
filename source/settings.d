@@ -8,6 +8,8 @@ private immutable pageCacheKey       = "page-cache";
 private immutable javascriptKey      = "javascript";
 private immutable sitequirksKey      = "site-quirks";
 private immutable homepageKey        = "homepage";
+private immutable forceHTTPSKey      = "force-https";
+private immutable insecureContentKey = "insecure-content";
 
 class BrowserSettings : Settings {
     @property bool   smoothScrolling() { return getBoolean(smoothScrollingKey); }
@@ -15,12 +17,16 @@ class BrowserSettings : Settings {
     @property bool   javascript()      { return getBoolean(javascriptKey);      }
     @property bool   sitequirks()      { return getBoolean(sitequirksKey);      }
     @property string homepage()        { return getString(homepageKey);         }
+    @property bool   forceHTTPS()      { return getBoolean(forceHTTPSKey);      }
+    @property bool   insecureContent() { return getBoolean(insecureContentKey); }
 
     @property void smoothScrolling(bool b) { setBoolean(smoothScrollingKey, b); }
     @property void pageCache(bool b)       { setBoolean(pageCacheKey, b);       }
     @property void javascript(bool b)      { setBoolean(javascriptKey, b);      }
     @property void sitequirks(bool b)      { setBoolean(sitequirksKey, b);      }
     @property void homepage(string d)      { setString(homepageKey, d);         }
+    @property void forceHTTPS(bool b)      { setBoolean(forceHTTPSKey, b);      }
+    @property void insecureContent(bool b) { setBoolean(insecureContentKey, b); }
 
     this() {
         super(gschemaName);

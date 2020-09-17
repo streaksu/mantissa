@@ -44,5 +44,23 @@
         opened for new tabs and startup.
       </description>
     </key>
+    <key type="b" name="force-https">
+      <default>true</default>
+      <summary>Force HTTPS navigation</summary>
+      <description>
+        This key determines whether the browser will
+        only load and interact with URLs and services
+        featuring the HTTPS protocol.
+      </description>
+    </key>
+    <key type="b" name="insecure-content">
+      <default>false</default>
+      <summary>Allow insecure content</summary>
+      <description>
+        This key determines whether the browser will
+        allow insecure content, that is, HTTP content on
+        HTTPS sites.
+      </description>
+    </key>
   </schema>
 </schemalist>
