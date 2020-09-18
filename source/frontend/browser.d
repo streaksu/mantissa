@@ -1,10 +1,11 @@
 module frontend.browser;
 
 import std.functional:                 toDelegate;
+import glib.Util:                      Util;
 import gtk.MainWindow:                 MainWindow;
 import gtk.HeaderBar:                  HeaderBar;
 import gtk.Button:                     Button;
-import globals:                        programName;
+import globals:                        programName, programNameRaw;
 import gtk.Entry:                      Entry;
 import gtk.Notebook:                   Notebook;
 import gtk.Label:                      Label;
@@ -20,7 +21,7 @@ import gtk.Image:                      GtkIconSize, Image;
 import settings:                       BrowserSettings;
 import frontend.about:                 About;
 import backend.url:                    urlFromUserInput;
-import backend.webkit.context:         CookiePolicy;
+import backend.webkit.cookiemanager:   CookieManager, CookiePolicy, PersistentStorage;
 import backend.webkit.webview:         LoadEvent, InsecureContentEvent, Webview;
 import backend.webkit.webviewsettings: WebviewSettings;
 
@@ -46,6 +47,7 @@ class Browser : MainWindow {
     private CheckButton sitequirks;
     private Entry       homepage;
     private ComboBox    cookiePolicy;
+    private CheckButton cookieKeep;
     private CheckButton forceHTTPS;
     private CheckButton insecureContent;
     private Button      about;
@@ -78,6 +80,7 @@ class Browser : MainWindow {
         sitequirks      = new CheckButton("Enable Site-Specific Quirks");
         homepage        = new Entry();
         cookiePolicy    = new ComboBox(false);
+        cookieKeep      = new CheckButton("Keep cookies between sessions");
         forceHTTPS      = new CheckButton("Force HTTPS Navigation");
         insecureContent = new CheckButton("Allow HTTP content on HTTPS sites");
         about           = new Button("About " ~ programName);
@@ -138,6 +141,7 @@ class Browser : MainWindow {
         extraBox.packStart(new Label("Browsing"),        false, false, 10);
         extraBox.packStart(homePBox,                     false, false, 10);
         extraBox.packStart(cookieBox,                    false, false, 10);
+        extraBox.packStart(cookieKeep,                   false, false, 10);
         extraBox.packStart(forceHTTPS,                   false, false, 10);
         extraBox.packStart(insecureContent,              false, false, 10);
         extraBox.packStart(about,                        false, false, 10);
@@ -162,8 +166,17 @@ class Browser : MainWindow {
         contentSettings.javascript         = settings.javascript;
         contentSettings.siteSpecificQuirks = settings.sitequirks;
 
+        auto cookies = Util.buildFilename([Util.getUserDataDir(), programNameRaw, "cookies.txt"]);
+        import std.file: exists, write, mkdir;
+        if (!exists(cookies) && settings.cookieKeep) {
+            mkdir(Util.buildFilename([Util.getUserDataDir(), programNameRaw]));
+            write(cookies, "");
+        }
+
         content.uri      = url;
-        content.context.acceptPolicy = cast(CookiePolicy)settings.cookiePolicy;
+        content.context.cookieManager.acceptPolicy = cast(CookiePolicy)settings.cookiePolicy;
+        if (settings.cookieKeep) content.context.cookieManager.setPersistentStorage(cookies, PersistentStorage.Text);
+        content.context.cookieManager.addOnChanged(toDelegate(&changedCookiesSignal));
         content.settings = contentSettings;
         content.addOnLoadChanged(toDelegate(&loadChangedSignal));
         content.addOnInsecureContent(toDelegate(&insecureContentSignal));
@@ -239,6 +252,7 @@ class Browser : MainWindow {
             settings.sitequirks      = sitequirks.getActive();
             settings.homepage        = homepage.getText();
             settings.cookiePolicy    = cookiePolicy.getActive();
+            settings.cookieKeep      = cookieKeep.getActive();
             settings.forceHTTPS      = forceHTTPS.getActive();
             settings.insecureContent = insecureContent.getActive();
             extraBox.hide();
@@ -249,6 +263,7 @@ class Browser : MainWindow {
             sitequirks.setActive(settings.sitequirks);
             homepage.setText(settings.homepage);
             cookiePolicy.setActive(settings.cookiePolicy);
+            cookieKeep.setActive(settings.cookieKeep);
             forceHTTPS.setActive(settings.forceHTTPS);
             insecureContent.setActive(settings.insecureContent);
             extraBox.show();
@@ -331,5 +346,13 @@ class Browser : MainWindow {
                 </html>
             ");
         }
+    }
+
+    private void changedCookiesSignal(CookieManager man) {
+        // If this doesn't exist it wont save the cookies.
+        // I do not know why.
+        // I do not know who thought this was a good idea.
+        // Sigh.
+        return;
     }
 }

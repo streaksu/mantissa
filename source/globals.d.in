@@ -2,6 +2,7 @@ module globals;
 
 import std.string: capitalize, splitLines;
 
+immutable programNameRaw      = "@name@";
 immutable programName         = capitalize("@name@");
 immutable programID           = "@id@";
 immutable programVersion      = "@version@";

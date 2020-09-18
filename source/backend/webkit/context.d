@@ -1,28 +1,19 @@
 module backend.webkit.context;
 
-import std.string: toStringz;
+import backend.webkit.cookiemanager: WebkitCookieManager, CookieManager;
 
-alias WebkitContext       = void*;
-alias WebkitCookieManager = void*;
-
-enum CookiePolicy {
-    AcceptAlways,
-    AcceptNever,
-    AcceptNoThirdParty
-}
+alias WebkitContext = void*;
 
 extern (C) {
     WebkitContext webkit_web_context_new();
     WebkitCookieManager webkit_web_context_get_cookie_manager(WebkitContext);
-    void webkit_cookie_manager_set_accept_policy(WebkitCookieManager, CookiePolicy);
 }
 
 class Context {
     private WebkitContext inner;
 
-    @property void acceptPolicy(CookiePolicy policy) {
-        auto cop = webkit_web_context_get_cookie_manager(inner);
-        webkit_cookie_manager_set_accept_policy(cop, policy); 
+    @property CookieManager cookieManager() {
+        return new CookieManager(webkit_web_context_get_cookie_manager(inner));
     }
 
     this(WebkitContext s) {

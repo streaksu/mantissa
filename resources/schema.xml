@@ -36,6 +36,14 @@
         standard behaviour.
       </description>
     </key>
+    <key type="s" name="homepage">
+      <default>'https://dlang.org'</default>
+      <summary>Homepage</summary>
+      <description>
+        This key determines which web will be
+        opened for new tabs and startup.
+      </description>
+    </key>
     <key type="i" name="cookie-policy">
       <default>1</default>
       <summary>Cookie Policy</summary>
@@ -46,12 +54,12 @@
         2 = Block all cookies not coming from the main site. 
       </description>
     </key>
-    <key type="s" name="homepage">
-      <default>'https://dlang.org'</default>
-      <summary>Homepage</summary>
+    <key type="b" name="cookie-keep">
+      <default>true</default>
+      <summary>Keep Cookies</summary>
       <description>
-        This key determines which web will be
-        opened for new tabs and startup.
+        This key determines whether the browser will
+        save cookies between sessions.
       </description>
     </key>
     <key type="b" name="force-https">
