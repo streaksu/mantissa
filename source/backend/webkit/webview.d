@@ -3,6 +3,7 @@ module backend.webkit.webview;
 import std.string;
 import gtk.Widget;
 import gobject.Signals;
+import backend.webkit.context;
 import backend.webkit.webviewsettings;
 
 alias WebkitView = void*;
@@ -11,6 +12,7 @@ extern (C) {
     WebkitView webkit_web_view_new();
     void webkit_web_view_load_uri(WebkitView, immutable(char)*);
     bool  webkit_web_view_get_tls_info(WebkitView, void**, void*);
+    WebkitContext webkit_web_view_get_context(WebkitView);
     char* webkit_web_view_get_uri(WebkitView);
     char* webkit_web_view_get_title(WebkitView);
     void  webkit_web_view_load_html(WebkitView, immutable(char)*, immutable(char)*);
@@ -42,6 +44,10 @@ class Webview : Widget {
 
     @property string uri() {
         return cast(string)fromStringz(webkit_web_view_get_uri(webview));
+    }
+
+    @property Context context() {
+        return new Context(webkit_web_view_get_context(webview));
     }
 
     @property string title() {

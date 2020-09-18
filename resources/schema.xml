@@ -36,6 +36,16 @@
         standard behaviour.
       </description>
     </key>
+    <key type="i" name="cookie-policy">
+      <default>1</default>
+      <summary>Cookie Policy</summary>
+      <description>
+        This key determines the cookie policy of the browser.
+        0 = Accept all cookies, always.
+        1 = Block all cookies, always.
+        2 = Block all cookies not coming from the main site. 
+      </description>
+    </key>
     <key type="s" name="homepage">
       <default>'https://dlang.org'</default>
       <summary>Homepage</summary>

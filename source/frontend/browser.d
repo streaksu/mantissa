@@ -11,11 +11,16 @@ import gtk.Label:                      Label;
 import gtk.Widget:                     Widget;
 import gtk.VBox:                       VBox;
 import gtk.HBox:                       HBox;
+import gtk.ComboBox:                   ComboBox;
+import gtk.ListStore:                  ListStore;
+import gobject.c.types:                GType;
+import gtk.CellRendererText:           CellRendererText;
 import gtk.CheckButton:                CheckButton;
 import gtk.Image:                      GtkIconSize, Image;
 import settings:                       BrowserSettings;
 import frontend.about:                 About;
 import backend.url:                    urlFromUserInput;
+import backend.webkit.context:         CookiePolicy;
 import backend.webkit.webview:         LoadEvent, InsecureContentEvent, Webview;
 import backend.webkit.webviewsettings: WebviewSettings;
 
@@ -40,6 +45,7 @@ class Browser : MainWindow {
     private CheckButton javascript;
     private CheckButton sitequirks;
     private Entry       homepage;
+    private ComboBox    cookiePolicy;
     private CheckButton forceHTTPS;
     private CheckButton insecureContent;
     private Button      about;
@@ -71,6 +77,7 @@ class Browser : MainWindow {
         javascript      = new CheckButton("Enable Javascript Support");
         sitequirks      = new CheckButton("Enable Site-Specific Quirks");
         homepage        = new Entry();
+        cookiePolicy    = new ComboBox(false);
         forceHTTPS      = new CheckButton("Force HTTPS Navigation");
         insecureContent = new CheckButton("Allow HTTP content on HTTPS sites");
         about           = new Button("About " ~ programName);
@@ -107,6 +114,22 @@ class Browser : MainWindow {
         homePBox.packStart(new Label("Homepage"), false, false, 5);
         homePBox.packStart(homepage,              false, false, 5);
 
+        auto cookieBox = new HBox(true, 5);
+        cookieBox.packStart(new Label("Cookie Policy"), false, false, 5);
+        cookieBox.packStart(cookiePolicy,               false, false, 5);
+        auto store = new ListStore([GType.STRING]);
+        auto iter1 = store.createIter();
+        auto iter2 = store.createIter();
+        auto iter3 = store.createIter();
+        store.setValue(iter1, 0, "Accept all cookies unconditionally");
+        store.setValue(iter2, 0, "Reject all cookies unconditionally");
+        store.setValue(iter3, 0, "Accept only cookies set by the main site");
+        cookiePolicy.setModel(store);
+        cookiePolicy.showAll();
+        auto col = new CellRendererText();
+        cookiePolicy.packStart(col, true);
+        cookiePolicy.addAttribute(col, "text", 0);
+
         extraBox.packStart(new Label("Engine settings"), false, false, 10);
         extraBox.packStart(smoothScrolling,              false, false, 10);
         extraBox.packStart(pageCache,                    false, false, 10);
@@ -114,6 +137,7 @@ class Browser : MainWindow {
         extraBox.packStart(sitequirks,                   false, false, 10);
         extraBox.packStart(new Label("Browsing"),        false, false, 10);
         extraBox.packStart(homePBox,                     false, false, 10);
+        extraBox.packStart(cookieBox,                    false, false, 10);
         extraBox.packStart(forceHTTPS,                   false, false, 10);
         extraBox.packStart(insecureContent,              false, false, 10);
         extraBox.packStart(about,                        false, false, 10);
@@ -139,6 +163,7 @@ class Browser : MainWindow {
         contentSettings.siteSpecificQuirks = settings.sitequirks;
 
         content.uri      = url;
+        content.context.acceptPolicy = cast(CookiePolicy)settings.cookiePolicy;
         content.settings = contentSettings;
         content.addOnLoadChanged(toDelegate(&loadChangedSignal));
         content.addOnInsecureContent(toDelegate(&insecureContentSignal));
@@ -213,6 +238,7 @@ class Browser : MainWindow {
             settings.javascript      = javascript.getActive();
             settings.sitequirks      = sitequirks.getActive();
             settings.homepage        = homepage.getText();
+            settings.cookiePolicy    = cookiePolicy.getActive();
             settings.forceHTTPS      = forceHTTPS.getActive();
             settings.insecureContent = insecureContent.getActive();
             extraBox.hide();
@@ -222,6 +248,7 @@ class Browser : MainWindow {
             javascript.setActive(settings.javascript);
             sitequirks.setActive(settings.sitequirks);
             homepage.setText(settings.homepage);
+            cookiePolicy.setActive(settings.cookiePolicy);
             forceHTTPS.setActive(settings.forceHTTPS);
             insecureContent.setActive(settings.insecureContent);
             extraBox.show();
