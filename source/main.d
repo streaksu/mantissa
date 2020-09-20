@@ -4,37 +4,49 @@ import std.functional:   toDelegate;
 import gio.c.types:      GApplicationFlags;
 import gio.FileIF:       FileIF;
 import gio.Application:  gioApplication = Application;
-import gtk.Application:  gtkApplication = Application;
+import gtk.Application:  Application;
+import gtk.Window:       Window;
 import globals:          programID;
 import settings:         BrowserSettings;
 import frontend.browser: Browser;
 
-class MainApplication : gtkApplication {
-    private Browser mainWindow;
-
+/**
+ * GTKApplication that represents the browser to the GTK ecosystem.
+ * It handles everything from opening commandline files to main windows.
+ */
+class MainApplication : Application {
+    /**
+     * Will create the object and set up the proper signals.
+     */
     this() {
-        super(programID, GApplicationFlags.HANDLES_OPEN);
-        addOnActivate(toDelegate(&activate));
-        addOnOpen(toDelegate(&openTabs));
+        super(programID, GApplicationFlags.HANDLES_OPEN); // Handle opening URLs
+        addOnActivate(toDelegate(&activateSignal));
+        addOnOpen(toDelegate(&openTabsSignal));
     }
 
-    void activate(gioApplication app) {
+    // When no URL to be opened is passed, this is called instead of
+    // openTabsSignal.
+    // In this case we are going to open a new main window.
+    private void activateSignal(gioApplication) {
         auto settings = new BrowserSettings();
-        createOrTab(settings.homepage);
+        addWindow(new Browser(settings.homepage));
     }
 
-    void openTabs(FileIF[] files, string, gioApplication app) {
-        foreach (file; files) {
-            createOrTab(file.getUri());
-        }
-    }
-
-    private void createOrTab(string uri) {
-        if (mainWindow is null) {
-            mainWindow = new Browser(uri);
-            addWindow(mainWindow);
+    // When some URLs are to be opened, this is called instead of
+    // activateSignal.
+    // In this case, we will want to append tabs to the active window.
+    private void openTabsSignal(FileIF[] files, string, gioApplication) {
+        auto win = cast(Browser)getActiveWindow();
+        if (win is null) {
+            win = new Browser(files[0].getUri);
+            addWindow(win);
+            foreach (i; 1..files.length) {
+                win.newTab(files[i].getUri());
+            }
         } else {
-            mainWindow.newTab(uri);
+            foreach (file; files) {
+                win.newTab(file.getUri());
+            }
         }
     }
 }

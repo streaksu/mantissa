@@ -28,7 +28,7 @@ import backend.webkit.webviewsettings: WebviewSettings;
 private immutable windowWidth  = 1366;
 private immutable windowHeight = 768;
 
-class Browser : MainWindow {
+final class Browser : MainWindow {
     private BrowserSettings settings;
 
     private Button   previousPage;

@@ -1,9 +1,14 @@
 module frontend.about;
 
-import gtk.AboutDialog;
-import globals;
+import gtk.AboutDialog: AboutDialog;
+import globals; // Everything really.
 
-class About : AboutDialog {
+/**
+ * About window of the application, meant to show credits, website of the
+ * project, all that stuff.
+ */
+final class About : AboutDialog {
+    /// Creates a filled about window.
     this() {
         // Work with the logo and program info.
         setLogoIconName(iconName);
