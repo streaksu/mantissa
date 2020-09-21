@@ -8,14 +8,15 @@ import backend.webkit.webviewsettings;
 
 alias WebkitView = void*;
 
-extern (C) {
+private extern (C) {
     WebkitView webkit_web_view_new();
     void webkit_web_view_load_uri(WebkitView, immutable(char)*);
     bool  webkit_web_view_get_tls_info(WebkitView, void**, void*);
     WebkitContext webkit_web_view_get_context(WebkitView);
     char* webkit_web_view_get_uri(WebkitView);
     char* webkit_web_view_get_title(WebkitView);
-    void  webkit_web_view_load_html(WebkitView, immutable(char)*, immutable(char)*);
+    void webkit_web_view_load_alternate_html(WebkitView, immutable(char)*, immutable(char)*, immutable(char)*);
+    void webkit_web_view_try_close(WebkitView);
     bool webkit_web_view_can_go_back(WebkitView);
     bool webkit_web_view_can_go_forward(WebkitView);
     WebkitSettings webkit_web_view_get_settings(WebkitView);
@@ -92,6 +93,10 @@ class Webview : Widget {
         super(cast(GtkWidget*)webview);
     }
 
+    void tryClose() {
+        webkit_web_view_try_close(webview);
+    }
+
     void goBack() {
         webkit_web_view_go_back(webview);
     }
@@ -108,8 +113,9 @@ class Webview : Widget {
         webkit_web_view_stop_loading(webview);
     }
 
-    void loadHTML(string html) {
-        webkit_web_view_load_html(webview, toStringz(html), null);
+    void loadAlternateHTML(string html, string uri, string baseURI) {
+        webkit_web_view_load_alternate_html(webview, toStringz(html),
+            toStringz(uri), toStringz(baseURI));
     }
 
     void addOnLoadChanged(void delegate(Webview, LoadEvent) dlg) {

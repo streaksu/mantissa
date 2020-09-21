@@ -1,16 +1,14 @@
 module backend.url;
 
-import std.regex;
-import std.file;
+import std.file: exists;
 
-private immutable noProtocol = ctRegex!(r"^[a-zA-Z0-9\.]+[\.][a-zA-Z0-9]+$");
-
+/**
+ * Takes user input and tries to sanitize it into a real URL.
+ */
 string urlFromUserInput(string userURL) {
     if (exists(userURL)) {
         return "file://" ~ userURL;
-    } else if (matchAll(userURL, noProtocol)) {
-        return "https://" ~ userURL;
     } else {
-        return userURL;
+        return "http://" ~ userURL;
     }
 }

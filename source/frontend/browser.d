@@ -1,5 +1,6 @@
 module frontend.browser;
 
+import std.file:                       exists, write, mkdir;
 import std.functional:                 toDelegate;
 import glib.Util:                      Util;
 import gtk.MainWindow:                 MainWindow;
@@ -153,33 +154,39 @@ final class Browser : MainWindow {
     }
 
     void newTab(string url) {
+        // Create webview and apply the settings.
+        auto content = new Webview();
+
+        content.uri                         = url;
+        content.settings.smoothScrolling    = settings.smoothScrolling;
+        content.settings.pageCache          = settings.pageCache;
+        content.settings.javascript         = settings.javascript;
+        content.settings.siteSpecificQuirks = settings.sitequirks;
+        content.context.cookieManager.acceptPolicy = cast(CookiePolicy)settings.cookiePolicy;
+
+        // Set cookie storage path if needed.
+        if (settings.cookieKeep) {
+            auto userdata  = Util.getUserDataDir();
+            auto storepath = Util.buildFilename([userdata, programNameRaw]);
+            auto store     = Util.buildFilename([storepath, "cookies.txt"]);
+
+            if (!exists(store)) {
+                mkdir(storepath);
+                write(store, "");
+            }
+
+            content.context.cookieManager.setPersistentStorage(store, PersistentStorage.Text);
+        }
+
+        content.context.cookieManager.addOnChanged(toDelegate(&changedCookiesSignal));
+        content.addOnLoadChanged(toDelegate(&loadChangedSignal));
+        content.addOnInsecureContent(toDelegate(&insecureContentSignal));
+        content.addOnDestroy(toDelegate(&viewDestroySignal));
+
+        // Finally, pack the UI.
         auto title  = new Label("");
         auto button = new Button("window-close", GtkIconSize.BUTTON);
         button.addOnClicked(toDelegate(&closeTabSignal));
-
-        auto content         = new Webview();
-        auto contentSettings = new WebviewSettings();
-        auto settings        = new BrowserSettings();
-
-        contentSettings.smoothScrolling    = settings.smoothScrolling;
-        contentSettings.pageCache          = settings.pageCache;
-        contentSettings.javascript         = settings.javascript;
-        contentSettings.siteSpecificQuirks = settings.sitequirks;
-
-        auto cookies = Util.buildFilename([Util.getUserDataDir(), programNameRaw, "cookies.txt"]);
-        import std.file: exists, write, mkdir;
-        if (!exists(cookies) && settings.cookieKeep) {
-            mkdir(Util.buildFilename([Util.getUserDataDir(), programNameRaw]));
-            write(cookies, "");
-        }
-
-        content.uri      = url;
-        content.context.cookieManager.acceptPolicy = cast(CookiePolicy)settings.cookiePolicy;
-        if (settings.cookieKeep) content.context.cookieManager.setPersistentStorage(cookies, PersistentStorage.Text);
-        content.context.cookieManager.addOnChanged(toDelegate(&changedCookiesSignal));
-        content.settings = contentSettings;
-        content.addOnLoadChanged(toDelegate(&loadChangedSignal));
-        content.addOnInsecureContent(toDelegate(&insecureContentSignal));
 
         auto titleBox = new HBox(false, 10);
         titleBox.packStart(title, false, false, 0);
@@ -201,7 +208,11 @@ final class Browser : MainWindow {
     }
 
     private void closeTabSignal(Button b) {
-        tabs.detachTab(tabClose[b]);
+        auto view = tabClose[b];
+        tabs.detachTab(view);
+        tabLabels.remove(view);
+        tabClose.remove(b);
+        view.destroy();
 
         switch (tabs.getNPages()) {
             case 1:
@@ -275,20 +286,23 @@ final class Browser : MainWindow {
     }
 
     private void tabChangedSignal(Widget contents, uint index, Notebook book) {
-        auto uri = (cast(Webview)contents).uri;
-        urlBar.setText(uri);
+        auto view = cast(Webview)contents;
+        urlBar.setText(view.uri);
+        urlBar.setProgressFraction(0);
         urlBar.showAll();
+        previousPage.setSensitive(view.canGoBack);
+        nextPage.setSensitive(view.canGoForward);
     }
 
     private void loadChangedSignal(Webview sender, LoadEvent event) {
         tabLabels[sender].setText(sender.title);
 
-        previousPage.setSensitive(sender.canGoBack);
-        nextPage.setSensitive(sender.canGoForward);
-
         if (getCurrentWebview() != sender) {
             return;
         }
+
+        previousPage.setSensitive(sender.canGoBack);
+        nextPage.setSensitive(sender.canGoForward);
 
         this.urlBar.setText(sender.uri);
 
@@ -305,7 +319,7 @@ final class Browser : MainWindow {
                 // Check HTTPS if requested.
                 if (settings.forceHTTPS) {
                     if (sender.getTLSInfo() == false) {
-                        sender.loadHTML("
+                        sender.loadAlternateHTML("
                             <!DOCTYPE html>
                             <html>
                                 <head>
@@ -315,7 +329,7 @@ final class Browser : MainWindow {
                                     <p>Load was cancelled: TLS info says no HTML.</p>
                                 </body>
                             </html>
-                        ");
+                        ", sender.uri, null);
                     }
                 }
 
@@ -334,7 +348,7 @@ final class Browser : MainWindow {
 
     private void insecureContentSignal(Webview sender, InsecureContentEvent event) {
         if (!settings.insecureContent) {
-            sender.loadHTML("
+            sender.loadAlternateHTML("
                 <!DOCTYPE html>
                 <html>
                     <head>
@@ -344,7 +358,7 @@ final class Browser : MainWindow {
                         <p>Load was cancelled: Insecure content on HTTPS</p>
                     </body>
                 </html>
-            ");
+            ", sender.uri, null);
         }
     }
 
@@ -354,5 +368,10 @@ final class Browser : MainWindow {
         // I do not know who thought this was a good idea.
         // Sigh.
         return;
+    }
+
+    private void viewDestroySignal(Widget view) {
+        auto v = cast(Webview)view;
+        v.loadAlternateHTML("", "", null);
     }
 }

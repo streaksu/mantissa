@@ -4,7 +4,7 @@ import backend.webkit.cookiemanager: WebkitCookieManager, CookieManager;
 
 alias WebkitContext = void*;
 
-extern (C) {
+private extern (C) {
     WebkitContext webkit_web_context_new();
     WebkitCookieManager webkit_web_context_get_cookie_manager(WebkitContext);
 }

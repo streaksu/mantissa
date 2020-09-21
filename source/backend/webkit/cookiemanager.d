@@ -17,7 +17,7 @@ enum PersistentStorage {
     SQLite
 }
 
-extern (C) {
+private extern (C) {
     void webkit_cookie_manager_set_accept_policy(WebkitCookieManager, CookiePolicy);
     void webkit_cookie_manager_set_persistent_storage(WebkitCookieManager, immutable(char*), PersistentStorage);
 }

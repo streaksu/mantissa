@@ -7,8 +7,8 @@ import gio.Application:  gioApplication = Application;
 import gtk.Application:  Application;
 import gtk.Window:       Window;
 import globals:          programID;
-import settings:         BrowserSettings;
 import frontend.browser: Browser;
+import settings:         BrowserSettings;
 
 /**
  * GTKApplication that represents the browser to the GTK ecosystem.

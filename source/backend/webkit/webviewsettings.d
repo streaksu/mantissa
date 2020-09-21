@@ -2,7 +2,7 @@ module backend.webkit.webviewsettings;
 
 alias WebkitSettings = void*;
 
-extern (C) {
+private extern (C) {
     WebkitSettings webkit_settings_new();
     void webkit_settings_set_enable_smooth_scrolling(WebkitSettings, bool);
     void webkit_settings_set_enable_page_cache(WebkitSettings, bool);
