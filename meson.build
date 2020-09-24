@@ -42,6 +42,8 @@ source = [
     'source/backend/url.d',
     'source/frontend/about.d',
     'source/frontend/browser.d',
+    'source/frontend/extramenu.d',
+    'source/frontend/tabs.d',
     meson.current_build_dir() + '/globals.d',
     'source/main.d',
     'source/settings.d'
