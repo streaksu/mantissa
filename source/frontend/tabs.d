@@ -152,7 +152,7 @@ final class Tabs : Notebook {
 
     // Called when a close button of a tab is pressed.
     private void closeTabSignal(Button b) {
-        const auto count = getNPages();
+        const auto count = getNPages() - 1; // We want 0-based indexes.
         foreach (i; 0..count) {
             auto view             = getNthPage(i);
             auto titleBox         = cast(HBox)getTabLabel(view);

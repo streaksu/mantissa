@@ -2,6 +2,10 @@ module frontend.browser;
 
 import std.functional:         toDelegate;
 import gtk.MainWindow:         MainWindow;
+import gtk.AccelGroup:         AccelGroup;
+import gdk.c.types:            GdkModifierType;
+import gtk.c.types:            GtkAccelFlags;
+import gobject.DClosure:       DClosure;
 import gtk.HeaderBar:          HeaderBar;
 import gtk.Button:             Button;
 import globals:                programName;
@@ -24,6 +28,8 @@ private immutable windowHeight = 768;
  */
 final class Browser : MainWindow {
     private BrowserSettings settings;
+    private AccelGroup      shortcuts;
+
     private Button          previousPage;
     private Button          nextPage;
     private Button          refresh;
@@ -44,6 +50,7 @@ final class Browser : MainWindow {
 
         // Initialize buttons and data.
         settings     = new BrowserSettings();
+        shortcuts    = new AccelGroup();
         previousPage = new Button("go-previous",  GtkIconSize.BUTTON);
         nextPage     = new Button("go-next",      GtkIconSize.BUTTON);
         refresh      = new Button("view-refresh", GtkIconSize.BUTTON);
@@ -62,6 +69,20 @@ final class Browser : MainWindow {
         addTab.addOnClicked(toDelegate(&newTabSignal));
         extra.addOnClicked(toDelegate(&extraSignal));
         tabs.addOnSwitchPage(toDelegate(&tabChangedSignal));
+
+        // Setup shortcuts.
+        addAccelGroup(shortcuts);
+        uint key;
+        GdkModifierType mods;
+        const auto flags = GtkAccelFlags.VISIBLE;
+        AccelGroup.acceleratorParse("F5", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&refreshSignal));
+        AccelGroup.acceleratorParse("<Control>r", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&refreshSignal));
+        AccelGroup.acceleratorParse("<Alt>Left", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&previousSignal));
+        AccelGroup.acceleratorParse("<Alt>Right", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&nextSignal));
 
         // Pack the header.
         auto header = new HeaderBar();
