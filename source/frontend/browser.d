@@ -83,6 +83,8 @@ final class Browser : MainWindow {
         shortcuts.connect(key, mods, flags, new DClosure(&previousSignal));
         AccelGroup.acceleratorParse("<Alt>Right", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&nextSignal));
+        AccelGroup.acceleratorParse("<Control>t", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&newTabSignal));
 
         // Pack the header.
         auto header = new HeaderBar();
