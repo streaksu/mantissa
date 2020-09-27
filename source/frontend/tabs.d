@@ -63,6 +63,7 @@ final class Tabs : Notebook {
         }
 
         view.addOnLoadChanged(toDelegate(&loadChangedSignal));
+        view.addOnLoadFailed(toDelegate(&loadFailedSignal));
         view.addOnInsecureContent(toDelegate(&insecureContentSignal));
         view.addOnDestroy(toDelegate(&viewDestroySignal));
         viewcok.addOnChanged(toDelegate(&changedCookiesSignal));
@@ -102,19 +103,31 @@ final class Tabs : Notebook {
         // Check for only HTTPS.
         if (settings.forceHTTPS && event == LoadEvent.Committed) {
             if (sender.getTLSInfo() == false) {
-                sender.loadAlternateHTML("
-                    <!DOCTYPE html>
-                    <html>
-                        <head>
-                            <title>Cancelled</title>
-                        </head>
-                        <body>
-                            <p>Load was cancelled: TLS info says no HTML.</p>
-                        </body>
-                    </html>
-                ", sender.uri, null);
+                sender.stopLoading();
             }
         }
+    }
+
+    // Called each time a load fails, that is, either internal error or
+    // a call to `stopLoading`.
+    // We will just check the reason for the stop and act accordingly.
+    private bool loadFailedSignal(Webview view, LoadEvent, string uri, void*) {
+        // Check if we really are dealing with an HTTPS error.
+        if (settings.forceHTTPS && view.getTLSInfo() == false) {
+            view.loadAlternateHTML("
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Cancelled</title>
+                    </head>
+                    <body>
+                        <p>The TLS info of '" ~ uri ~ "' says no HTTPS.</p>
+                    </body>
+                </html>
+            ", uri, null);
+        }
+
+        return false;
     }
 
     // Called when insecure content is found in a view.

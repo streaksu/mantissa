@@ -122,6 +122,10 @@ class Webview : Widget {
         Signals.connect(this, "load-changed", dlg);
     }
 
+    void addOnLoadFailed(bool delegate(Webview, LoadEvent, string, void*) dlg) {
+        Signals.connect(this, "load-failed", dlg);
+    }
+
     void addOnInsecureContent(void delegate(Webview, InsecureContentEvent) dlg) {
         Signals.connect(this, "insecure-content-detected", dlg);
     }

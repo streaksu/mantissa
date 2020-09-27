@@ -29,7 +29,7 @@ class MainApplication : Application {
     // In this case we are going to open a new main window.
     private void activateSignal(gioApplication) {
         auto settings = new BrowserSettings();
-        addWindow(new Browser(settings.homepage));
+        addWindow(new Browser(this, settings.homepage));
     }
 
     // When some URLs are to be opened, this is called instead of
@@ -38,7 +38,7 @@ class MainApplication : Application {
     private void openTabsSignal(FileIF[] files, string, gioApplication) {
         auto win = cast(Browser)getActiveWindow();
         if (win is null) {
-            win = new Browser(files[0].getUri);
+            win = new Browser(this, files[0].getUri);
             addWindow(win);
             foreach (i; 1..files.length) {
                 win.newTab(files[i].getUri());

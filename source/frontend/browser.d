@@ -1,7 +1,8 @@
 module frontend.browser;
 
 import std.functional:         toDelegate;
-import gtk.MainWindow:         MainWindow;
+import gtk.Application:        Application;
+import gtk.ApplicationWindow:  ApplicationWindow;
 import gtk.AccelGroup:         AccelGroup;
 import gdk.c.types:            GdkModifierType;
 import gtk.c.types:            GtkAccelFlags;
@@ -26,10 +27,9 @@ private immutable windowHeight = 768;
 /**
  * Main browser window.
  */
-final class Browser : MainWindow {
+final class Browser : ApplicationWindow {
     private BrowserSettings settings;
     private AccelGroup      shortcuts;
-
     private Button          previousPage;
     private Button          nextPage;
     private Button          refresh;
@@ -43,9 +43,9 @@ final class Browser : MainWindow {
     /**
      * Constructs the main window with the passed url as only one.
      */
-    this(string openurl) {
+    this(Application app, string openurl) {
         // Init ourselves.
-        super(programName);
+        super(app);
         setDefaultSize(windowWidth, windowHeight);
 
         // Initialize buttons and data.
@@ -72,11 +72,13 @@ final class Browser : MainWindow {
 
         // Setup shortcuts.
         addAccelGroup(shortcuts);
-        uint key;
+        uint key; // @suppress(dscanner.suspicious.unmodified)
         GdkModifierType mods;
         const auto flags = GtkAccelFlags.VISIBLE;
         AccelGroup.acceleratorParse("F5", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&refreshSignal));
+        AccelGroup.acceleratorParse("F6", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&focusSignal));
         AccelGroup.acceleratorParse("<Control>r", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&refreshSignal));
         AccelGroup.acceleratorParse("<Alt>Left", key, mods);
@@ -142,6 +144,11 @@ final class Browser : MainWindow {
         }
     }
 
+    // What happens when F6 and other means are pressed to focus the urlBar.
+    private void focusSignal() {
+        urlBar.grabFocus();
+    }
+
     // What happens when the user finishes outputting a url.
     private void urlBarEnterSignal(Entry entry) {
         auto widget = tabs.getCurrentWebview();
@@ -181,7 +188,6 @@ final class Browser : MainWindow {
 
         previousPage.setSensitive(sender.canGoBack);
         nextPage.setSensitive(sender.canGoForward);
-        urlBar.setText(sender.uri);
 
         final switch (event) {
             case LoadEvent.Started:
@@ -192,6 +198,8 @@ final class Browser : MainWindow {
                 break;
             case LoadEvent.Committed:
                 urlBar.setProgressFraction(0.75);
+                setTitle(sender.title);
+                urlBar.setText(sender.uri);
                 break;
             case LoadEvent.Finished:
                 urlBar.setProgressFraction(0);
