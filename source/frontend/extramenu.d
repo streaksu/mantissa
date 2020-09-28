@@ -1,6 +1,8 @@
 module frontend.extramenu;
 
 import std.functional:       toDelegate;
+import gtk.c.types:          GtkPolicyType;
+import gtk.ScrolledWindow:   ScrolledWindow;
 import gtk.VBox:             VBox;
 import gtk.HBox:             HBox;
 import gtk.ToggleButton:     ToggleButton;
@@ -20,7 +22,8 @@ import settings:             BrowserSettings;
  * Menu supposed to represent a utility panned menu in the main browser page.
  * Should handle settings, along with another comodities like cookie management.
  */
-final class ExtraMenu : VBox {
+final class ExtraMenu : ScrolledWindow {
+    private VBox            box;
     private BrowserSettings settings;
     private CheckButton     smoothScrolling;
     private CheckButton     pageCache;
@@ -38,7 +41,8 @@ final class ExtraMenu : VBox {
      */
     this() {
         // Initialize everything.
-        super(false, 10);
+        // super();
+        box             = new VBox(false, 10);
         settings        = new BrowserSettings();
         smoothScrolling = new CheckButton("Enable Smooth Scrolling");
         pageCache       = new CheckButton("Enable Page Cache");
@@ -65,11 +69,11 @@ final class ExtraMenu : VBox {
         // Pack the UI.
         auto homePBox = new HBox(false, 5);
         homePBox.packStart(new Label("Homepage"), false, false, 5);
-        homePBox.packStart(homepage,              false, false, 5);
+        homePBox.packStart(homepage,              true,  true,  5);
 
         auto cookieBox = new HBox(false, 5);
         cookieBox.packStart(new Label("Cookie Policy"), false, false, 5);
-        cookieBox.packStart(cookiePolicy,               false, false, 5);
+        cookieBox.packStart(cookiePolicy,               true,  true,  5);
         auto store = new ListStore([GType.STRING]);
         auto iter1 = store.createIter();
         auto iter2 = store.createIter();
@@ -83,18 +87,17 @@ final class ExtraMenu : VBox {
         cookiePolicy.packStart(col, true);
         cookiePolicy.addAttribute(col, "text", 0);
 
-        packStart(new Label("Engine settings"), false, false, 10);
-        packStart(smoothScrolling,              false, false, 10);
-        packStart(pageCache,                    false, false, 10);
-        packStart(javascript,                   false, false, 10);
-        packStart(sitequirks,                   false, false, 10);
-        packStart(new Label("Browsing"),        false, false, 10);
-        packStart(homePBox,                     false, false, 10);
-        packStart(cookieBox,                    false, false, 10);
-        packStart(cookieKeep,                   false, false, 10);
-        packStart(forceHTTPS,                   false, false, 10);
-        packStart(insecureContent,              false, false, 10);
-        packStart(about,                        false, false, 10);
+        box.packStart(new Label("Engine settings"), false, false, 10);
+        box.packStart(smoothScrolling,              false, false, 10);
+        box.packStart(pageCache,                    false, false, 10);
+        box.packStart(javascript,                   false, false, 10);
+        box.packStart(sitequirks,                   false, false, 10);
+        box.packStart(new Label("Browsing"),        false, false, 10);
+        box.packStart(homePBox,                     false, false, 10);
+        box.packStart(cookieBox,                    false, false, 10);
+        box.packStart(cookieKeep,                   false, false, 10);
+        box.packStart(forceHTTPS,                   false, false, 10);
+        box.packStart(insecureContent,              false, false, 10);
 
         // Wire signals.
         smoothScrolling.addOnToggled(toDelegate(&checkbuttonToggledSignal));
@@ -104,8 +107,15 @@ final class ExtraMenu : VBox {
         homepage.addOnActivate(toDelegate(&entryActivateSignal));
         cookiePolicy.addOnChanged(toDelegate(&comboChangedSignal));
         cookieKeep.addOnToggled(toDelegate(&checkbuttonToggledSignal));
+        forceHTTPS.addOnToggled(toDelegate(&checkbuttonToggledSignal));
         insecureContent.addOnToggled(toDelegate(&checkbuttonToggledSignal));
         about.addOnClicked(toDelegate(&aboutPressedSignal));
+
+        // Show all.
+        addWithViewport(box);
+        setPropagateNaturalWidth(true);
+        setMaxContentWidth(500);
+        showAll();
     }
 
     // Called when one of the checkbuttons is checked or unchecked.

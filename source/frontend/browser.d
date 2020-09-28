@@ -17,6 +17,7 @@ import gtk.HBox:               HBox;
 import gtk.Image:              GtkIconSize, Image;
 import settings:               BrowserSettings;
 import frontend.extramenu:     ExtraMenu;
+import frontend.searchbar:     SearchBar;
 import frontend.tabs:          Tabs;
 import backend.url:            urlFromUserInput;
 import backend.webkit.webview: LoadEvent, Webview;
@@ -33,7 +34,7 @@ final class Browser : ApplicationWindow {
     private Button          previousPage;
     private Button          nextPage;
     private Button          refresh;
-    private Entry           urlBar;
+    private SearchBar       urlBar;
     private Button          addTab;
     private Button          extra;
     private HBox            mainBox;
@@ -54,7 +55,7 @@ final class Browser : ApplicationWindow {
         previousPage = new Button("go-previous",  GtkIconSize.BUTTON);
         nextPage     = new Button("go-next",      GtkIconSize.BUTTON);
         refresh      = new Button("view-refresh", GtkIconSize.BUTTON);
-        urlBar       = new Entry();
+        urlBar       = new SearchBar();
         addTab       = new Button("list-add",           GtkIconSize.BUTTON);
         extra        = new Button("open-menu-symbolic", GtkIconSize.BUTTON);
         mainBox      = new HBox(false, 0);
@@ -177,6 +178,7 @@ final class Browser : ApplicationWindow {
         urlBar.showAll();
         previousPage.setSensitive(view.canGoBack);
         nextPage.setSensitive(view.canGoForward);
+        urlBar.setSecureIcon(view.getTLSInfo());
     }
 
     // Manage what happens when the load of a uri changes per webview.
@@ -191,6 +193,7 @@ final class Browser : ApplicationWindow {
 
         final switch (event) {
             case LoadEvent.Started:
+                urlBar.removeIcon();
                 urlBar.setProgressFraction(0.25);
                 break;
             case LoadEvent.Redirected:
@@ -200,6 +203,7 @@ final class Browser : ApplicationWindow {
                 urlBar.setProgressFraction(0.75);
                 setTitle(sender.title);
                 urlBar.setText(sender.uri);
+                urlBar.setSecureIcon(sender.getTLSInfo());
                 break;
             case LoadEvent.Finished:
                 urlBar.setProgressFraction(0);
