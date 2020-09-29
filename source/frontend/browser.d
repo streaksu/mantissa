@@ -55,7 +55,7 @@ final class Browser : ApplicationWindow {
         previousPage = new Button("go-previous",  GtkIconSize.BUTTON);
         nextPage     = new Button("go-next",      GtkIconSize.BUTTON);
         refresh      = new Button("view-refresh", GtkIconSize.BUTTON);
-        urlBar       = new SearchBar();
+        urlBar       = new SearchBar(this);
         addTab       = new Button("list-add",           GtkIconSize.BUTTON);
         extra        = new Button("open-menu-symbolic", GtkIconSize.BUTTON);
         mainBox      = new HBox(false, 0);

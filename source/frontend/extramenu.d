@@ -41,7 +41,6 @@ final class ExtraMenu : ScrolledWindow {
      */
     this() {
         // Initialize everything.
-        // super();
         box             = new VBox(false, 10);
         settings        = new BrowserSettings();
         smoothScrolling = new CheckButton("Enable Smooth Scrolling");
