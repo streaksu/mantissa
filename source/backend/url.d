@@ -3,16 +3,22 @@ module backend.url;
 import std.file:   exists;
 import std.string: startsWith;
 
+/// Types a URI can be guessed as.
+enum URIGuessedType {
+    LocalFile,   /// A local file or directory.
+    WebResource, /// Points to an online site.
+    Search,      /// Phrase for search using a search engine.
+}
+
 /**
- * Takes user input and tries to sanitize it into a real URL.
+ * Guesses the nature of a URI.
  */
-string urlFromUserInput(string userURL) {
-    if (exists(userURL)) {
-        return "file://" ~ userURL;
-    } else if (startsWith(userURL, "http") || startsWith(userURL, "ftp")
-            || startsWith(userURL, "file")) {
-        return userURL;
+URIGuessedType guessURIType(string uri) {
+    if (exists(uri)) {
+        return URIGuessedType.LocalFile;
+    } else if (startsWith(uri, "http") || startsWith(uri, "ftp")) {
+        return URIGuessedType.WebResource;
     } else {
-        return "http://" ~ userURL;
+        return URIGuessedType.Search;
     }
 }

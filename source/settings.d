@@ -8,6 +8,7 @@ private immutable pageCacheKey       = "page-cache";
 private immutable javascriptKey      = "javascript";
 private immutable sitequirksKey      = "site-quirks";
 private immutable homepageKey        = "homepage";
+private immutable searchEngineKey    = "search-engine";
 private immutable cookiePolicyKey    = "cookie-policy";
 private immutable cookieKeepKey      = "cookie-keep";
 private immutable forceHTTPSKey      = "force-https";
@@ -31,6 +32,8 @@ class BrowserSettings : Settings {
     @property string homepage() { return getString(homepageKey); }
     /// Which cookie policy did the user want? (values documented in the .xml)
     @property int cookiePolicy() { return getInt(cookiePolicyKey); }
+    /// Which search engine did the user want?
+    @property string searchEngine() { return getString(searchEngineKey); }
     /// Does the user want to keep cookies?
     @property bool cookieKeep() { return getBoolean(cookieKeepKey); }
     /// Does the user want to force HTTPs?
@@ -48,6 +51,8 @@ class BrowserSettings : Settings {
     @property void sitequirks(bool b) { setBoolean(sitequirksKey, b); }
     /// Save the desired homepage.
     @property void homepage(string d) { setString(homepageKey, d); }
+    /// Save the desired search engine.
+    @property void searchEngine(string a) { setString(searchEngineKey, a); }
     /// Save the desired cookie policy.
     @property void cookiePolicy(int a) { setInt(cookiePolicyKey, a); }
     /// Save cookie saving policy.

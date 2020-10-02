@@ -17,9 +17,9 @@ import gtk.HBox:               HBox;
 import gtk.Image:              IconSize, Image;
 import settings:               BrowserSettings;
 import frontend.extramenu:     ExtraMenu;
+import frontend.history:       addToHistory;
 import frontend.searchbar:     SearchBar;
 import frontend.tabs:          Tabs;
-import backend.url:            urlFromUserInput;
 import backend.webkit.webview: LoadEvent, Webview;
 
 private immutable windowWidth  = 1366;
@@ -153,7 +153,7 @@ final class Browser : ApplicationWindow {
     // What happens when the user finishes outputting a url.
     private void urlBarEnterSignal(Entry entry) {
         auto widget = tabs.getCurrentWebview();
-        widget.uri  = urlFromUserInput(entry.getText());
+        widget.uri  = entry.getText();
     }
 
     // New tab button signal.
@@ -204,6 +204,7 @@ final class Browser : ApplicationWindow {
                 setTitle(sender.title);
                 urlBar.setText(sender.uri);
                 urlBar.setSecureIcon(sender.getTLSInfo());
+                addToHistory(sender.uri);
                 break;
             case LoadEvent.Finished:
                 urlBar.setProgressFraction(0);

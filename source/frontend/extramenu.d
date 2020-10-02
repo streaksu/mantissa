@@ -29,6 +29,7 @@ final class ExtraMenu : ScrolledWindow {
     private CheckButton     javascript;
     private CheckButton     sitequirks;
     private Entry           homepage;
+    private Entry           searchEngine;
     private ComboBox        cookiePolicy;
     private CheckButton     cookieKeep;
     private CheckButton     forceHTTPS;
@@ -47,6 +48,7 @@ final class ExtraMenu : ScrolledWindow {
         javascript      = new CheckButton("Enable Javascript Support");
         sitequirks      = new CheckButton("Enable Site-Specific Quirks");
         homepage        = new Entry();
+        searchEngine    = new Entry();
         cookiePolicy    = new ComboBox(false);
         cookieKeep      = new CheckButton("Keep cookies between sessions");
         forceHTTPS      = new CheckButton("Force HTTPS Navigation");
@@ -59,6 +61,7 @@ final class ExtraMenu : ScrolledWindow {
         javascript.setActive(settings.javascript);
         sitequirks.setActive(settings.sitequirks);
         homepage.setText(settings.homepage);
+        searchEngine.setText(settings.searchEngine);
         cookiePolicy.setActive(settings.cookiePolicy);
         cookieKeep.setActive(settings.cookieKeep);
         forceHTTPS.setActive(settings.forceHTTPS);
@@ -68,6 +71,10 @@ final class ExtraMenu : ScrolledWindow {
         auto homePBox = new HBox(false, 5);
         homePBox.packStart(new Label("Homepage"), false, false, 5);
         homePBox.packStart(homepage,              true,  true,  5);
+
+        auto engineBox = new HBox(false, 5);
+        engineBox.packStart(new Label("Search Engine"), false, false, 5);
+        engineBox.packStart(searchEngine,               true,  true,  5);
 
         auto cookieBox = new HBox(false, 5);
         cookieBox.packStart(new Label("Cookie Policy"), false, false, 5);
@@ -92,6 +99,7 @@ final class ExtraMenu : ScrolledWindow {
         box.packStart(sitequirks,                   false, false, 10);
         box.packStart(new Label("Browsing"),        false, false, 10);
         box.packStart(homePBox,                     false, false, 10);
+        box.packStart(engineBox,                    false, false, 10);
         box.packStart(cookieBox,                    false, false, 10);
         box.packStart(cookieKeep,                   false, false, 10);
         box.packStart(forceHTTPS,                   false, false, 10);
@@ -104,6 +112,7 @@ final class ExtraMenu : ScrolledWindow {
         javascript.addOnToggled(toDelegate(&checkbuttonToggledSignal));
         sitequirks.addOnToggled(toDelegate(&checkbuttonToggledSignal));
         homepage.addOnActivate(toDelegate(&entryActivateSignal));
+        searchEngine.addOnActivate(toDelegate(&entryActivateSignal));
         cookiePolicy.addOnChanged(toDelegate(&comboChangedSignal));
         cookieKeep.addOnToggled(toDelegate(&checkbuttonToggledSignal));
         forceHTTPS.addOnToggled(toDelegate(&checkbuttonToggledSignal));
@@ -121,7 +130,7 @@ final class ExtraMenu : ScrolledWindow {
     private void checkbuttonToggledSignal(ToggleButton button) {
         const auto set = button.getActive();
 
-        if (button is smoothScrolling)      settings.smoothScrolling = set;
+        if      (button is smoothScrolling) settings.smoothScrolling = set;
         else if (button is pageCache)       settings.pageCache       = set;
         else if (button is javascript)      settings.javascript      = set;
         else if (button is sitequirks)      settings.sitequirks      = set;
@@ -132,8 +141,12 @@ final class ExtraMenu : ScrolledWindow {
     }
 
     // Called when an entry is pressed enter on.
-    private void entryActivateSignal(Entry) {
-        settings.homepage = homepage.getText();
+    private void entryActivateSignal(Entry entry) {
+        const auto text = entry.getText();
+
+        if      (entry is homepage)     settings.homepage     = text;
+        else if (entry is searchEngine) settings.searchEngine = text;
+        else assert(0);
     }
 
     // Called when the user changes the item of a combobox.

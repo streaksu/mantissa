@@ -44,6 +44,13 @@
         opened for new tabs and startup.
       </description>
     </key>
+    <key type="s" name="search-engine">
+      <default>'https://duckduckgo.com/?q='</default>
+      <summary>Search Engine</summary>
+      <description>
+        This key determines the URI of the search engine used by the browser.
+      </description>
+    </key>
     <key type="i" name="cookie-policy">
       <default>1</default>
       <summary>Cookie Policy</summary>
