@@ -1,13 +1,13 @@
 module frontend.searchbar;
 
 import std.functional: toDelegate;
-import gtk.c.types:    GtkEntryIconPosition, GtkDialogFlags, GtkResponseType;
+import gtk.c.types:    EntryIconPosition, DialogFlags, ResponseType;
 import gtk.Entry:      Entry;
 import gtk.Window:     Window;
 import gdk.Event:      Event;
 import gtk.Dialog:     Dialog;
 import gtk.Label:      Label;
-import gtk.Image:      Image, GtkIconSize;
+import gtk.Image:      Image, IconSize;
 
 private immutable SAFE_ICON   = "system-lock-screen-symbolic";
 private immutable UNSAFE_ICON = "dialog-warning-symbolic";
@@ -17,7 +17,7 @@ private immutable UNSAFE_ICON = "dialog-warning-symbolic";
  * Text for webviews is requested using the same methods as a normal entry.
  * That is, `getText` and `addOnActivate`.
  */
-class SearchBar : Entry {
+final class SearchBar : Entry {
     private Window parent;
 
     /**
@@ -33,25 +33,29 @@ class SearchBar : Entry {
      */
     void setSecureIcon(bool isSecure) {
         auto icon = isSecure ? SAFE_ICON : UNSAFE_ICON;
-        setIconFromIconName(GtkEntryIconPosition.PRIMARY, icon);
+        setIconFromIconName(EntryIconPosition.PRIMARY, icon);
     }
 
     /**
      * Removes the resource security icon.
      */
     void removeIcon() {
-        setIconFromIconName(GtkEntryIconPosition.PRIMARY, null);
+        setIconFromIconName(EntryIconPosition.PRIMARY, null);
     }
 
     // Called when the icon of the search bar is pressed.
-    private void iconPressSignal(GtkEntryIconPosition pos, Event, Entry e) {
+    private void iconPressSignal(EntryIconPosition pos, Event, Entry e) {
         const auto icon = e.getIconName(pos);
-        auto dialog = new Dialog("Security info", parent,
-            GtkDialogFlags.DESTROY_WITH_PARENT, ["Close"],
-            [GtkResponseType.CLOSE]);
+        auto dialog = new Dialog(
+            "Security info",
+            parent,
+            DialogFlags.DESTROY_WITH_PARENT,
+            ["Close"],
+            [ResponseType.CLOSE]
+        );
         auto cont = dialog.getContentArea();
 
-        cont.packStart(new Image(icon, GtkIconSize.DIALOG), true, true, 10);
+        cont.packStart(new Image(icon, IconSize.DIALOG), true, true, 10);
         if (icon == SAFE_ICON) {
             cont.add(new Label("This resource is safe!"));
             cont.add(new Label("Your connection with this resource is secured, your data cannot be stolen"));

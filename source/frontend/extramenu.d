@@ -1,7 +1,6 @@
 module frontend.extramenu;
 
 import std.functional:       toDelegate;
-import gtk.c.types:          GtkPolicyType;
 import gtk.ScrolledWindow:   ScrolledWindow;
 import gtk.VBox:             VBox;
 import gtk.HBox:             HBox;
@@ -97,6 +96,7 @@ final class ExtraMenu : ScrolledWindow {
         box.packStart(cookieKeep,                   false, false, 10);
         box.packStart(forceHTTPS,                   false, false, 10);
         box.packStart(insecureContent,              false, false, 10);
+        box.packStart(about,                        false, false, 10);
 
         // Wire signals.
         smoothScrolling.addOnToggled(toDelegate(&checkbuttonToggledSignal));

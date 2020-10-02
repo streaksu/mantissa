@@ -1,6 +1,7 @@
 module main;
 
 import std.functional:   toDelegate;
+import std.algorithm:    remove;
 import gio.c.types:      GApplicationFlags;
 import gio.FileIF:       FileIF;
 import gio.Application:  gioApplication = Application;
@@ -40,13 +41,11 @@ class MainApplication : Application {
         if (win is null) {
             win = new Browser(this, files[0].getUri);
             addWindow(win);
-            foreach (i; 1..files.length) {
-                win.newTab(files[i].getUri());
-            }
-        } else {
-            foreach (file; files) {
-                win.newTab(file.getUri());
-            }
+            files = files.remove(0);
+        }
+
+        foreach (file; files) {
+            win.newTab(file.getUri());
         }
     }
 }

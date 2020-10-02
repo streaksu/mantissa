@@ -9,7 +9,8 @@ import std.string: startsWith;
 string urlFromUserInput(string userURL) {
     if (exists(userURL)) {
         return "file://" ~ userURL;
-    } else if (startsWith(userURL, "http") || startsWith(userURL, "ftp")) {
+    } else if (startsWith(userURL, "http") || startsWith(userURL, "ftp")
+            || startsWith(userURL, "file")) {
         return userURL;
     } else {
         return "http://" ~ userURL;

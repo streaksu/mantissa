@@ -1,7 +1,10 @@
 language: d
 
+# As of right now, the D ABI is not compatible accross compilers.
+# Therefore, we can only test against the compiler the distro used
+# to build their version of the dependencies.
+# In the case of ubuntu, it is LDC.
 d:
-  - dmd
   - ldc
 
 before_install:

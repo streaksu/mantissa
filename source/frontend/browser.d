@@ -4,8 +4,8 @@ import std.functional:         toDelegate;
 import gtk.Application:        Application;
 import gtk.ApplicationWindow:  ApplicationWindow;
 import gtk.AccelGroup:         AccelGroup;
-import gdk.c.types:            GdkModifierType;
-import gtk.c.types:            GtkAccelFlags;
+import gdk.c.types:            ModifierType;
+import gtk.c.types:            AccelFlags;
 import gobject.DClosure:       DClosure;
 import gtk.HeaderBar:          HeaderBar;
 import gtk.Button:             Button;
@@ -14,7 +14,7 @@ import gtk.Entry:              Entry;
 import gtk.Widget:             Widget;
 import gtk.Notebook:           Notebook;
 import gtk.HBox:               HBox;
-import gtk.Image:              GtkIconSize, Image;
+import gtk.Image:              IconSize, Image;
 import settings:               BrowserSettings;
 import frontend.extramenu:     ExtraMenu;
 import frontend.searchbar:     SearchBar;
@@ -52,12 +52,12 @@ final class Browser : ApplicationWindow {
         // Initialize buttons and data.
         settings     = new BrowserSettings();
         shortcuts    = new AccelGroup();
-        previousPage = new Button("go-previous",  GtkIconSize.BUTTON);
-        nextPage     = new Button("go-next",      GtkIconSize.BUTTON);
-        refresh      = new Button("view-refresh", GtkIconSize.BUTTON);
+        previousPage = new Button("go-previous",  IconSize.BUTTON);
+        nextPage     = new Button("go-next",      IconSize.BUTTON);
+        refresh      = new Button("view-refresh", IconSize.BUTTON);
         urlBar       = new SearchBar(this);
-        addTab       = new Button("list-add",           GtkIconSize.BUTTON);
-        extra        = new Button("open-menu-symbolic", GtkIconSize.BUTTON);
+        addTab       = new Button("list-add",           IconSize.BUTTON);
+        extra        = new Button("open-menu-symbolic", IconSize.BUTTON);
         mainBox      = new HBox(false, 0);
         tabs         = new Tabs();
         extraMenu    = new ExtraMenu();
@@ -74,8 +74,8 @@ final class Browser : ApplicationWindow {
         // Setup shortcuts.
         addAccelGroup(shortcuts);
         uint key; // @suppress(dscanner.suspicious.unmodified)
-        GdkModifierType mods;
-        const auto flags = GtkAccelFlags.VISIBLE;
+        ModifierType mods;
+        const auto flags = AccelFlags.VISIBLE;
         AccelGroup.acceleratorParse("F5", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&refreshSignal));
         AccelGroup.acceleratorParse("F6", key, mods);
@@ -211,9 +211,9 @@ final class Browser : ApplicationWindow {
         }
 
         if (sender.isLoading) {
-            refresh.setImage(new Image("process-stop", GtkIconSize.BUTTON));
+            refresh.setImage(new Image("process-stop", IconSize.BUTTON));
         } else {
-            refresh.setImage(new Image("view-refresh", GtkIconSize.BUTTON));
+            refresh.setImage(new Image("view-refresh", IconSize.BUTTON));
         }
     }
 }
