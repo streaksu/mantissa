@@ -24,7 +24,7 @@ final class About : AboutDialog {
         setLicense(
             "Distributed under the " ~ programLicense ~ " license.\n" ~
             "If a copy didn't come with your copy of the software you can\n" ~
-            "grab one in " ~ programLicenseLink
+            "grab one at " ~ programLicenseLink
         );
 
         // Add the thanks section in the credits.

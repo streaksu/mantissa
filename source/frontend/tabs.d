@@ -14,20 +14,17 @@ import backend.webkit.cookiemanager:   CookieManager, CookiePolicy, PersistentSt
 import backend.webkit.webview:         LoadEvent, InsecureContentEvent, Webview;
 import backend.webkit.webviewsettings: WebviewSettings;
 import globals:                        programNameRaw;
-import settings:                       BrowserSettings;
+import storage:                        UserSettings;
 
 /**
  * Widget that represents the tabs of the browser.
  */
 final class Tabs : Notebook {
-    private BrowserSettings settings;
-
     /**
      * Pack the structure and initialize all the pertitent locals.
      * It does not add any tabs.
      */
     this() {
-        settings = new BrowserSettings();
         setScrollable(true);
     }
 
@@ -42,14 +39,14 @@ final class Tabs : Notebook {
         auto viewcok = view.context.cookieManager;
 
         view.uri                   = uri;
-        viewset.smoothScrolling    = settings.smoothScrolling;
-        viewset.pageCache          = settings.pageCache;
-        viewset.javascript         = settings.javascript;
-        viewset.siteSpecificQuirks = settings.sitequirks;
-        viewcok.acceptPolicy       = cast(CookiePolicy)settings.cookiePolicy;
+        viewset.smoothScrolling    = UserSettings.smoothScrolling;
+        viewset.pageCache          = UserSettings.pageCache;
+        viewset.javascript         = UserSettings.javascript;
+        viewset.siteSpecificQuirks = UserSettings.sitequirks;
+        viewcok.acceptPolicy       = cast(CookiePolicy)UserSettings.cookiePolicy;
 
         // Set cookie storage path if needed.
-        if (settings.cookieKeep) {
+        if (UserSettings.cookieKeep) {
             auto userdata  = Util.getUserDataDir();
             auto storepath = Util.buildFilename([userdata, programNameRaw]);
             auto store     = Util.buildFilename([storepath, "cookies.txt"]);
@@ -101,7 +98,7 @@ final class Tabs : Notebook {
         titleBoxLabel.setText(sender.title);
 
         // Check for only HTTPS.
-        if (settings.forceHTTPS && event == LoadEvent.Committed) {
+        if (UserSettings.forceHTTPS && event == LoadEvent.Committed) {
             if (sender.getTLSInfo() == false) {
                 sender.stopLoading();
             }
@@ -113,7 +110,7 @@ final class Tabs : Notebook {
     // We will just check the reason for the stop and act accordingly.
     private bool loadFailedSignal(Webview view, LoadEvent, string uri, void*) {
         // Check if we really are dealing with an HTTPS error.
-        if (settings.forceHTTPS && view.getTLSInfo() == false) {
+        if (UserSettings.forceHTTPS && view.getTLSInfo() == false) {
             view.loadAlternateHTML("
                 <!DOCTYPE html>
                 <html>
@@ -133,7 +130,7 @@ final class Tabs : Notebook {
     // Called when insecure content is found in a view.
     // That is, HTTP content on an HTTPS site.
     private void insecureContentSignal(Webview sender, InsecureContentEvent) {
-        if (!settings.insecureContent) {
+        if (!UserSettings.insecureContent) {
             sender.loadAlternateHTML("
                 <!DOCTYPE html>
                 <html>

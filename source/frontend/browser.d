@@ -15,12 +15,11 @@ import gtk.Widget:             Widget;
 import gtk.Notebook:           Notebook;
 import gtk.HBox:               HBox;
 import gtk.Image:              IconSize, Image;
-import settings:               BrowserSettings;
+import backend.webkit.webview: LoadEvent, Webview;
 import frontend.extramenu:     ExtraMenu;
-import frontend.history:       addToHistory;
 import frontend.searchbar:     SearchBar;
 import frontend.tabs:          Tabs;
-import backend.webkit.webview: LoadEvent, Webview;
+import storage:                HistoryStore, UserSettings;
 
 private immutable windowWidth  = 1366;
 private immutable windowHeight = 768;
@@ -29,17 +28,16 @@ private immutable windowHeight = 768;
  * Main browser window.
  */
 final class Browser : ApplicationWindow {
-    private BrowserSettings settings;
-    private AccelGroup      shortcuts;
-    private Button          previousPage;
-    private Button          nextPage;
-    private Button          refresh;
-    private SearchBar       urlBar;
-    private Button          addTab;
-    private Button          extra;
-    private HBox            mainBox;
-    private Tabs            tabs;
-    private ExtraMenu       extraMenu;
+    private AccelGroup shortcuts;
+    private Button     previousPage;
+    private Button     nextPage;
+    private Button     refresh;
+    private SearchBar  urlBar;
+    private Button     addTab;
+    private Button     extra;
+    private HBox       mainBox;
+    private Tabs       tabs;
+    private ExtraMenu  extraMenu;
 
     /**
      * Constructs the main window with the passed url as only one.
@@ -50,7 +48,6 @@ final class Browser : ApplicationWindow {
         setDefaultSize(windowWidth, windowHeight);
 
         // Initialize buttons and data.
-        settings     = new BrowserSettings();
         shortcuts    = new AccelGroup();
         previousPage = new Button("go-previous",  IconSize.BUTTON);
         nextPage     = new Button("go-next",      IconSize.BUTTON);
@@ -158,7 +155,7 @@ final class Browser : ApplicationWindow {
 
     // New tab button signal.
     private void newTabSignal(Button) {
-        newTab(settings.homepage);
+        newTab(UserSettings.homepage);
     }
 
     // Signal that decides whether we show the extra menu or not.
@@ -201,13 +198,15 @@ final class Browser : ApplicationWindow {
                 break;
             case LoadEvent.Committed:
                 urlBar.setProgressFraction(0.75);
-                setTitle(sender.title);
-                urlBar.setText(sender.uri);
-                urlBar.setSecureIcon(sender.getTLSInfo());
-                addToHistory(sender.uri);
                 break;
             case LoadEvent.Finished:
                 urlBar.setProgressFraction(0);
+                setTitle(sender.title);
+                urlBar.setText(sender.uri);
+                urlBar.setSecureIcon(sender.getTLSInfo());
+                if (sender.title != null) {
+                    HistoryStore.updateOrAdd(sender.title, sender.uri);
+                }
                 break;
         }
 

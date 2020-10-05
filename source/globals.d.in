@@ -14,4 +14,3 @@ immutable programArtists      = splitLines("@artists@");
 immutable programLicense      = "@license@";
 immutable programLicenseLink  = "@license_link@";
 immutable iconName            = "@icon@";
-immutable gschemaName         = "@gschema@";

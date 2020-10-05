@@ -10,6 +10,7 @@ schema_install  = join_paths(datadir, 'glib-2.0/schemas')
 # Dependencies.
 gtkd   = dependency('gtkd-3',         version: '>=3.9.0')
 webkit = dependency('webkit2gtk-4.0', version: '>=2.26.1')
+sqlite = dependency('d2sqlite3',      method:  'dub')
 
 # Source files to compile and include directories.
 include = include_directories('source')
@@ -26,7 +27,6 @@ conf.set('artists',      'Mintsuki https://github.com/mintsuki')
 conf.set('license',      meson.project_license()[0])
 conf.set('license_link', 'https://opensource.org/licenses/BSL-1.0')
 conf.set('icon',         'mantissa')
-conf.set('gschema',      'org.streaksu.mantissa')
 
 configure_file(
     input: 'source/globals.d.in',
@@ -39,16 +39,15 @@ source = [
     'source/backend/webkit/cookiemanager.d',
     'source/backend/webkit/webview.d',
     'source/backend/webkit/webviewsettings.d',
-    'source/backend/url.d',
+    'source/backend/uri.d',
     'source/frontend/about.d',
     'source/frontend/browser.d',
     'source/frontend/extramenu.d',
-    'source/frontend/history.d',
     'source/frontend/searchbar.d',
     'source/frontend/tabs.d',
     meson.current_build_dir() + '/globals.d',
     'source/main.d',
-    'source/settings.d'
+    'source/storage.d'
 ]
 
 # Executable.
@@ -56,17 +55,27 @@ e = executable(
     meson.project_name(),
     source,
     include_directories: include,
-    dependencies: [gtkd, webkit],
+    dependencies: [gtkd, webkit, sqlite],
     install: true
 )
 
 # Auxiliary files and their installation (logo, desktop, etc).
 desktop = 'resources/entry.desktop'
 icon    = 'resources/icon.png'
-schema  = 'resources/schema.xml'
 
 install_data(sources: desktop, rename: 'org.streaksu.mantissa.desktop', install_dir: desktop_install)
 install_data(sources: icon, rename: 'mantissa.png', install_dir: icon_install)
-install_data(sources: schema, rename: 'org.streaksu.mantissa.gschema.xml', install_dir: schema_install)
 
 meson.add_install_script('postinstall.py')
+
+# Tests.
+t = executable(
+    meson.project_name() + '_unittest',
+    source,
+    include_directories: include,
+    dependencies: [gtkd, webkit, sqlite],
+    d_unittest: true,
+    install: false
+)
+
+test('Mantissa - unittest', t)

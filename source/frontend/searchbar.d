@@ -1,6 +1,7 @@
 module frontend.searchbar;
 
-import std.string:          fromStringz;
+import std.string:          fromStringz, indexOf;
+import std.typecons:        No;
 import std.functional:      toDelegate;
 import gtk.c.types:         EntryIconPosition, DialogFlags, ResponseType;
 import gobject.c.types:     GType;
@@ -15,9 +16,8 @@ import gtk.TreeIter:        GtkTreeIter, TreeIter;
 import gtk.Dialog:          Dialog;
 import gtk.Label:           Label;
 import gtk.Image:           Image, IconSize;
-import backend.url:         URIGuessedType, guessURIType;
-import frontend.history:    getHistory;
-import settings:            BrowserSettings;
+import backend.uri:         URIType, guessURIType, normalizeURI;
+import storage:             HistoryStore;
 
 private immutable SAFE_ICON   = "system-lock-screen-symbolic";
 private immutable UNSAFE_ICON = "dialog-warning-symbolic";
@@ -28,32 +28,29 @@ private immutable UNSAFE_ICON = "dialog-warning-symbolic";
  * That is, `getText` and `addOnActivate`.
  */
 final class SearchBar : Entry {
-    private BrowserSettings settings;
     private Window          parent;
     private EntryCompletion completion;
     private ListStore       completionList;
     private TreeIter        mainOption;
-    private URIGuessedType  mainOptionType;
-    private string          mainOptionURI;
 
     /**
      * Create the search bar and process some triggers.
      */
     this(Window p) {
-        settings       = new BrowserSettings();
         parent         = p;
         completion     = new EntryCompletion();
-        completionList = new ListStore([GType.STRING]);
+        completionList = new ListStore([GType.STRING, GType.STRING, GType.STRING]);
         mainOption     = completionList.createIter();
-        completionList.setValue(mainOption, 0, "Placeholder");
         completion.setModel(completionList);
         completion.setTextColumn(0);
         completion.setMatchFunc(&match, cast(void*)this, null);
 
-        const auto history = getHistory();
-        foreach (uri; history) {
+        const auto history = HistoryStore.history;
+        foreach (item; history) {
             auto iter = completionList.createIter();
-            completionList.setValue(iter, 0, uri);
+            completionList.setValue(iter, 0, item.title ~ " - " ~ item.uri);
+            completionList.setValue(iter, 1, item.title);
+            completionList.setValue(iter, 2, item.uri);
         }
 
         completion.addOnMatchSelected(toDelegate(&matchSelectedSignal));
@@ -105,22 +102,24 @@ final class SearchBar : Entry {
     }
 
     private void preeditChangedSignal(EditableIF) {
-        mainOptionURI  = getText();
-        mainOptionType = guessURIType(mainOptionURI);
+        const auto uri            = getText();
+        const auto mainOptionType = guessURIType(uri);
 
         string mainOptionMessage;
         final switch (mainOptionType) {
-            case URIGuessedType.LocalFile:
-                mainOptionMessage = mainOptionURI ~ " - Open File";
+            case URIType.LocalFile:
+                mainOptionMessage = uri ~ " - Open File";
                 break;
-            case URIGuessedType.WebResource:
-                mainOptionMessage = mainOptionURI ~ " - Visit";
+            case URIType.WebResource:
+                mainOptionMessage = uri ~ " - Visit";
                 break;
-            case URIGuessedType.Search:
-                mainOptionMessage = mainOptionURI ~ " - Search";
+            case URIType.Search:
+                mainOptionMessage = uri ~ " - Search";
                 break;
         }
         completionList.setValue(mainOption, 0, mainOptionMessage);
+        completionList.setValue(mainOption, 1, "");
+        completionList.setValue(mainOption, 2, uri);
     }
 
     private bool matchSelectedSignal(TreeModelIF, TreeIter iter, EntryCompletion) {
@@ -128,23 +127,14 @@ final class SearchBar : Entry {
         // false even though they are the same. This is an ugly workaround for that.
         iter.setModel(completionList);
         mainOption.setModel(completionList);
-        const auto uri      = iter.getValueString(0);
-        const auto expected = mainOption.getValueString(0);
+        const auto itertitle = iter.getValueString(0);
+        const auto expected  = mainOption.getValueString(0);
 
-        if (uri == expected) {
-            final switch (mainOptionType) {
-                case URIGuessedType.LocalFile:
-                    setText("file://" ~ mainOptionURI);
-                    break;
-                case URIGuessedType.WebResource:
-                    setText(mainOptionURI);
-                    break;
-                case URIGuessedType.Search:
-                    setText(settings.searchEngine ~ mainOptionURI);
-                    break;
-            }
+        if (itertitle == expected) {
+            const auto uri = mainOption.getValueString(2);
+            setText(normalizeURI(uri, guessURIType(uri)));
         } else {
-            setText(uri);
+            setText(iter.getValueString(2));
         }
 
         return true;
@@ -160,13 +150,13 @@ private extern(C) int match(GtkEntryCompletion*, const(char)* k, GtkTreeIter* it
     auto iter      = new TreeIter(it);
 
     // Modify the entry.
-    if (iter is searchbar.mainOption) {
+    iter.setModel(searchbar.completionList);
+    searchbar.mainOption.setModel(searchbar.completionList);
+
+    if (iter.getValueString(0) == searchbar.mainOption.getValueString(0)) {
         return 1;
     } else {
-        import std.string:   indexOf;
-        import std.typecons: No;
-        iter.setModel(searchbar.completionList);
-        const auto index = indexOf(iter.getValueString(0), key, No.caseSensitive);
+        const auto index = indexOf(iter.getValueString(1), key, No.caseSensitive);
         return index != -1 ? 1 : 0;
     }
 }

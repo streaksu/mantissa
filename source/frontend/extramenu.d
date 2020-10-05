@@ -14,16 +14,15 @@ import gtk.CellRendererText: CellRendererText;
 import gtk.Button:           Button;
 import gtk.Label:            Label;
 import frontend.about:       About;
+import storage:              UserSettings;
 import globals:              programName;
-import settings:             BrowserSettings;
 
 /**
  * Menu supposed to represent a utility panned menu in the main browser page.
- * Should handle settings, along with another comodities like cookie management.
+ * Should handle UserSettings, along with another comodities like cookie management.
  */
 final class ExtraMenu : ScrolledWindow {
     private VBox            box;
-    private BrowserSettings settings;
     private CheckButton     smoothScrolling;
     private CheckButton     pageCache;
     private CheckButton     javascript;
@@ -42,7 +41,6 @@ final class ExtraMenu : ScrolledWindow {
     this() {
         // Initialize everything.
         box             = new VBox(false, 10);
-        settings        = new BrowserSettings();
         smoothScrolling = new CheckButton("Enable Smooth Scrolling");
         pageCache       = new CheckButton("Enable Page Cache");
         javascript      = new CheckButton("Enable Javascript Support");
@@ -56,16 +54,16 @@ final class ExtraMenu : ScrolledWindow {
         about           = new Button("About " ~ programName);
 
         // Set values.
-        smoothScrolling.setActive(settings.smoothScrolling);
-        pageCache.setActive(settings.pageCache);
-        javascript.setActive(settings.javascript);
-        sitequirks.setActive(settings.sitequirks);
-        homepage.setText(settings.homepage);
-        searchEngine.setText(settings.searchEngine);
-        cookiePolicy.setActive(settings.cookiePolicy);
-        cookieKeep.setActive(settings.cookieKeep);
-        forceHTTPS.setActive(settings.forceHTTPS);
-        insecureContent.setActive(settings.insecureContent);
+        smoothScrolling.setActive(UserSettings.smoothScrolling);
+        pageCache.setActive(UserSettings.pageCache);
+        javascript.setActive(UserSettings.javascript);
+        sitequirks.setActive(UserSettings.sitequirks);
+        homepage.setText(UserSettings.homepage);
+        searchEngine.setText(UserSettings.searchEngine);
+        cookiePolicy.setActive(UserSettings.cookiePolicy);
+        cookieKeep.setActive(UserSettings.cookieKeep);
+        forceHTTPS.setActive(UserSettings.forceHTTPS);
+        insecureContent.setActive(UserSettings.insecureContent);
 
         // Pack the UI.
         auto homePBox = new HBox(false, 5);
@@ -130,13 +128,13 @@ final class ExtraMenu : ScrolledWindow {
     private void checkbuttonToggledSignal(ToggleButton button) {
         const auto set = button.getActive();
 
-        if      (button is smoothScrolling) settings.smoothScrolling = set;
-        else if (button is pageCache)       settings.pageCache       = set;
-        else if (button is javascript)      settings.javascript      = set;
-        else if (button is sitequirks)      settings.sitequirks      = set;
-        else if (button is cookieKeep)      settings.cookieKeep      = set;
-        else if (button is forceHTTPS)      settings.forceHTTPS      = set;
-        else if (button is insecureContent) settings.insecureContent = set;
+        if      (button is smoothScrolling) UserSettings.smoothScrolling = set;
+        else if (button is pageCache)       UserSettings.pageCache       = set;
+        else if (button is javascript)      UserSettings.javascript      = set;
+        else if (button is sitequirks)      UserSettings.sitequirks      = set;
+        else if (button is cookieKeep)      UserSettings.cookieKeep      = set;
+        else if (button is forceHTTPS)      UserSettings.forceHTTPS      = set;
+        else if (button is insecureContent) UserSettings.insecureContent = set;
         else assert(0);
     }
 
@@ -144,14 +142,14 @@ final class ExtraMenu : ScrolledWindow {
     private void entryActivateSignal(Entry entry) {
         const auto text = entry.getText();
 
-        if      (entry is homepage)     settings.homepage     = text;
-        else if (entry is searchEngine) settings.searchEngine = text;
+        if      (entry is homepage)     UserSettings.homepage     = text;
+        else if (entry is searchEngine) UserSettings.searchEngine = text;
         else assert(0);
     }
 
     // Called when the user changes the item of a combobox.
     private void comboChangedSignal(ComboBox) {
-        settings.cookiePolicy = cookiePolicy.getActive();
+        UserSettings.cookiePolicy = cookiePolicy.getActive();
     }
 
     // Called when the about button is pressed.

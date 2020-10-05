@@ -9,7 +9,7 @@ import gtk.Application:  Application;
 import gtk.Window:       Window;
 import globals:          programID;
 import frontend.browser: Browser;
-import settings:         BrowserSettings;
+import storage:          UserSettings;
 
 /**
  * GTKApplication that represents the browser to the GTK ecosystem.
@@ -29,8 +29,7 @@ class MainApplication : Application {
     // openTabsSignal.
     // In this case we are going to open a new main window.
     private void activateSignal(gioApplication) {
-        auto settings = new BrowserSettings();
-        addWindow(new Browser(this, settings.homepage));
+        addWindow(new Browser(this, UserSettings.homepage));
     }
 
     // When some URLs are to be opened, this is called instead of
