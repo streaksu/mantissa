@@ -115,6 +115,7 @@ final class Browser : ApplicationWindow {
         tabs.addTab(uri);
         auto view = tabs.getCurrentWebview();
         view.addOnLoadChanged(toDelegate(&loadChangedSignal));
+        view.addOnTitleChanged(toDelegate(&titleChangedSignal));
     }
 
     // Called when pressing the previous button.
@@ -204,7 +205,6 @@ final class Browser : ApplicationWindow {
             case LoadEvent.Finished:
                 urlBar.setProgressFraction(0);
                 urlBar.setSecureIcon(sender.getTLSInfo());
-                HistoryStore.updateOrAdd(sender.title, sender.uri);
                 break;
         }
 
@@ -213,5 +213,11 @@ final class Browser : ApplicationWindow {
         } else {
             refresh.setImage(new Image("view-refresh", IconSize.BUTTON));
         }
+    }
+
+    // Called when the title changes, that we will use as signal to add
+    // to the history.
+    private void titleChangedSignal(Webview sender) {
+        HistoryStore.updateOrAdd(sender.title, sender.uri);
     }
 }

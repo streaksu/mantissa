@@ -29,6 +29,10 @@ final class Tabs : Notebook {
         setScrollable(true);
     }
 
+    /**
+     * Adds a tab featuring a webview set to the passed uri.
+     * It will put it on focus, so it will be accessible with `getActive`.
+     */
     void addTab(string uri) {
         auto view = new Webview();
         view.uri = uri;
@@ -36,7 +40,7 @@ final class Tabs : Notebook {
     }
 
     /**
-     * Adds a tab featuring a webview set to the passed uri.
+     * Adds a tab featuring the passed webview.
      * It will put it on focus, so it will be accessible with `getActive`.
      */
     void addTab(Webview view) {
@@ -67,8 +71,9 @@ final class Tabs : Notebook {
         view.addOnLoadChanged(toDelegate(&loadChangedSignal));
         view.addOnLoadFailed(toDelegate(&loadFailedSignal));
         view.addOnCreate(toDelegate(&createSignal));
+        view.addOnTitleChanged(toDelegate(&titleChangedSignal));
         view.addOnInsecureContent(toDelegate(&insecureContentSignal));
-        view.addOnDestroy(toDelegate(&viewDestroySignal));
+        view.addOnClose(toDelegate(&viewCloseSignal));
         viewcok.addOnChanged(toDelegate(&changedCookiesSignal));
 
         // Finally, pack the UI.
@@ -97,12 +102,6 @@ final class Tabs : Notebook {
 
     // Called when the load status changed of some view.
     private void loadChangedSignal(Webview sender, LoadEvent event) {
-        // Change the title of the label.
-        auto titleBox         = cast(HBox)getTabLabel(sender);
-        auto titleBoxChildren = titleBox.getChildren().toArray!(Widget);
-        auto titleBoxLabel    = cast(Label)titleBoxChildren[0];
-        titleBoxLabel.setText(sender.title);
-
         // Check for only HTTPS.
         if (UserSettings.forceHTTPS && event == LoadEvent.Committed) {
             if (sender.getTLSInfo() == false) {
@@ -151,11 +150,11 @@ final class Tabs : Notebook {
         }
     }
 
-    // The view may be deleated non inmidiately, we do not want the view to
-    // keey loading and playing video or whatever on the meantime.
-    private void viewDestroySignal(Widget view) {
-        auto v = cast(Webview)view;
-        v.loadAlternateHTML("", "", null);
+    // Called when the view is tried to be closed, its our responsability to
+    // destroy it.
+    // Destroying it will also remove it from the tabs, so no problem there.
+    private void viewCloseSignal(Webview view) {
+        view.destroy();
     }
 
     // If this doesn't exist it wont save the cookies.
@@ -178,14 +177,14 @@ final class Tabs : Notebook {
     private void closeTabSignal(Button b) {
         const auto count = getNPages();
         foreach (i; 0..count) {
-            auto view             = getNthPage(i);
+            auto view             = cast(Webview)getNthPage(i);
             auto titleBox         = cast(HBox)getTabLabel(view);
             auto titleBoxChildren = titleBox.getChildren().toArray!(Widget);
             auto titleBoxButton   = cast(Button)titleBoxChildren[1];
 
             if (titleBoxButton is b) {
                 detachTab(view);
-                view.destroy();
+                view.tryClose();
                 switch (getNPages()) {
                     case 1:
                         setShowTabs(false);
@@ -199,5 +198,13 @@ final class Tabs : Notebook {
                 break;
             }
         }
+    }
+
+    // Called when the title of a webview changes.
+    private void titleChangedSignal(Webview sender) {
+        auto titleBox         = cast(HBox)getTabLabel(sender);
+        auto titleBoxChildren = titleBox.getChildren().toArray!(Widget);
+        auto titleBoxLabel    = cast(Label)titleBoxChildren[0];
+        titleBoxLabel.setText(sender.title);
     }
 }

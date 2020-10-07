@@ -144,4 +144,12 @@ class Webview : Widget {
     void addOnCreate(Webview delegate(Webview, NavigationAction) dlg) {
         Signals.connect(this, "create", dlg);
     }
+
+    void addOnClose(void delegate(Webview) dlg) {
+        Signals.connect(this, "close", dlg);
+    }
+
+    void addOnTitleChanged(void delegate(Webview) dlg) {
+        Signals.connect(this, "notify::title", dlg);
+    }
 }
