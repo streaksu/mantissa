@@ -185,6 +185,8 @@ final class Browser : ApplicationWindow {
             return;
         }
 
+        setTitle(sender.title);
+        urlBar.setText(sender.uri);
         previousPage.setSensitive(sender.canGoBack);
         nextPage.setSensitive(sender.canGoForward);
 
@@ -201,12 +203,8 @@ final class Browser : ApplicationWindow {
                 break;
             case LoadEvent.Finished:
                 urlBar.setProgressFraction(0);
-                setTitle(sender.title);
-                urlBar.setText(sender.uri);
                 urlBar.setSecureIcon(sender.getTLSInfo());
-                if (sender.title != null) {
-                    HistoryStore.updateOrAdd(sender.title, sender.uri);
-                }
+                HistoryStore.updateOrAdd(sender.title, sender.uri);
                 break;
         }
 

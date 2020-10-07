@@ -1,20 +1,21 @@
 module frontend.tabs;
 
-import std.file:                       exists, mkdir, write;
-import std.functional:                 toDelegate;
-import glib.Util:                      Util;
-import gtk.Main:                       Main;
-import gtk.Widget:                     Widget;
-import gtk.HBox:                       HBox;
-import gtk.Notebook:                   Notebook;
-import gtk.Label:                      Label;
-import gtk.Button:                     Button;
-import gtk.Image:                      GtkIconSize;
-import backend.webkit.cookiemanager:   CookieManager, CookiePolicy, PersistentStorage;
-import backend.webkit.webview:         LoadEvent, InsecureContentEvent, Webview;
-import backend.webkit.webviewsettings: WebviewSettings;
-import globals:                        programNameRaw;
-import storage:                        UserSettings;
+import std.file:                        exists, mkdirRecurse, write;
+import std.functional:                  toDelegate;
+import glib.Util:                       Util;
+import gtk.Main:                        Main;
+import gtk.Widget:                      Widget;
+import gtk.HBox:                        HBox;
+import gtk.Notebook:                    Notebook;
+import gtk.Label:                       Label;
+import gtk.Button:                      Button;
+import gtk.Image:                       GtkIconSize;
+import backend.webkit.cookiemanager:    CookieManager, CookiePolicy, PersistentStorage;
+import backend.webkit.navigationaction: NavigationAction;
+import backend.webkit.webview:          LoadEvent, InsecureContentEvent, Webview;
+import backend.webkit.webviewsettings:  WebviewSettings;
+import globals:                         programNameRaw;
+import storage:                         UserSettings;
 
 /**
  * Widget that represents the tabs of the browser.
@@ -28,17 +29,21 @@ final class Tabs : Notebook {
         setScrollable(true);
     }
 
+    void addTab(string uri) {
+        auto view = new Webview();
+        view.uri = uri;
+        addTab(view);
+    }
+
     /**
      * Adds a tab featuring a webview set to the passed uri.
      * It will put it on focus, so it will be accessible with `getActive`.
      */
-    void addTab(string uri) {
+    void addTab(Webview view) {
         // Create webview and apply the settings.
-        auto view    = new Webview();
         auto viewset = view.settings;
         auto viewcok = view.context.cookieManager;
 
-        view.uri                   = uri;
         viewset.smoothScrolling    = UserSettings.smoothScrolling;
         viewset.pageCache          = UserSettings.pageCache;
         viewset.javascript         = UserSettings.javascript;
@@ -49,18 +54,19 @@ final class Tabs : Notebook {
         if (UserSettings.cookieKeep) {
             auto userdata  = Util.getUserDataDir();
             auto storepath = Util.buildFilename([userdata, programNameRaw]);
-            auto store     = Util.buildFilename([storepath, "cookies.txt"]);
+            auto store     = Util.buildFilename([storepath, "cookies.sqlite"]);
 
             if (!exists(store)) {
-                mkdir(storepath);
+                mkdirRecurse(storepath);
                 write(store, "");
             }
 
-            viewcok.setPersistentStorage(store, PersistentStorage.Text);
+            viewcok.setPersistentStorage(store, PersistentStorage.SQLite);
         }
 
         view.addOnLoadChanged(toDelegate(&loadChangedSignal));
         view.addOnLoadFailed(toDelegate(&loadFailedSignal));
+        view.addOnCreate(toDelegate(&createSignal));
         view.addOnInsecureContent(toDelegate(&insecureContentSignal));
         view.addOnDestroy(toDelegate(&viewDestroySignal));
         viewcok.addOnChanged(toDelegate(&changedCookiesSignal));
@@ -158,6 +164,14 @@ final class Tabs : Notebook {
     // undocumented on the official docs. Sigh.
     private void changedCookiesSignal(CookieManager) {
         return;
+    }
+
+    // Called when a new webview is requested.
+    private Webview createSignal(Webview webview, NavigationAction action) {
+        auto view = new Webview(webview);
+        view.uri  = action.request.uri;
+        addTab(view);
+        return view;
     }
 
     // Called when a close button of a tab is pressed.

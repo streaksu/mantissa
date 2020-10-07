@@ -37,6 +37,8 @@ configure_file(
 source = [
     'source/backend/webkit/context.d',
     'source/backend/webkit/cookiemanager.d',
+    'source/backend/webkit/navigationaction.d',
+    'source/backend/webkit/urirequest.d',
     'source/backend/webkit/webview.d',
     'source/backend/webkit/webviewsettings.d',
     'source/backend/uri.d',

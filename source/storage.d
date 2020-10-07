@@ -2,22 +2,26 @@ module storage;
 
 import std.conv:             to;
 import std.array:            appender;
-import std.file:             exists;
+import std.file:             exists, mkdirRecurse;
 import std.datetime.systime: Clock, SysTime;
 import glib.Util:            Util;
 import d2sqlite3:            Database, Statement, ResultRange, Row;
 import globals:              programNameRaw;
 
 // Database that holds all the settings and data.
-private Database db;
+private Database database;
 
 shared static this() {
     auto userdata  = Util.getUserDataDir();
     auto storepath = Util.buildFilename([userdata, programNameRaw]);
     auto store     = Util.buildFilename([storepath, "globaldata.sqlite"]);
-    db             = Database(store);
+    if (!exists(storepath)) {
+        mkdirRecurse(storepath);
+    }
 
-    db.run(
+    database = Database(store);
+
+    database.run(
         "CREATE TABLE IF NOT EXISTS usersettings (
             setting TEXT NOT NULL UNIQUE,
             enabled INTEGER NOT NULL,
@@ -25,7 +29,7 @@ shared static this() {
         )"
     );
 
-    db.run(
+    database.run(
         "CREATE TABLE IF NOT EXISTS history (
             title    TEXT NOT NULL,
             uri      TEXT NOT NULL UNIQUE,
@@ -36,7 +40,7 @@ shared static this() {
 }
 
 shared static ~this() {
-    db.close();
+    database.close();
 }
 
 /**
@@ -45,7 +49,7 @@ shared static ~this() {
 struct UserSettings {
     /// Does the user want smooth scrolling of windows?
     @property static bool smoothScrolling() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'smooth_scrolling'"
         );
         if (!items.empty) {
@@ -57,15 +61,16 @@ struct UserSettings {
 
     /// Save smooth scrolling settings.
     @property static void smoothScrolling(bool b) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('smooth_scrolling', " ~ (b ? "1" : "0") ~ ", 'Placeholder')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("smooth_scrolling", b, "Placeholder");
     }
 
     /// Does the user want to cache pages?
     @property static bool pageCache() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'pagecache'"
         );
         if (!items.empty) {
@@ -77,15 +82,16 @@ struct UserSettings {
 
     /// Save page caching settings.
     @property static void pageCache(bool b) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('pagecache', " ~ (b ? "1" : "0") ~ ", 'Placeholder')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("pagecache", b, "Placeholder");
     }
 
     /// Does the user want to enable javascript support?
     @property static bool javascript() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'javascript'"
         );
         if (!items.empty) {
@@ -97,15 +103,16 @@ struct UserSettings {
 
     /// Save javascript settings.
     @property static void javascript(bool b) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('javascript', " ~ (b ? "1" : "0") ~ ", 'Placeholder')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("javascript", b, "Placeholder");
     }
 
     /// Does the user want to enable engine site quirks?
     @property static bool sitequirks() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'sitequirks'"
         );
         if (!items.empty) {
@@ -117,15 +124,16 @@ struct UserSettings {
 
     /// Save site quirks.
     @property static void sitequirks(bool b) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('sitequirks', " ~ (b ? "1" : "0") ~ ", 'Placeholder')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("sitequirks", b, "Placeholder");
     }
 
     /// Which homepage did the user set to use?
     @property static string homepage() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'homepage'"
         );
         if (!items.empty) {
@@ -137,15 +145,16 @@ struct UserSettings {
 
     /// Save the desired homepage.
     @property static void homepage(string d) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('homepage', 0, '" ~ d ~ "')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("homepage", false, d);
     }
 
     /// Which cookie policy did the user want? (values documented in the .xml)
     @property static int cookiePolicy() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'cookiepolicy'"
         );
         if (!items.empty) {
@@ -157,15 +166,16 @@ struct UserSettings {
 
     /// Save the desired cookie policy.
     @property static void cookiePolicy(int a) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('cookiepolicy', 0, '" ~ to!string(a) ~ "')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("cookiepolicy", false, to!string(a));
     }
 
     /// Which search engine did the user want?
     @property static string searchEngine() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'searchengine'"
         );
         if (!items.empty) {
@@ -177,15 +187,16 @@ struct UserSettings {
 
     /// Save the desired search engine.
     @property static void searchEngine(string d) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('searchengine', 0, '" ~ d ~ "')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("searchengine", false, d);
     }
 
     /// Does the user want to keep cookies?
     @property static bool cookieKeep() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'cookiekeep'"
         );
         if (!items.empty) {
@@ -197,15 +208,16 @@ struct UserSettings {
 
     /// Save cookie saving policy.
     @property static void cookieKeep(bool b) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('cookiekeep', " ~ (b ? "1" : "0") ~ ", 'Placeholder')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("cookiekeep", b, "Placeholder");
     }
 
     /// Does the user want to force HTTPs?
     @property static bool forceHTTPS() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'forcehttps'"
         );
         if (!items.empty) {
@@ -217,15 +229,16 @@ struct UserSettings {
 
     /// Save HTTPs enforcing policy.
     @property static void forceHTTPS(bool b) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('forcehttps', " ~ (b ? "1" : "0") ~ ", 'Placeholder')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("forcehttps", b, "Placeholder");
     }
 
     /// Does the user want to allow insecure content on HTTPs sites?
     @property static bool insecureContent() {
-        auto items = db.execute(
+        auto items = database.execute(
             "SELECT * FROM usersettings WHERE setting == 'insecurecontent'"
         );
         if (!items.empty) {
@@ -237,10 +250,11 @@ struct UserSettings {
 
     /// Save insecure content policy.
     @property static void insecureContent(bool b) {
-        db.run(
+        auto statement = database.prepare(
             "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES ('insecurecontent', " ~ (b ? "1" : "0") ~ ", 'Placeholder')"
+            VALUES (:settings, :enabled, :extra)"
         );
+        statement.inject("insecurecontent", b, "Placeholder");
     }
 }
 
@@ -261,7 +275,7 @@ struct HistoryStore {
      */
     @property static HistoryURI[] history() {
         auto result = appender!(HistoryURI[]);
-        auto items  = db.execute("SELECT * FROM history");
+        auto items  = database.execute("SELECT * FROM history");
 
         foreach (Row row; items) {
             const auto title    = row["title"].as!string;
@@ -270,6 +284,7 @@ struct HistoryStore {
             const auto time     = SysTime.fromSimpleString(row["time"].as!string);
             result.put(HistoryURI(title, uri, bookmark, time));
         }
+
         return result.data;
     }
 
@@ -279,7 +294,7 @@ struct HistoryStore {
      *
      * This call assumes the access time of the resource to be Clock.currTime.
      */
-    @property static void updateOrAdd(string title, string uri) {
+    static void updateOrAdd(string title, string uri) {
         updateOrAdd(HistoryURI(title, uri, false, Clock.currTime));
     }
 
@@ -287,22 +302,12 @@ struct HistoryStore {
      * Update the contents of a given history element.
      * If not present, the element will be added.
      */
-    @property static void updateOrAdd(HistoryURI item) {
-        // TODO: Actually update.
-
-        // Check if there is a single item with the same URI and update.
-        // If not, add.
-        const auto count = db.execute(
-            "SELECT count(*) FROM history WHERE uri == '" ~ item.uri ~ "'"
-        ).oneValue!long;
-        if (count == 0) {
-            auto statement = db.prepare(
-                "INSERT INTO history (title, uri, bookmark, time)
-                VALUES (:title, :uri, :bookmark, :time)"
-            );
-
-            statement.inject(item.title, item.uri, item.isBookmark,
-                item.time.toSimpleString());
-        }
+    static void updateOrAdd(HistoryURI item) {
+        auto statement = database.prepare(
+            "REPLACE INTO history (title, uri, bookmark, time)
+            VALUES (:title, :uri, :bookmark, :time)"
+        );
+        auto time = item.time.toSimpleString();
+        statement.inject(item.title, item.uri, item.isBookmark, time);
     }
 }
