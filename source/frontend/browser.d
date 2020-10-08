@@ -174,6 +174,7 @@ final class Browser : ApplicationWindow {
         urlBar.setText(view.uri);
         urlBar.setProgressFraction(0);
         urlBar.showAll();
+        setTitle(view.title);
         previousPage.setSensitive(view.canGoBack);
         nextPage.setSensitive(view.canGoForward);
         urlBar.setSecureIcon(view.getTLSInfo());
@@ -186,7 +187,6 @@ final class Browser : ApplicationWindow {
             return;
         }
 
-        setTitle(sender.title);
         urlBar.setText(sender.uri);
         previousPage.setSensitive(sender.canGoBack);
         nextPage.setSensitive(sender.canGoForward);
@@ -208,16 +208,17 @@ final class Browser : ApplicationWindow {
                 break;
         }
 
-        if (sender.isLoading) {
-            refresh.setImage(new Image("process-stop", IconSize.BUTTON));
-        } else {
-            refresh.setImage(new Image("view-refresh", IconSize.BUTTON));
-        }
+        const string id = sender.isLoading ? "process-stop" : "view-refresh";
+        refresh.setImage(new Image(id, IconSize.BUTTON));
     }
 
     // Called when the title changes, that we will use as signal to add
     // to the history.
     private void titleChangedSignal(Webview sender) {
         HistoryStore.updateOrAdd(sender.title, sender.uri);
+
+        if (sender == tabs.getCurrentWebview()) {
+            setTitle(sender.title);
+        }
     }
 }

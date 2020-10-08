@@ -10,10 +10,10 @@ import gtk.Notebook:                    Notebook;
 import gtk.Label:                       Label;
 import gtk.Button:                      Button;
 import gtk.Image:                       GtkIconSize;
-import backend.webkit.cookiemanager:    CookieManager, CookiePolicy, PersistentStorage;
+import backend.webkit.cookiemanager:    CookieManager, CookieAcceptPolicy, PersistentStorage;
 import backend.webkit.navigationaction: NavigationAction;
+import backend.webkit.settings:         Settings;
 import backend.webkit.webview:          LoadEvent, InsecureContentEvent, Webview;
-import backend.webkit.webviewsettings:  WebviewSettings;
 import globals:                         programNameRaw;
 import storage:                         UserSettings;
 
@@ -52,7 +52,7 @@ final class Tabs : Notebook {
         viewset.pageCache          = UserSettings.pageCache;
         viewset.javascript         = UserSettings.javascript;
         viewset.siteSpecificQuirks = UserSettings.sitequirks;
-        viewcok.acceptPolicy       = cast(CookiePolicy)UserSettings.cookiePolicy;
+        viewcok.acceptPolicy       = cast(CookieAcceptPolicy)UserSettings.cookiePolicy;
 
         // Set cookie storage path if needed.
         if (UserSettings.cookieKeep) {

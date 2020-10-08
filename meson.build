@@ -10,7 +10,7 @@ schema_install  = join_paths(datadir, 'glib-2.0/schemas')
 # Dependencies.
 gtkd   = dependency('gtkd-3',         version: '>=3.9.0')
 webkit = dependency('webkit2gtk-4.0', version: '>=2.26.1')
-sqlite = dependency('d2sqlite3',      method:  'dub')
+sqlite = dependency('d2sqlite3',      version: '>=0.19.1', method: 'dub')
 
 # Source files to compile and include directories.
 include = include_directories('source')
@@ -38,9 +38,9 @@ source = [
     'source/backend/webkit/context.d',
     'source/backend/webkit/cookiemanager.d',
     'source/backend/webkit/navigationaction.d',
+    'source/backend/webkit/settings.d',
     'source/backend/webkit/urirequest.d',
     'source/backend/webkit/webview.d',
-    'source/backend/webkit/webviewsettings.d',
     'source/backend/uri.d',
     'source/frontend/about.d',
     'source/frontend/browser.d',
@@ -77,6 +77,7 @@ t = executable(
     include_directories: include,
     dependencies: [gtkd, webkit, sqlite],
     d_unittest: true,
+    build_by_default: false,
     install: false
 )
 
