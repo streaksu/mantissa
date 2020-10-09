@@ -1,2 +1,16 @@
-# Build dir
-build
+.dub
+docs.json
+__dummy.html
+docs/
+/mantissa
+mantissa.so
+mantissa.dylib
+mantissa.dll
+mantissa.a
+mantissa.lib
+mantissa-test-*
+*.exe
+*.o
+*.obj
+*.lst
+dub.selections.json

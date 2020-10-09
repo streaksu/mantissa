@@ -10,10 +10,10 @@ import gtk.Notebook:                    Notebook;
 import gtk.Label:                       Label;
 import gtk.Button:                      Button;
 import gtk.Image:                       GtkIconSize;
-import backend.webkit.cookiemanager:    CookieManager, CookieAcceptPolicy, PersistentStorage;
-import backend.webkit.navigationaction: NavigationAction;
-import backend.webkit.settings:         Settings;
-import backend.webkit.webview:          LoadEvent, InsecureContentEvent, Webview;
+import webkit2gtkd.cookiemanager:       CookieManager, CookieAcceptPolicy, PersistentStorage;
+import webkit2gtkd.navigationaction:    NavigationAction;
+import webkit2gtkd.settings:            Settings;
+import webkit2gtkd.webview:             LoadEvent, InsecureContentEvent, Webview;
 import globals:                         programNameRaw;
 import storage:                         UserSettings;
 

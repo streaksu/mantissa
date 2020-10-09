@@ -1,0 +1,17 @@
+{
+	"authors": [
+		"streaksu"
+	],
+	"copyright": "Copyright © 2020, streaksu",
+	"dependencies": {
+		"d2sqlite3": "~>0.19.1",
+		"gtk-d": "~>3.9.0",
+		"webkit2gtkd": "~>0.0.1"
+	},
+	"description": "A wrapper for the webkit2gtk library using GtkD",
+	"homepage": "https://github.com/streaksu/mantissa",
+	"version": "1.2.0",
+	"license": "BSL-1.0",
+	"name": "mantissa",
+	"targetType": "executable"
+}

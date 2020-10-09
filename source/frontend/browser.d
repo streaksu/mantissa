@@ -15,7 +15,7 @@ import gtk.Widget:             Widget;
 import gtk.Notebook:           Notebook;
 import gtk.HBox:               HBox;
 import gtk.Image:              IconSize, Image;
-import backend.webkit.webview: LoadEvent, Webview;
+import webkit2gtkd.webview:    LoadEvent, Webview;
 import frontend.extramenu:     ExtraMenu;
 import frontend.searchbar:     SearchBar;
 import frontend.tabs:          Tabs;
