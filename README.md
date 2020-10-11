@@ -31,11 +31,13 @@ This materializes into the following packages:
 
 The project uses `dub` as its build system, and features an install script for
 each supported platform.
+For more information on `dub`'s command-line options one can go
+[here](https://dub.pm/commandline). `--arch` and `--build` can be quite useful!
 
 The recommended procedure to build Mantissa in a linux system would be:
 
 ```bash
-dub build
+dub build --build=release
 dub test
 ./linux-install.sh # Accepts PREFIX and DESTDIR as environment variables.
 ```

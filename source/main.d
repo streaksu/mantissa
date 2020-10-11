@@ -15,7 +15,7 @@ import storage:          UserSettings;
  * GTKApplication that represents the browser to the GTK ecosystem.
  * It handles everything from opening commandline files to main windows.
  */
-class MainApplication : Application {
+final class MainApplication : Application {
     /**
      * Will create the object and set up the proper signals.
      */

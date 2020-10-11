@@ -16,7 +16,7 @@ import gtk.Notebook:           Notebook;
 import gtk.HBox:               HBox;
 import gtk.Image:              IconSize, Image;
 import webkit2gtkd.webview:    LoadEvent, Webview;
-import frontend.extramenu:     ExtraMenu;
+import frontend.options:       Options;
 import frontend.searchbar:     SearchBar;
 import frontend.tabs:          Tabs;
 import storage:                HistoryStore, UserSettings;
@@ -34,10 +34,8 @@ final class Browser : ApplicationWindow {
     private Button     refresh;
     private SearchBar  urlBar;
     private Button     addTab;
-    private Button     extra;
-    private HBox       mainBox;
+    private Options    options;
     private Tabs       tabs;
-    private ExtraMenu  extraMenu;
 
     /**
      * Constructs the main window with the passed url as only one.
@@ -53,11 +51,9 @@ final class Browser : ApplicationWindow {
         nextPage     = new Button("go-next",      IconSize.BUTTON);
         refresh      = new Button("view-refresh", IconSize.BUTTON);
         urlBar       = new SearchBar(this);
-        addTab       = new Button("list-add",           IconSize.BUTTON);
-        extra        = new Button("open-menu-symbolic", IconSize.BUTTON);
-        mainBox      = new HBox(false, 0);
+        addTab       = new Button("list-add", IconSize.BUTTON);
+        options      = new Options();
         tabs         = new Tabs();
-        extraMenu    = new ExtraMenu();
 
         previousPage.addOnClicked(toDelegate(&previousSignal));
         nextPage.addOnClicked(toDelegate(&nextSignal));
@@ -65,7 +61,6 @@ final class Browser : ApplicationWindow {
         urlBar.addOnActivate(toDelegate(&urlBarEnterSignal));
         urlBar.setHexpand(true);
         addTab.addOnClicked(toDelegate(&newTabSignal));
-        extra.addOnClicked(toDelegate(&extraSignal));
         tabs.addOnSwitchPage(toDelegate(&tabChangedSignal));
 
         // Setup shortcuts.
@@ -79,6 +74,8 @@ final class Browser : ApplicationWindow {
         shortcuts.connect(key, mods, flags, new DClosure(&focusSignal));
         AccelGroup.acceleratorParse("<Control>r", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&refreshSignal));
+        AccelGroup.acceleratorParse("<Control>q", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&close));
         AccelGroup.acceleratorParse("<Alt>Left", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&previousSignal));
         AccelGroup.acceleratorParse("<Alt>Right", key, mods);
@@ -92,20 +89,15 @@ final class Browser : ApplicationWindow {
         header.packStart(nextPage);
         header.packStart(refresh);
         header.setCustomTitle(urlBar);
-        header.packEnd(extra);
+        header.packEnd(options);
         header.packEnd(addTab);
         header.setShowCloseButton(true);
         setTitlebar(header);
-
-        // Pack the main box.
-        mainBox.packStart(tabs,      true,  true,  0);
-        mainBox.packStart(extraMenu, false, false, 0);
-        add(mainBox);
+        add(tabs);
 
         // Make new tab, show all.
         showAll();
         newTab(openurl);
-        extraMenu.hide();
     }
 
     /**
@@ -157,15 +149,6 @@ final class Browser : ApplicationWindow {
     // New tab button signal.
     private void newTabSignal(Button) {
         newTab(UserSettings.homepage);
-    }
-
-    // Signal that decides whether we show the extra menu or not.
-    private void extraSignal(Button) {
-        if (extraMenu.isVisible()) {
-            extraMenu.hide();
-        } else {
-            extraMenu.show();
-        }
     }
 
     // What happens when the main browser tab is changed.
