@@ -10,7 +10,7 @@ immutable programNameRaw = "mantissa";
 immutable programName = "Mantissa";
 
 /// Version of the application.
-immutable programVersion = "1.2.0";
+immutable programVersion = "1.3.0";
 
 /// Short description of the application.
 immutable programDescription = "A GTK based browser written in D and with love";
