@@ -310,4 +310,15 @@ struct HistoryStore {
         auto time = item.time.toSimpleString();
         statement.inject(item.title, item.uri, item.isBookmark, time);
     }
+
+    /**
+     * Remove the requested entry.
+     */
+    static void deleteEntry(HistoryURI item) {
+        auto statement = database.prepare(
+            "DELETE FROM history
+            WHERE uri = :uri"
+        );
+        statement.inject(item.uri);
+    }
 }

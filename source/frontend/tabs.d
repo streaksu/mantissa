@@ -30,16 +30,6 @@ final class Tabs : Notebook {
     }
 
     /**
-     * Adds a tab featuring a webview set to the passed uri.
-     * It will put it on focus, so it will be accessible with `getActive`.
-     */
-    void addTab(string uri) {
-        auto view = new Webview();
-        view.uri = uri;
-        addTab(view);
-    }
-
-    /**
      * Adds a tab featuring the passed webview.
      * It will put it on focus, so it will be accessible with `getActive`.
      */

@@ -52,7 +52,7 @@ final class Browser : ApplicationWindow {
         refresh      = new Button("view-refresh", IconSize.BUTTON);
         urlBar       = new SearchBar(this);
         addTab       = new Button("list-add", IconSize.BUTTON);
-        options      = new Options();
+        options      = new Options(toDelegate(&historyTabSignal));
         tabs         = new Tabs();
 
         previousPage.addOnClicked(toDelegate(&previousSignal));
@@ -104,10 +104,16 @@ final class Browser : ApplicationWindow {
      * Adds a new tab to the browser, processing the pertinent triggers.
      */
     void newTab(string uri) {
-        tabs.addTab(uri);
-        auto view = tabs.getCurrentWebview();
+        auto view = new Webview();
+        view.uri = uri;
         view.addOnLoadChanged(toDelegate(&loadChangedSignal));
         view.addOnTitleChanged(toDelegate(&titleChangedSignal));
+        tabs.addTab(view);
+    }
+
+    // Called when a tab with a URI from the history is chosen.
+    private void historyTabSignal(string uri) {
+        newTab(uri);
     }
 
     // Called when pressing the previous button.
