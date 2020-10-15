@@ -1,14 +1,15 @@
 module frontend.options;
 
-import std.functional:       toDelegate;
-import std.datetime.systime: Clock, SysTime;
-import gtk.MenuButton:       MenuButton;
-import gtk.Menu:             Menu;
-import gtk.MenuItem:         MenuItem;
-import frontend.about:       About;
-import frontend.preferences: Preferences;
-import globals:              programName;
-import storage:              HistoryStore;
+import std.functional:        toDelegate;
+import std.datetime.systime:  Clock, SysTime;
+import gtk.MenuButton:        MenuButton;
+import gtk.Menu:              Menu;
+import gtk.MenuItem:          MenuItem;
+import gtk.SeparatorMenuItem: SeparatorMenuItem;
+import frontend.about:        About;
+import frontend.preferences:  Preferences;
+import globals:               programName;
+import storage:               HistoryStore;
 
 /**
  * Options button for the headerbar.
@@ -48,8 +49,9 @@ final class Options : MenuButton {
         popup.append(preferences);
         popup.append(about);
 
-        // Fill history listing.
-        foreach (uri; history) {
+        // Fill history and bookmarks listing.
+        historyMenu.append(new SeparatorMenuItem());
+        foreach_reverse (uri; history) {
             auto item = new MenuItem(uri.title);
             item.addOnActivate(toDelegate(&historyChosenSignal));
             historyMenu.append(item);

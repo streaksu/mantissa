@@ -43,219 +43,81 @@ shared static ~this() {
     database.close();
 }
 
+// Creates a field for UserSettings with a getter and setter.
+private mixin template UserSetting(string setting, T, string defaultValue) {
+    static if (is(T == bool)) {
+        mixin("static @property bool " ~ setting ~ "() {
+            auto items = database.execute(
+                \"SELECT * FROM usersettings WHERE setting == '" ~ setting ~ "'\"
+            );
+            if (!items.empty) {
+                return items.front()[\"enabled\"].as!bool;
+            }
+
+            return " ~ defaultValue ~ ";
+        }");
+        mixin("static @property void " ~ setting ~ "(bool value) {
+            auto statement = database.prepare(
+                \"REPLACE INTO usersettings (setting, enabled, extra)
+                VALUES (:settings, :enabled, :extra)\"
+            );
+            statement.inject(\"" ~ setting ~ "\", value, \"Placeholder\");
+        }");
+    } else static if (is(T == string)) {
+        mixin("static @property string " ~ setting ~ "() {
+            auto items = database.execute(
+                \"SELECT * FROM usersettings WHERE setting == '" ~ setting ~ "'\"
+            );
+            if (!items.empty) {
+                return items.front()[\"extra\"].as!string;
+            }
+
+            return \"" ~ defaultValue ~ "\";
+        }");
+        mixin("static @property void " ~ setting ~ "(string value) {
+            auto statement = database.prepare(
+                \"REPLACE INTO usersettings (setting, enabled, extra)
+                VALUES (:settings, :enabled, :extra)\"
+            );
+            statement.inject(\"" ~ setting ~ "\", false, value);
+        }");
+    } else static if (is(T == int)) {
+        mixin("static @property int " ~ setting ~ "() {
+            auto items = database.execute(
+                \"SELECT * FROM usersettings WHERE setting == '" ~ setting ~ "'\"
+            );
+            if (!items.empty) {
+                return to!int(items.front()[\"extra\"].as!string);
+            }
+
+            return " ~ defaultValue ~ ";
+        }");
+        mixin("static @property void " ~ setting ~ "(int value) {
+            auto statement = database.prepare(
+                \"REPLACE INTO usersettings (setting, enabled, extra)
+                VALUES (:settings, :enabled, :extra)\"
+            );
+            statement.inject(\"" ~ setting ~ "\", false, to!string(value));
+        }");
+    } else {
+        static assert (0, "Invalid UserSetting type");
+    }
+}
+
 /**
  * Static class that wraps the user settings.
  */
 struct UserSettings {
-    /// Does the user want smooth scrolling of windows?
-    @property static bool smoothScrolling() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'smooth_scrolling'"
-        );
-        if (!items.empty) {
-            return items.front()["enabled"].as!bool;
-        }
-
-        return true;
-    }
-
-    /// Save smooth scrolling settings.
-    @property static void smoothScrolling(bool b) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("smooth_scrolling", b, "Placeholder");
-    }
-
-    /// Does the user want to cache pages?
-    @property static bool pageCache() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'pagecache'"
-        );
-        if (!items.empty) {
-            return items.front()["enabled"].as!bool;
-        }
-
-        return true;
-    }
-
-    /// Save page caching settings.
-    @property static void pageCache(bool b) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("pagecache", b, "Placeholder");
-    }
-
-    /// Does the user want to enable javascript support?
-    @property static bool javascript() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'javascript'"
-        );
-        if (!items.empty) {
-            return items.front()["enabled"].as!bool;
-        }
-
-        return false;
-    }
-
-    /// Save javascript settings.
-    @property static void javascript(bool b) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("javascript", b, "Placeholder");
-    }
-
-    /// Does the user want to enable engine site quirks?
-    @property static bool sitequirks() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'sitequirks'"
-        );
-        if (!items.empty) {
-            return items.front()["enabled"].as!bool;
-        }
-
-        return true;
-    }
-
-    /// Save site quirks.
-    @property static void sitequirks(bool b) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("sitequirks", b, "Placeholder");
-    }
-
-    /// Which homepage did the user set to use?
-    @property static string homepage() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'homepage'"
-        );
-        if (!items.empty) {
-            return items.front()["extra"].as!string;
-        }
-
-        return "https://dlang.org";
-    }
-
-    /// Save the desired homepage.
-    @property static void homepage(string d) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("homepage", false, d);
-    }
-
-    /// Which cookie policy did the user want? (values documented in the .xml)
-    @property static int cookiePolicy() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'cookiepolicy'"
-        );
-        if (!items.empty) {
-            return to!int(items.front()["extra"].as!string);
-        }
-
-        return 2;
-    }
-
-    /// Save the desired cookie policy.
-    @property static void cookiePolicy(int a) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("cookiepolicy", false, to!string(a));
-    }
-
-    /// Which search engine did the user want?
-    @property static string searchEngine() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'searchengine'"
-        );
-        if (!items.empty) {
-            return items.front()["extra"].as!string;
-        }
-
-        return "https://duckduckgo.com/search?q=";
-    }
-
-    /// Save the desired search engine.
-    @property static void searchEngine(string d) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("searchengine", false, d);
-    }
-
-    /// Does the user want to keep cookies?
-    @property static bool cookieKeep() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'cookiekeep'"
-        );
-        if (!items.empty) {
-            return items.front()["enabled"].as!bool;
-        }
-
-        return true;
-    }
-
-    /// Save cookie saving policy.
-    @property static void cookieKeep(bool b) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("cookiekeep", b, "Placeholder");
-    }
-
-    /// Does the user want to force HTTPs?
-    @property static bool forceHTTPS() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'forcehttps'"
-        );
-        if (!items.empty) {
-            return items.front()["enabled"].as!bool;
-        }
-
-        return true;
-    }
-
-    /// Save HTTPs enforcing policy.
-    @property static void forceHTTPS(bool b) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("forcehttps", b, "Placeholder");
-    }
-
-    /// Does the user want to allow insecure content on HTTPs sites?
-    @property static bool insecureContent() {
-        auto items = database.execute(
-            "SELECT * FROM usersettings WHERE setting == 'insecurecontent'"
-        );
-        if (!items.empty) {
-            return items.front()["enabled"].as!bool;
-        }
-
-        return true;
-    }
-
-    /// Save insecure content policy.
-    @property static void insecureContent(bool b) {
-        auto statement = database.prepare(
-            "REPLACE INTO usersettings (setting, enabled, extra)
-            VALUES (:settings, :enabled, :extra)"
-        );
-        statement.inject("insecurecontent", b, "Placeholder");
-    }
+    mixin UserSetting!("smoothScrolling", bool,   "true");
+    mixin UserSetting!("pageCache",       bool,   "true");
+    mixin UserSetting!("javascript",      bool,   "true");
+    mixin UserSetting!("sitequirks",      bool,   "true");
+    mixin UserSetting!("homepage",        string, "https://dlang.org");
+    mixin UserSetting!("cookiePolicy",    int,    "2");
+    mixin UserSetting!("searchEngine",    string, "https://duckduckgo.com/search?q=");
+    mixin UserSetting!("cookieKeep",      bool,   "true");
+    mixin UserSetting!("forceHTTPS",      bool,   "true");
+    mixin UserSetting!("insecureContent", bool,   "true");
 }
 
 /**

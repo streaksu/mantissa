@@ -204,7 +204,9 @@ final class Browser : ApplicationWindow {
     // Called when the title changes, that we will use as signal to add
     // to the history.
     private void titleChangedSignal(Webview sender) {
-        HistoryStore.updateOrAdd(sender.title, sender.uri);
+        if (sender.title != "") {
+            HistoryStore.updateOrAdd(sender.title, sender.uri);
+        }
 
         if (sender == tabs.getCurrentWebview()) {
             setTitle(sender.title);

@@ -39,7 +39,7 @@ final class SearchBar : Entry {
     this(Window p) {
         parent         = p;
         completion     = new EntryCompletion();
-        completionList = new ListStore([GType.STRING, GType.STRING, GType.STRING]);
+        completionList = new ListStore([GType.STRING, GType.STRING]);
         mainOption     = completionList.createIter();
         completion.setModel(completionList);
         completion.setTextColumn(0);
@@ -48,9 +48,8 @@ final class SearchBar : Entry {
         const auto history = HistoryStore.history;
         foreach (item; history) {
             auto iter = completionList.createIter();
-            completionList.setValue(iter, 0, item.title ~ " - " ~ item.uri);
-            completionList.setValue(iter, 1, item.title);
-            completionList.setValue(iter, 2, item.uri);
+            completionList.setValue(iter, 0, item.title);
+            completionList.setValue(iter, 1, item.uri);
         }
 
         completion.addOnMatchSelected(toDelegate(&matchSelectedSignal));
@@ -118,8 +117,7 @@ final class SearchBar : Entry {
                 break;
         }
         completionList.setValue(mainOption, 0, mainOptionMessage);
-        completionList.setValue(mainOption, 1, "");
-        completionList.setValue(mainOption, 2, uri);
+        completionList.setValue(mainOption, 1, uri);
     }
 
     private bool matchSelectedSignal(TreeModelIF, TreeIter iter, EntryCompletion) {
@@ -131,10 +129,10 @@ final class SearchBar : Entry {
         const auto expected  = mainOption.getValueString(0);
 
         if (itertitle == expected) {
-            const auto uri = mainOption.getValueString(2);
+            const auto uri = mainOption.getValueString(1);
             setText(normalizeURI(uri, guessURIType(uri)));
         } else {
-            setText(iter.getValueString(2));
+            setText(iter.getValueString(1));
         }
 
         return true;
