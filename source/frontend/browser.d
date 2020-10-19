@@ -5,15 +5,16 @@ import gtk.Application:        Application;
 import gtk.ApplicationWindow:  ApplicationWindow;
 import gtk.AccelGroup:         AccelGroup;
 import gdk.c.types:            ModifierType;
-import gtk.c.types:            AccelFlags;
+import gtk.c.types:            AccelFlags, ReliefStyle;
 import gobject.DClosure:       DClosure;
 import gtk.HeaderBar:          HeaderBar;
-import gtk.Button:             Button;
+import gtk.ToolButton:         ToolButton;
 import globals:                programName;
 import gtk.Entry:              Entry;
 import gtk.Widget:             Widget;
 import gtk.Notebook:           Notebook;
 import gtk.HBox:               HBox;
+import gtk.VBox:               VBox;
 import gtk.Image:              IconSize, Image;
 import webkit2gtkd.webview:    LoadEvent, Webview;
 import frontend.options:       Options;
@@ -29,11 +30,11 @@ private immutable windowHeight = 768;
  */
 final class Browser : ApplicationWindow {
     private AccelGroup shortcuts;
-    private Button     previousPage;
-    private Button     nextPage;
-    private Button     refresh;
+    private ToolButton previousPage;
+    private ToolButton nextPage;
+    private ToolButton refresh;
     private SearchBar  urlBar;
-    private Button     addTab;
+    private ToolButton addTab;
     private Options    options;
     private Tabs       tabs;
 
@@ -47,11 +48,11 @@ final class Browser : ApplicationWindow {
 
         // Initialize buttons and data.
         shortcuts    = new AccelGroup();
-        previousPage = new Button("go-previous",  IconSize.BUTTON);
-        nextPage     = new Button("go-next",      IconSize.BUTTON);
-        refresh      = new Button("view-refresh", IconSize.BUTTON);
+        previousPage = new ToolButton(new Image("go-previous", IconSize.LARGE_TOOLBAR), "Previous Page");
+        nextPage     = new ToolButton(new Image("go-next", IconSize.LARGE_TOOLBAR), "Next Page");
+        refresh      = new ToolButton("view-refresh");
         urlBar       = new SearchBar(this);
-        addTab       = new Button("list-add", IconSize.BUTTON);
+        addTab       = new ToolButton(new Image("list-add", IconSize.LARGE_TOOLBAR), "Add Tab");
         options      = new Options(toDelegate(&historyTabSignal));
         tabs         = new Tabs();
 
@@ -62,6 +63,7 @@ final class Browser : ApplicationWindow {
         urlBar.setHexpand(true);
         addTab.addOnClicked(toDelegate(&newTabSignal));
         tabs.addOnSwitchPage(toDelegate(&tabChangedSignal));
+        options.setRelief(ReliefStyle.NONE);
 
         // Setup shortcuts.
         addAccelGroup(shortcuts);
@@ -83,17 +85,31 @@ final class Browser : ApplicationWindow {
         AccelGroup.acceleratorParse("<Control>t", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&newTabSignal));
 
-        // Pack the header.
-        auto header = new HeaderBar();
-        header.packStart(previousPage);
-        header.packStart(nextPage);
-        header.packStart(refresh);
-        header.setCustomTitle(urlBar);
-        header.packEnd(options);
-        header.packEnd(addTab);
-        header.setShowCloseButton(true);
-        setTitlebar(header);
-        add(tabs);
+        // Pack the window depending on appearance settings.
+        if (UserSettings.useHeaderBar) {
+            auto header = new HeaderBar();
+            header.packStart(previousPage);
+            header.packStart(nextPage);
+            header.packStart(refresh);
+            header.setCustomTitle(urlBar);
+            header.packEnd(options);
+            header.packEnd(addTab);
+            header.setShowCloseButton(true);
+            setTitlebar(header);
+            add(tabs);
+        } else {
+            auto mainBox   = new VBox(false, 0);
+            auto headerBox = new HBox(false, 0);
+            headerBox.packStart(previousPage, false, false, 0);
+            headerBox.packStart(nextPage,     false, false, 0);
+            headerBox.packStart(refresh,      false, false, 0);
+            headerBox.packStart(urlBar,       true,  true,  0);
+            headerBox.packEnd(options,        false, false, 0);
+            headerBox.packEnd(addTab,         false, false, 0);
+            mainBox.packStart(headerBox, false, false, 0);
+            mainBox.packStart(tabs,      true,  true,  0);
+            add(mainBox);
+        }
 
         // Make new tab, show all.
         showAll();
@@ -119,19 +135,19 @@ final class Browser : ApplicationWindow {
     // Called when pressing the previous button.
     // We assume the current view is able to go back, else, the button
     // should not be able to be pressed.
-    private void previousSignal(Button) {
+    private void previousSignal(ToolButton) {
         auto widget = tabs.getCurrentWebview();
         widget.goBack();
     }
 
     // Ditto but for the next button.
-    private void nextSignal(Button) {
+    private void nextSignal(ToolButton) {
         auto widget = tabs.getCurrentWebview();
         widget.goForward();
     }
 
     // Refresh button signal, we just stop or start depending on the state.
-    private void refreshSignal(Button) {
+    private void refreshSignal(ToolButton) {
         auto widget = tabs.getCurrentWebview();
 
         if (widget.isLoading) {
@@ -153,7 +169,7 @@ final class Browser : ApplicationWindow {
     }
 
     // New tab button signal.
-    private void newTabSignal(Button) {
+    private void newTabSignal(ToolButton) {
         newTab(UserSettings.homepage);
     }
 
@@ -198,7 +214,7 @@ final class Browser : ApplicationWindow {
         }
 
         const string id = sender.isLoading ? "process-stop" : "view-refresh";
-        refresh.setImage(new Image(id, IconSize.BUTTON));
+        refresh.setIconName(id);
     }
 
     // Called when the title changes, that we will use as signal to add

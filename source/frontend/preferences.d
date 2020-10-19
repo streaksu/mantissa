@@ -33,6 +33,7 @@ final class Preferences : Window {
     private CheckButton  cookieKeep;
     private CheckButton  forceHTTPS;
     private CheckButton  insecureContent;
+    private CheckButton  useHeaderBar;
 
     /**
      * Creates the object.
@@ -59,6 +60,7 @@ final class Preferences : Window {
         cookieKeep         = new CheckButton("Keep Cookies Between Sessions");
         forceHTTPS         = new CheckButton("Force HTTPS Navigation");
         insecureContent    = new CheckButton("Allow Insecure Content On HTTPS");
+        useHeaderBar       = new CheckButton("Use GTK's Header Bar");
         smoothScrolling.setActive(UserSettings.smoothScrolling);
         pageCache.setActive(UserSettings.pageCache);
         javascript.setActive(UserSettings.javascript);
@@ -69,6 +71,7 @@ final class Preferences : Window {
         cookieKeep.setActive(UserSettings.cookieKeep);
         forceHTTPS.setActive(UserSettings.forceHTTPS);
         insecureContent.setActive(UserSettings.insecureContent);
+        useHeaderBar.setActive(UserSettings.useHeaderBar);
 
         // Pack the stack.
         auto engineSettings = new VBox(false, 10);
@@ -111,6 +114,10 @@ final class Preferences : Window {
         browserSettings.packStart(insecureContent, false, false, 10);
         stack.addTitled(browserSettings, "browserSettings", "Browser Settings");
 
+        auto appearanceSettings = new VBox(false, 10);
+        appearanceSettings.packStart(useHeaderBar, false, false, 10);
+        stack.addTitled(appearanceSettings, "appearanceSettings", "Appearance");
+
         // Wire signals and show all.
         addOnDestroy(toDelegate(&closeSignal));
         showAll();
@@ -129,5 +136,6 @@ final class Preferences : Window {
         UserSettings.cookieKeep      = cookieKeep.getActive();
         UserSettings.forceHTTPS      = forceHTTPS.getActive();
         UserSettings.insecureContent = insecureContent.getActive();
+        UserSettings.useHeaderBar    = useHeaderBar.getActive();
     }
 }

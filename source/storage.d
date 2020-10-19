@@ -118,6 +118,7 @@ struct UserSettings {
     mixin UserSetting!("cookieKeep",      bool,   "true");
     mixin UserSetting!("forceHTTPS",      bool,   "true");
     mixin UserSetting!("insecureContent", bool,   "true");
+    mixin UserSetting!("useHeaderBar",    bool,   "true");
 }
 
 /**
