@@ -80,17 +80,26 @@ final class Preferences : Window {
         engineSettings.packStart(siteSpecificQuirks, false, false, 10);
         stack.addTitled(engineSettings, "engineSettings", "Engine Settings");
 
-        auto homepageBox = new HBox(false, 10);
-        homepageBox.packStart(new Label("Homepage"), false, false, 0);
-        homepageBox.packStart(homepage,              true, true,   0);
+        auto homepageBox   = new HBox(false, 10);
+        auto homepageLabel = new Label("Homepage");
+        homepageLabel.setWidthChars(15);
+        homepageLabel.setXalign(0);
+        homepageBox.packStart(homepageLabel, false, false, 0);
+        homepageBox.packStart(homepage,      true, true,   0);
 
-        auto searchEngineBox = new HBox(false, 10);
-        searchEngineBox.packStart(new Label("Search Engine"), false, false, 0);
-        searchEngineBox.packStart(searchEngine,               true, true,   0);
+        auto searchEngineBox   = new HBox(false, 10);
+        auto searchEngineLabel = new Label("Search Engine");
+        searchEngineLabel.setWidthChars(15);
+        searchEngineLabel.setXalign(0);
+        searchEngineBox.packStart(searchEngineLabel, false, false, 0);
+        searchEngineBox.packStart(searchEngine,      true, true,   0);
 
-        auto cookiePolicyBox = new HBox(false, 10);
-        cookiePolicyBox.packStart(new Label("Cookie Policy"), false, false, 0);
-        cookiePolicyBox.packStart(cookiePolicy,               true,  true,  0);
+        auto cookiePolicyBox   = new HBox(false, 10);
+        auto cookiePolicyLabel = new Label("Cookie Policy");
+        cookiePolicyLabel.setWidthChars(15);
+        cookiePolicyLabel.setXalign(0);
+        cookiePolicyBox.packStart(cookiePolicyLabel, false, false, 0);
+        cookiePolicyBox.packStart(cookiePolicy,      true,  true,  0);
         auto store = new ListStore([GType.STRING]);
         auto iter1 = store.createIter();
         auto iter2 = store.createIter();
