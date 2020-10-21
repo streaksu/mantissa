@@ -1,6 +1,5 @@
 module frontend.preferences;
 
-import std.functional:       toDelegate;
 import gtk.Window:           Window;
 import gtk.Widget:           Widget;
 import gtk.StackSidebar:     StackSidebar;
@@ -119,7 +118,7 @@ final class Preferences : Window {
         stack.addTitled(appearanceSettings, "appearanceSettings", "Appearance");
 
         // Wire signals and show all.
-        addOnDestroy(toDelegate(&closeSignal));
+        addOnDestroy(&closeSignal);
         showAll();
     }
 

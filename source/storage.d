@@ -108,17 +108,19 @@ private mixin template UserSetting(string setting, T, string defaultValue) {
  * Static class that wraps the user settings.
  */
 struct UserSettings {
-    mixin UserSetting!("smoothScrolling", bool,   "true");
-    mixin UserSetting!("pageCache",       bool,   "true");
-    mixin UserSetting!("javascript",      bool,   "true");
-    mixin UserSetting!("sitequirks",      bool,   "true");
-    mixin UserSetting!("homepage",        string, "https://dlang.org");
-    mixin UserSetting!("cookiePolicy",    int,    "2");
-    mixin UserSetting!("searchEngine",    string, "https://duckduckgo.com/search?q=");
-    mixin UserSetting!("cookieKeep",      bool,   "true");
-    mixin UserSetting!("forceHTTPS",      bool,   "true");
-    mixin UserSetting!("insecureContent", bool,   "true");
-    mixin UserSetting!("useHeaderBar",    bool,   "true");
+    mixin UserSetting!("smoothScrolling",  bool,   "true");
+    mixin UserSetting!("pageCache",        bool,   "true");
+    mixin UserSetting!("javascript",       bool,   "true");
+    mixin UserSetting!("sitequirks",       bool,   "true");
+    mixin UserSetting!("homepage",         string, "https://dlang.org");
+    mixin UserSetting!("cookiePolicy",     int,    "2");
+    mixin UserSetting!("searchEngine",     string, "https://duckduckgo.com/search?q=");
+    mixin UserSetting!("cookieKeep",       bool,   "true");
+    mixin UserSetting!("forceHTTPS",       bool,   "true");
+    mixin UserSetting!("insecureContent",  bool,   "true");
+    mixin UserSetting!("useHeaderBar",     bool,   "true");
+    mixin UserSetting!("mainWindowWidth",  int,    "1366");
+    mixin UserSetting!("mainWindowHeight", int,    "768");
 }
 
 /**

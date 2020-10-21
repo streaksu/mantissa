@@ -58,18 +58,18 @@ final class Tabs : Notebook {
             viewcok.setPersistentStorage(store, PersistentStorage.SQLite);
         }
 
-        view.addOnLoadChanged(toDelegate(&loadChangedSignal));
-        view.addOnLoadFailed(toDelegate(&loadFailedSignal));
-        view.addOnCreate(toDelegate(&createSignal));
-        view.addOnTitleChanged(toDelegate(&titleChangedSignal));
-        view.addOnInsecureContent(toDelegate(&insecureContentSignal));
-        view.addOnClose(toDelegate(&viewCloseSignal));
-        viewcok.addOnChanged(toDelegate(&changedCookiesSignal));
+        view.addOnLoadChanged(&loadChangedSignal);
+        view.addOnLoadFailed(&loadFailedSignal);
+        view.addOnCreate(&createSignal);
+        view.addOnTitleChanged(&titleChangedSignal);
+        view.addOnInsecureContent(&insecureContentSignal);
+        view.addOnClose(&viewCloseSignal);
+        viewcok.addOnChanged(&changedCookiesSignal);
 
         // Finally, pack the UI.
         auto title  = new Label("");
         auto button = new Button("window-close", GtkIconSize.BUTTON);
-        button.addOnClicked(toDelegate(&closeTabSignal));
+        button.addOnClicked(&closeTabSignal);
 
         auto titleBox = new HBox(false, 10);
         titleBox.packStart(title, false, false, 0);

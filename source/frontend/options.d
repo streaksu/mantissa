@@ -1,6 +1,5 @@
 module frontend.options;
 
-import std.functional:        toDelegate;
 import std.datetime.systime:  Clock, SysTime;
 import gtk.MenuButton:        MenuButton;
 import gtk.Menu:              Menu;
@@ -38,10 +37,10 @@ final class Options : MenuButton {
         historyCallback   = historyChose;
         history           = HistoryStore.history;
 
-        clearTodayHistory.addOnActivate(toDelegate(&deleteTodayHistorySignal));
-        clearAllHistory.addOnActivate(toDelegate(&deleteAllHistorySignal));
-        preferences.addOnActivate(toDelegate(&preferencesSignal));
-        about.addOnActivate(toDelegate(&aboutSignal));
+        clearTodayHistory.addOnActivate(&deleteTodayHistorySignal);
+        clearAllHistory.addOnActivate(&deleteAllHistorySignal);
+        preferences.addOnActivate(&preferencesSignal);
+        about.addOnActivate(&aboutSignal);
 
         // Wire widgets.
         historyMenu.append(clearTodayHistory);
@@ -53,7 +52,7 @@ final class Options : MenuButton {
         historyMenu.append(new SeparatorMenuItem());
         foreach_reverse (uri; history) {
             auto item = new MenuItem(uri.title);
-            item.addOnActivate(toDelegate(&historyChosenSignal));
+            item.addOnActivate(&historyChosenSignal);
             historyMenu.append(item);
         }
 

@@ -1,6 +1,6 @@
 module frontend.browser;
 
-import std.functional:         toDelegate;
+import gdk.Event:              Event;
 import gtk.Application:        Application;
 import gtk.ApplicationWindow:  ApplicationWindow;
 import gtk.AccelGroup:         AccelGroup;
@@ -22,9 +22,6 @@ import frontend.searchbar:     SearchBar;
 import frontend.tabs:          Tabs;
 import storage:                HistoryStore, UserSettings;
 
-private immutable windowWidth  = 1366;
-private immutable windowHeight = 768;
-
 /**
  * Main browser window.
  */
@@ -44,7 +41,11 @@ final class Browser : ApplicationWindow {
     this(Application app, string openurl) {
         // Init ourselves.
         super(app);
-        setDefaultSize(windowWidth, windowHeight);
+        addOnDelete(&closeSignal);
+        import std.stdio: writeln;
+        writeln(UserSettings.mainWindowWidth);
+        writeln(UserSettings.mainWindowHeight);
+        setDefaultSize(UserSettings.mainWindowWidth, UserSettings.mainWindowHeight);
 
         // Initialize buttons and data.
         shortcuts    = new AccelGroup();
@@ -53,16 +54,16 @@ final class Browser : ApplicationWindow {
         refresh      = new ToolButton("view-refresh");
         urlBar       = new SearchBar(this);
         addTab       = new ToolButton(new Image("list-add", IconSize.LARGE_TOOLBAR), "Add Tab");
-        options      = new Options(toDelegate(&historyTabSignal));
+        options      = new Options(&historyTabSignal);
         tabs         = new Tabs();
 
-        previousPage.addOnClicked(toDelegate(&previousSignal));
-        nextPage.addOnClicked(toDelegate(&nextSignal));
-        refresh.addOnClicked(toDelegate(&refreshSignal));
-        urlBar.addOnActivate(toDelegate(&urlBarEnterSignal));
+        previousPage.addOnClicked(&previousSignal);
+        nextPage.addOnClicked(&nextSignal);
+        refresh.addOnClicked(&refreshSignal);
+        urlBar.addOnActivate(&urlBarEnterSignal);
         urlBar.setHexpand(true);
-        addTab.addOnClicked(toDelegate(&newTabSignal));
-        tabs.addOnSwitchPage(toDelegate(&tabChangedSignal));
+        addTab.addOnClicked(&newTabSignal);
+        tabs.addOnSwitchPage(&tabChangedSignal);
         options.setRelief(ReliefStyle.NONE);
 
         // Setup shortcuts.
@@ -122,9 +123,19 @@ final class Browser : ApplicationWindow {
     void newTab(string uri) {
         auto view = new Webview();
         view.uri = uri;
-        view.addOnLoadChanged(toDelegate(&loadChangedSignal));
-        view.addOnTitleChanged(toDelegate(&titleChangedSignal));
+        view.addOnLoadChanged(&loadChangedSignal);
+        view.addOnTitleChanged(&titleChangedSignal);
         tabs.addTab(view);
+    }
+
+    // Called when the window closes, we will use it to save some settings.
+    private bool closeSignal(Event, Widget) {
+        int width, height; // @suppress(dscanner.suspicious.unmodified)
+        getSize(width, height);
+        UserSettings.mainWindowWidth  = width;
+        UserSettings.mainWindowHeight = height;
+        destroy();
+        return true;
     }
 
     // Called when a tab with a URI from the history is chosen.

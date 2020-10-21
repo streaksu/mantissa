@@ -2,7 +2,6 @@ module frontend.searchbar;
 
 import std.string:          fromStringz, indexOf;
 import std.typecons:        No;
-import std.functional:      toDelegate;
 import gtk.c.types:         EntryIconPosition, DialogFlags, ResponseType;
 import gobject.c.types:     GType;
 import gtk.Entry:           Entry;
@@ -52,10 +51,10 @@ final class SearchBar : Entry {
             completionList.setValue(iter, 1, item.uri);
         }
 
-        completion.addOnMatchSelected(toDelegate(&matchSelectedSignal));
+        completion.addOnMatchSelected(&matchSelectedSignal);
         setCompletion(completion);
-        addOnChanged(toDelegate(&preeditChangedSignal));
-        addOnIconPress(toDelegate(&iconPressSignal));
+        addOnChanged(&preeditChangedSignal);
+        addOnIconPress(&iconPressSignal);
     }
 
     /**

@@ -1,6 +1,5 @@
 module main;
 
-import std.functional:   toDelegate;
 import std.algorithm:    remove;
 import gio.c.types:      GApplicationFlags;
 import gio.FileIF:       FileIF;
@@ -21,8 +20,8 @@ final class MainApplication : Application {
      */
     this() {
         super(programID, GApplicationFlags.HANDLES_OPEN); // Handle opening URLs
-        addOnActivate(toDelegate(&activateSignal));
-        addOnOpen(toDelegate(&openTabsSignal));
+        addOnActivate(&activateSignal);
+        addOnOpen(&openTabsSignal);
     }
 
     // When no URL to be opened is passed, this is called instead of
