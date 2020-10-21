@@ -32,6 +32,3 @@ immutable programLicense = "BSL-1.0";
 
 /// Link to the application's license for a full version.
 immutable programLicenseLink = "https://opensource.org/licenses/BSL-1.0";
-
-/// Icon name for the application to use.
-immutable iconName = "mantissa";

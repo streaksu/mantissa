@@ -42,9 +42,6 @@ final class Browser : ApplicationWindow {
         // Init ourselves.
         super(app);
         addOnDelete(&closeSignal);
-        import std.stdio: writeln;
-        writeln(UserSettings.mainWindowWidth);
-        writeln(UserSettings.mainWindowHeight);
         setDefaultSize(UserSettings.mainWindowWidth, UserSettings.mainWindowHeight);
 
         // Initialize buttons and data.

@@ -10,31 +10,27 @@ import globals; // Everything really.
 final class About : AboutDialog {
     /// Creates a filled about window.
     this() {
-        // Work with the logo and program info.
-        setLogoIconName(iconName);
+        setLogoIconName(programNameRaw);
         setProgramName(programName);
         setVersion(programVersion);
         setComments(programDescription);
         setCopyright(programCopyright);
         setWebsite(programWebsite);
-
-        // Authors, artists, license, etc.
         setAuthors(programAuthors.dup);
         setArtists(programArtists.dup);
+
         setLicense(
             "Distributed under the " ~ programLicense ~ " license.\n" ~
             "If a copy didn't come with your copy of the software you can\n" ~
             "grab one at " ~ programLicenseLink
         );
 
-        // Add the thanks section in the credits.
         addCreditSection("Thanks to", [
             "The D Foundation https://dlang.org for such a great language",
             "The GtkD team https://gtkd.org for the useful framework",
             "The d2sqlite3 team https://github.com/dlang-community/d2sqlite3 for the superb library"
         ]);
 
-        // Show all.
         showAll();
     }
 }

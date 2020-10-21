@@ -4,7 +4,9 @@ import std.datetime.systime:  Clock, SysTime;
 import gtk.MenuButton:        MenuButton;
 import gtk.Menu:              Menu;
 import gtk.MenuItem:          MenuItem;
+import gtk.ImageMenuItem:     ImageMenuItem;
 import gtk.SeparatorMenuItem: SeparatorMenuItem;
+import gtk.Image:             Image, IconSize;
 import frontend.about:        About;
 import frontend.preferences:  Preferences;
 import globals:               programName;
@@ -18,8 +20,8 @@ final class Options : MenuButton {
     private Menu     historyMenu;
     private MenuItem clearTodayHistory;
     private MenuItem clearAllHistory;
-    private MenuItem preferences;
-    private MenuItem about;
+    private ImageMenuItem preferences;
+    private ImageMenuItem about;
     private void delegate(string) historyCallback;
     private HistoryStore.HistoryURI[] history;
 
@@ -32,14 +34,18 @@ final class Options : MenuButton {
         historyMenu       = popup.appendSubmenu("History");
         clearTodayHistory = new MenuItem("Clear Today's History");
         clearAllHistory   = new MenuItem("Clear All History");
-        preferences       = new MenuItem("Preferences");
-        about             = new MenuItem("About " ~ programName);    
+        preferences       = new ImageMenuItem("Preferences");
+        about             = new ImageMenuItem("About " ~ programName);    
         historyCallback   = historyChose;
         history           = HistoryStore.history;
 
         clearTodayHistory.addOnActivate(&deleteTodayHistorySignal);
         clearAllHistory.addOnActivate(&deleteAllHistorySignal);
+        preferences.setImage(new Image("preferences-other", IconSize.MENU));
+        preferences.setAlwaysShowImage(true);
         preferences.addOnActivate(&preferencesSignal);
+        about.setImage(new Image("help-about", IconSize.MENU));
+        about.setAlwaysShowImage(true);
         about.addOnActivate(&aboutSignal);
 
         // Wire widgets.
