@@ -1,22 +1,23 @@
 module frontend.searchbar;
 
-import std.string:          fromStringz, indexOf;
-import std.typecons:        No;
-import gtk.c.types:         EntryIconPosition, DialogFlags, ResponseType;
-import gobject.c.types:     GType;
-import gtk.Entry:           Entry;
-import gtk.EntryCompletion: GtkEntryCompletion, EntryCompletion;
-import gtk.Window:          Window;
-import gtk.EditableIF:      EditableIF;
-import gtk.TreeModelIF:     TreeModelIF;
-import gdk.Event:           Event;
-import gtk.ListStore:       ListStore;
-import gtk.TreeIter:        GtkTreeIter, TreeIter;
-import gtk.Dialog:          Dialog;
-import gtk.Label:           Label;
-import gtk.Image:           Image, IconSize;
-import backend.uri:         URIType, guessURIType, normalizeURI;
-import storage:             HistoryStore;
+import std.string:           fromStringz, indexOf;
+import std.typecons:         No;
+import gtk.c.types:          EntryIconPosition, DialogFlags, ResponseType;
+import gobject.c.types:      GType;
+import gtk.Entry:            Entry;
+import gtk.EntryCompletion:  GtkEntryCompletion, EntryCompletion;
+import gtk.Window:           Window;
+import gtk.EditableIF:       EditableIF;
+import gtk.TreeModelIF:      TreeModelIF;
+import gdk.Event:            Event;
+import gtk.ListStore:        ListStore;
+import gtk.TreeIter:         GtkTreeIter, TreeIter;
+import gtk.Dialog:           Dialog;
+import gtk.Label:            Label;
+import gtk.Image:            Image, IconSize;
+import backend.translations: _;
+import backend.uri:          URIType, guessURIType, normalizeURI;
+import storage:              HistoryStore;
 
 private immutable SAFE_ICON   = "system-lock-screen-symbolic";
 private immutable UNSAFE_ICON = "dialog-warning-symbolic";
@@ -76,22 +77,22 @@ final class SearchBar : Entry {
     private void iconPressSignal(EntryIconPosition pos, Event, Entry e) {
         const auto icon = e.getIconName(pos);
         auto dialog = new Dialog(
-            "Security info",
+            _("Security info"),
             parent,
             DialogFlags.DESTROY_WITH_PARENT,
-            ["Close"],
+            [_("Close")],
             [ResponseType.CLOSE]
         );
         auto cont = dialog.getContentArea();
 
         cont.packStart(new Image(icon, IconSize.DIALOG), true, true, 10);
         if (icon == SAFE_ICON) {
-            cont.add(new Label("This resource is safe!"));
-            cont.add(new Label("Your connection with this resource is secured, your data cannot be stolen"));
+            cont.add(new Label(_("This resource is safe!")));
+            cont.add(new Label(_("Your connection with this resource is secure, your data cannot be stolen")));
         } else {
-            cont.add(new Label("This resource is not safe!"));
-            cont.add(new Label("Your connection with this resource is unsecured, your data could be stolen!"));
-            cont.add(new Label("Please search for secure alternatives, or contact the resource admins"));
+            cont.add(new Label(_("This resource is not safe!")));
+            cont.add(new Label(_("Your connection with this resource is unsecure, your data could be stolen!")));
+            cont.add(new Label(_("Please search for secure alternatives, or contact the site's webmasters")));
         }
 
         dialog.showAll();
@@ -106,13 +107,13 @@ final class SearchBar : Entry {
         string mainOptionMessage;
         final switch (mainOptionType) {
             case URIType.LocalFile:
-                mainOptionMessage = uri ~ " - Open File";
+                mainOptionMessage = uri ~ " - " ~ _("Open File");
                 break;
             case URIType.WebResource:
-                mainOptionMessage = uri ~ " - Visit";
+                mainOptionMessage = uri ~ " - " ~ _("Visit");
                 break;
             case URIType.Search:
-                mainOptionMessage = uri ~ " - Search";
+                mainOptionMessage = uri ~ " - " ~ _("Search");
                 break;
         }
         completionList.setValue(mainOption, 0, mainOptionMessage);

@@ -1,7 +1,13 @@
 [Desktop Entry]
 Name=Mantissa
+Name[es]=Mantissa
+Name[it]=Mantissa
 GenericName=Web Browser
-Comment=A minimalistic, simple GTK based browser
+GenericName[es]=Navegador Web
+GenericName[it]=Browser Web
+Comment=A lightweight web browser made with GTK, D and love.
+Comment[es]=Un navegador web ligero hecho con GTK, D y amor de madre.
+Comment[it]=Un web browser leggero sviluppato con GTK, D e un po' d'amore.
 Keywords=web;browser;internet;
 Exec=mantissa %U
 Icon=mantissa
@@ -9,4 +15,3 @@ Terminal=false
 Type=Application
 Categories=Network;WebBrowser;
 MimeType=text/html;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;application/x-mimearchive;
-StartupWMClass=Mantissa

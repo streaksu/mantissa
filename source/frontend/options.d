@@ -7,6 +7,7 @@ import gtk.MenuItem:          MenuItem;
 import gtk.ImageMenuItem:     ImageMenuItem;
 import gtk.SeparatorMenuItem: SeparatorMenuItem;
 import gtk.Image:             Image, IconSize;
+import backend.translations:  _;
 import frontend.about:        About;
 import frontend.preferences:  Preferences;
 import globals:               programName;
@@ -31,11 +32,11 @@ final class Options : MenuButton {
     this(void delegate(string) historyChose) {
         // Initialize everything and signals.
         popup             = new Menu();
-        historyMenu       = popup.appendSubmenu("History");
-        clearTodayHistory = new MenuItem("Clear Today's History");
-        clearAllHistory   = new MenuItem("Clear All History");
-        preferences       = new ImageMenuItem("Preferences");
-        about             = new ImageMenuItem("About " ~ programName);    
+        historyMenu       = popup.appendSubmenu(_("History"));
+        clearTodayHistory = new MenuItem(_("Clear Today's History"));
+        clearAllHistory   = new MenuItem(_("Clear All History"));
+        preferences       = new ImageMenuItem(_("Preferences"));
+        about             = new ImageMenuItem(_("About Mantissa"));    
         historyCallback   = historyChose;
         history           = HistoryStore.history;
 

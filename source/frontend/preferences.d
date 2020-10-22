@@ -13,6 +13,7 @@ import gtk.ComboBox:         ComboBox;
 import gtk.ListStore:        ListStore;
 import gobject.c.types:      GType;
 import gtk.CellRendererText: CellRendererText;
+import backend.translations: _;
 import storage:              UserSettings;
 
 /**
@@ -39,27 +40,27 @@ final class Preferences : Window {
      */
     this() {
         // Initialize ourselves and pack the window.
-        super("Preferences");
+        super(_("Preferences"));
         mainBox = new HBox(false, 10);
         sidebar = new StackSidebar();
         stack   = new Stack();
         mainBox.packStart(sidebar, false, false, 0);
-        mainBox.packStart(stack, true, true, 10);
+        mainBox.packStart(stack,   true,  true,  10);
         sidebar.setStack(stack);
         add(mainBox);
 
         // Initialize inputs and set values.
-        smoothScrolling    = new CheckButton("Enable Smooth Scrolling");
-        pageCache          = new CheckButton("Enable Page Caching");
-        javascript         = new CheckButton("Enable Javascript Support");
-        siteSpecificQuirks = new CheckButton("Enable Site-Specific Quirks");
+        smoothScrolling    = new CheckButton(_("Enable Smooth Scrolling"));
+        pageCache          = new CheckButton(_("Enable Page Caching"));
+        javascript         = new CheckButton(_("Enable Javascript Support"));
+        siteSpecificQuirks = new CheckButton(_("Enable Site-Specific Quirks"));
         homepage           = new Entry();
         searchEngine       = new Entry();
         cookiePolicy       = new ComboBox(false);
-        cookieKeep         = new CheckButton("Keep Cookies Between Sessions");
-        forceHTTPS         = new CheckButton("Force HTTPS Navigation");
-        insecureContent    = new CheckButton("Allow Insecure Content On HTTPS");
-        useHeaderBar       = new CheckButton("Use GTK's Header Bar");
+        cookieKeep         = new CheckButton(_("Keep Cookies Between Sessions"));
+        forceHTTPS         = new CheckButton(_("Force HTTPS Navigation"));
+        insecureContent    = new CheckButton(_("Allow Insecure Content On HTTPS"));
+        useHeaderBar       = new CheckButton(_("Use GTK's Header Bar"));
         smoothScrolling.setActive(UserSettings.smoothScrolling);
         pageCache.setActive(UserSettings.pageCache);
         javascript.setActive(UserSettings.javascript);
@@ -78,24 +79,24 @@ final class Preferences : Window {
         engineSettings.packStart(pageCache,          false, false, 10);
         engineSettings.packStart(javascript,         false, false, 10);
         engineSettings.packStart(siteSpecificQuirks, false, false, 10);
-        stack.addTitled(engineSettings, "engineSettings", "Engine Settings");
+        stack.addTitled(engineSettings, "engineSettings", _("Engine Settings"));
 
         auto homepageBox   = new HBox(false, 10);
-        auto homepageLabel = new Label("Homepage");
+        auto homepageLabel = new Label(_("Homepage"));
         homepageLabel.setWidthChars(15);
         homepageLabel.setXalign(0);
         homepageBox.packStart(homepageLabel, false, false, 0);
         homepageBox.packStart(homepage,      true, true,   0);
 
         auto searchEngineBox   = new HBox(false, 10);
-        auto searchEngineLabel = new Label("Search Engine");
+        auto searchEngineLabel = new Label(_("Search Engine"));
         searchEngineLabel.setWidthChars(15);
         searchEngineLabel.setXalign(0);
         searchEngineBox.packStart(searchEngineLabel, false, false, 0);
         searchEngineBox.packStart(searchEngine,      true, true,   0);
 
         auto cookiePolicyBox   = new HBox(false, 10);
-        auto cookiePolicyLabel = new Label("Cookie Policy");
+        auto cookiePolicyLabel = new Label(_("Cookie Policy"));
         cookiePolicyLabel.setWidthChars(15);
         cookiePolicyLabel.setXalign(0);
         cookiePolicyBox.packStart(cookiePolicyLabel, false, false, 0);
@@ -104,9 +105,9 @@ final class Preferences : Window {
         auto iter1 = store.createIter();
         auto iter2 = store.createIter();
         auto iter3 = store.createIter();
-        store.setValue(iter1, 0, "Accept all cookies unconditionally");
-        store.setValue(iter2, 0, "Reject all cookies unconditionally");
-        store.setValue(iter3, 0, "Accept only cookies set by the main site");
+        store.setValue(iter1, 0, _("Accept all cookies unconditionally"));
+        store.setValue(iter2, 0, _("Reject all cookies unconditionally"));
+        store.setValue(iter3, 0, _("Accept only cookies set by the main site"));
         cookiePolicy.setModel(store);
         cookiePolicy.showAll();
         auto col = new CellRendererText();
@@ -120,11 +121,11 @@ final class Preferences : Window {
         browserSettings.packStart(cookieKeep,      false, false, 10);
         browserSettings.packStart(forceHTTPS,      false, false, 10);
         browserSettings.packStart(insecureContent, false, false, 10);
-        stack.addTitled(browserSettings, "browserSettings", "Browser Settings");
+        stack.addTitled(browserSettings, "browserSettings", _("Browser Settings"));
 
         auto appearanceSettings = new VBox(false, 10);
         appearanceSettings.packStart(useHeaderBar, false, false, 10);
-        stack.addTitled(appearanceSettings, "appearanceSettings", "Appearance");
+        stack.addTitled(appearanceSettings, "appearanceSettings", _("Appearance"));
 
         // Wire signals and show all.
         addOnDestroy(&closeSignal);
