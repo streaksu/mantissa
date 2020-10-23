@@ -234,6 +234,7 @@ final class Browser : ApplicationWindow {
 
         if (sender == tabs.getCurrentWebview()) {
             setTitle(sender.title);
+            urlBar.setText(sender.uri); // for on-site navigation.
         }
     }
 }

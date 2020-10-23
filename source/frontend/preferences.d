@@ -52,7 +52,7 @@ final class Preferences : Window {
         // Initialize inputs and set values.
         smoothScrolling    = new CheckButton(_("Enable Smooth Scrolling"));
         pageCache          = new CheckButton(_("Enable Page Caching"));
-        javascript         = new CheckButton(_("Enable Javascript Support"));
+        javascript         = new CheckButton(_("Enable JavaScript Support"));
         siteSpecificQuirks = new CheckButton(_("Enable Site-Specific Quirks"));
         homepage           = new Entry();
         searchEngine       = new Entry();
@@ -105,8 +105,8 @@ final class Preferences : Window {
         auto iter1 = store.createIter();
         auto iter2 = store.createIter();
         auto iter3 = store.createIter();
-        store.setValue(iter1, 0, _("Accept all cookies unconditionally"));
-        store.setValue(iter2, 0, _("Reject all cookies unconditionally"));
+        store.setValue(iter1, 0, _("Accept all cookies"));
+        store.setValue(iter2, 0, _("Reject all cookies"));
         store.setValue(iter3, 0, _("Accept only cookies set by the main site"));
         cookiePolicy.setModel(store);
         cookiePolicy.showAll();
