@@ -6,7 +6,7 @@
 	"dependencies": {
 		"d2sqlite3": "~>0.19.1",
 		"gtk-d": "~>3.9.0",
-		"webkit2gtkd": "~>0.0.1"
+		"webkit2gtkd": "~>0.0.3"
 	},
 	"description": "A wrapper for the webkit2gtk library using GtkD",
 	"homepage": "https://github.com/streaksu/mantissa",

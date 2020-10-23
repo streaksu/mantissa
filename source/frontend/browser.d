@@ -16,7 +16,10 @@ import gtk.Notebook:           Notebook;
 import gtk.HBox:               HBox;
 import gtk.VBox:               VBox;
 import gtk.Image:              IconSize, Image;
-import webkit2gtkd.webview:    LoadEvent, Webview;
+import webkit2.WebView:        LoadEvent, WebView;
+import gio.TlsCertificate:     TlsCertificate, TlsCertificateFlags;
+import gobject.ObjectG:        ObjectG;
+import gobject.ParamSpec:      ParamSpec;
 import frontend.options:       Options;
 import frontend.searchbar:     SearchBar;
 import frontend.tabs:          Tabs;
@@ -118,10 +121,10 @@ final class Browser : ApplicationWindow {
      * Adds a new tab to the browser, processing the pertinent triggers.
      */
     void newTab(string uri) {
-        auto view = new Webview();
-        view.uri = uri;
+        auto view = new WebView();
+        view.loadUri(uri);
         view.addOnLoadChanged(&loadChangedSignal);
-        view.addOnTitleChanged(&titleChangedSignal);
+        view.addOnNotify(&titleChangedSignal, "title");
         tabs.addTab(view);
     }
 
@@ -173,7 +176,7 @@ final class Browser : ApplicationWindow {
     // What happens when the user finishes outputting a url.
     private void urlBarEnterSignal(Entry entry) {
         auto widget = tabs.getCurrentWebview();
-        widget.uri  = entry.getText();
+        widget.loadUri(entry.getText());
     }
 
     // New tab button signal.
@@ -183,41 +186,46 @@ final class Browser : ApplicationWindow {
 
     // What happens when the main browser tab is changed.
     private void tabChangedSignal(Widget contents, uint, Notebook) {
-        auto view = cast(Webview)contents;
-        urlBar.setText(view.uri);
+        auto view = cast(WebView)contents;
+        TlsCertificate      tls;
+        TlsCertificateFlags flags;
+
+        urlBar.setText(view.getUri());
         urlBar.setProgressFraction(0);
         urlBar.showAll();
-        setTitle(view.title);
+        setTitle(view.getTitle());
         previousPage.setSensitive(view.canGoBack);
         nextPage.setSensitive(view.canGoForward);
-        urlBar.setSecureIcon(view.getTLSInfo());
+        urlBar.setSecureIcon(view.getTlsInfo(tls, flags));
     }
 
     // Manage what happens when the load of a uri changes per webview.
     // We will discern what to do whether its the active one or not later.
-    private void loadChangedSignal(Webview sender, LoadEvent event) {
+    private void loadChangedSignal(LoadEvent event, WebView sender) {
         if (tabs.getCurrentWebview() != sender) {
             return;
         }
 
-        urlBar.setText(sender.uri);
-        previousPage.setSensitive(sender.canGoBack);
-        nextPage.setSensitive(sender.canGoForward);
+        urlBar.setText(sender.getUri());
+        previousPage.setSensitive(sender.canGoBack());
+        nextPage.setSensitive(sender.canGoForward());
 
         final switch (event) {
-            case LoadEvent.Started:
+            case LoadEvent.STARTED:
                 urlBar.removeIcon();
                 urlBar.setProgressFraction(0.25);
                 break;
-            case LoadEvent.Redirected:
+            case LoadEvent.REDIRECTED:
                 urlBar.setProgressFraction(0.5);
                 break;
-            case LoadEvent.Committed:
+            case LoadEvent.COMMITTED:
                 urlBar.setProgressFraction(0.75);
                 break;
-            case LoadEvent.Finished:
+            case LoadEvent.FINISHED:
+                TlsCertificate      tls;
+                TlsCertificateFlags flags;
                 urlBar.setProgressFraction(0);
-                urlBar.setSecureIcon(sender.getTLSInfo());
+                urlBar.setSecureIcon(sender.getTlsInfo(tls, flags));
                 break;
         }
 
@@ -227,14 +235,16 @@ final class Browser : ApplicationWindow {
 
     // Called when the title changes, that we will use as signal to add
     // to the history.
-    private void titleChangedSignal(Webview sender) {
-        if (sender.title != "") {
-            HistoryStore.updateOrAdd(sender.title, sender.uri);
+    private void titleChangedSignal(ParamSpec, ObjectG obj) {
+        auto sender = cast(WebView)obj;
+
+        if (sender.getTitle() != "") {
+            HistoryStore.updateOrAdd(sender.getTitle(), sender.getUri());
         }
 
         if (sender == tabs.getCurrentWebview()) {
-            setTitle(sender.title);
-            urlBar.setText(sender.uri); // for on-site navigation.
+            setTitle(sender.getTitle());
+            urlBar.setText(sender.getUri()); // for on-site navigation.
         }
     }
 }

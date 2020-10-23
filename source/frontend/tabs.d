@@ -1,21 +1,23 @@
 module frontend.tabs;
 
-import std.file:                        exists, mkdirRecurse, write;
-import std.functional:                  toDelegate;
-import glib.Util:                       Util;
-import gtk.Main:                        Main;
-import gtk.Widget:                      Widget;
-import gtk.HBox:                        HBox;
-import gtk.Notebook:                    Notebook;
-import gtk.Label:                       Label;
-import gtk.Button:                      Button;
-import gtk.Image:                       GtkIconSize;
-import webkit2gtkd.cookiemanager:       CookieManager, CookieAcceptPolicy, PersistentStorage;
-import webkit2gtkd.navigationaction:    NavigationAction;
-import webkit2gtkd.settings:            Settings;
-import webkit2gtkd.webview:             LoadEvent, InsecureContentEvent, Webview;
-import globals:                         programNameRaw;
-import storage:                         UserSettings;
+import std.file:                 exists, mkdirRecurse, write;
+import glib.Util:                Util;
+import gtk.Main:                 Main;
+import gtk.Widget:               Widget;
+import gtk.HBox:                 HBox;
+import gtk.Notebook:             Notebook;
+import gtk.Label:                Label;
+import gtk.Button:               Button;
+import gtk.Image:                GtkIconSize;
+import gio.TlsCertificate:       TlsCertificate, TlsCertificateFlags;
+import gobject.ObjectG:          ObjectG;
+import gobject.ParamSpec:        ParamSpec;
+import webkit2.CookieManager:    CookieManager, CookieAcceptPolicy, CookiePersistentStorage;
+import webkit2.NavigationAction: NavigationAction;
+import webkit2.Settings:         Settings;
+import webkit2.WebView:          LoadEvent, InsecureContentEvent, WebView;
+import globals:                  programNameRaw;
+import storage:                  UserSettings;
 
 /**
  * Widget that represents the tabs of the browser.
@@ -33,16 +35,16 @@ final class Tabs : Notebook {
      * Adds a tab featuring the passed webview.
      * It will put it on focus, so it will be accessible with `getActive`.
      */
-    void addTab(Webview view) {
+    void addTab(WebView view) {
         // Create webview and apply the settings.
-        auto viewset = view.settings;
-        auto viewcok = view.context.cookieManager;
+        auto viewset = view.getSettings();
+        auto viewcok = view.getContext.getCookieManager();
 
-        viewset.smoothScrolling    = UserSettings.smoothScrolling;
-        viewset.pageCache          = UserSettings.pageCache;
-        viewset.javascript         = UserSettings.javascript;
-        viewset.siteSpecificQuirks = UserSettings.sitequirks;
-        viewcok.acceptPolicy       = cast(CookieAcceptPolicy)UserSettings.cookiePolicy;
+        viewset.setEnableSmoothScrolling(UserSettings.smoothScrolling);
+        viewset.setEnablePageCache(UserSettings.pageCache);
+        viewset.setEnableJavascript(UserSettings.javascript);
+        viewset.setEnableSiteSpecificQuirks(UserSettings.sitequirks);
+        viewcok.setAcceptPolicy(cast(CookieAcceptPolicy)UserSettings.cookiePolicy);
 
         // Set cookie storage path if needed.
         if (UserSettings.cookieKeep) {
@@ -55,14 +57,14 @@ final class Tabs : Notebook {
                 write(store, "");
             }
 
-            viewcok.setPersistentStorage(store, PersistentStorage.SQLite);
+            viewcok.setPersistentStorage(store, CookiePersistentStorage.SQLITE);
         }
 
         view.addOnLoadChanged(&loadChangedSignal);
-        view.addOnLoadFailed(&loadFailedSignal);
+        // view.addOnLoadFailed(&loadFailedSignal);
         view.addOnCreate(&createSignal);
-        view.addOnTitleChanged(&titleChangedSignal);
-        view.addOnInsecureContent(&insecureContentSignal);
+        // view.addOnTitleChanged(&titleChangedSignal);
+        view.addOnInsecureContentDetected(&insecureContentSignal);
         view.addOnClose(&viewCloseSignal);
         viewcok.addOnChanged(&changedCookiesSignal);
 
@@ -86,15 +88,18 @@ final class Tabs : Notebook {
     /**
      * Returns the current active webview.
      */
-    Webview getCurrentWebview() {
-        return cast(Webview)getNthPage(getCurrentPage());
+    WebView getCurrentWebview() {
+        return cast(WebView)getNthPage(getCurrentPage());
     }
 
     // Called when the load status changed of some view.
-    private void loadChangedSignal(Webview sender, LoadEvent event) {
+    private void loadChangedSignal(LoadEvent event, WebView sender) {
+        TlsCertificate      tls;
+        TlsCertificateFlags flags;
+
         // Check for only HTTPS.
-        if (UserSettings.forceHTTPS && event == LoadEvent.Committed) {
-            if (sender.getTLSInfo() == false) {
+        if (UserSettings.forceHTTPS && event == LoadEvent.COMMITTED) {
+            if (sender.getTlsInfo(tls, flags) == false) {
                 sender.stopLoading();
             }
         }
@@ -103,10 +108,13 @@ final class Tabs : Notebook {
     // Called each time a load fails, that is, either internal error or
     // a call to `stopLoading`.
     // We will just check the reason for the stop and act accordingly.
-    private bool loadFailedSignal(Webview view, LoadEvent, string uri, void*) {
+    private bool loadFailedSignal(WebView view, LoadEvent, string uri, void*) {
+        TlsCertificate      tls;
+        TlsCertificateFlags flags;
+
         // Check if we really are dealing with an HTTPS error.
-        if (UserSettings.forceHTTPS && view.getTLSInfo() == false) {
-            view.loadAlternateHTML("
+        if (UserSettings.forceHTTPS && view.getTlsInfo(tls, flags) == false) {
+            view.loadAlternateHtml("
                 <!DOCTYPE html>
                 <html>
                     <head>
@@ -124,9 +132,9 @@ final class Tabs : Notebook {
 
     // Called when insecure content is found in a view.
     // That is, HTTP content on an HTTPS site.
-    private void insecureContentSignal(Webview sender, InsecureContentEvent) {
+    private void insecureContentSignal(InsecureContentEvent, WebView sender) {
         if (!UserSettings.insecureContent) {
-            sender.loadAlternateHTML("
+            sender.loadAlternateHtml("
                 <!DOCTYPE html>
                 <html>
                     <head>
@@ -136,14 +144,14 @@ final class Tabs : Notebook {
                         <p>Load was cancelled: Insecure content on HTTPS</p>
                     </body>
                 </html>
-            ", sender.uri, null);
+            ", sender.getUri(), null);
         }
     }
 
     // Called when the view is tried to be closed, its our responsability to
     // destroy it.
     // Destroying it will also remove it from the tabs, so no problem there.
-    private void viewCloseSignal(Webview view) {
+    private void viewCloseSignal(WebView view) {
         view.destroy();
     }
 
@@ -156,9 +164,9 @@ final class Tabs : Notebook {
     }
 
     // Called when a new webview is requested.
-    private Webview createSignal(Webview webview, NavigationAction action) {
-        auto view = new Webview(webview);
-        view.uri  = action.request.uri;
+    private WebView createSignal(NavigationAction action, WebView webview) {
+        auto view = new WebView(webview);
+        view.loadUri(action.getRequest.getUri);
         addTab(view);
         return view;
     }
@@ -167,7 +175,7 @@ final class Tabs : Notebook {
     private void closeTabSignal(Button b) {
         const auto count = getNPages();
         foreach (i; 0..count) {
-            auto view             = cast(Webview)getNthPage(i);
+            auto view             = cast(WebView)getNthPage(i);
             auto titleBox         = cast(HBox)getTabLabel(view);
             auto titleBoxChildren = titleBox.getChildren().toArray!(Widget);
             auto titleBoxButton   = cast(Button)titleBoxChildren[1];
@@ -191,10 +199,11 @@ final class Tabs : Notebook {
     }
 
     // Called when the title of a webview changes.
-    private void titleChangedSignal(Webview sender) {
+    private void titleChangedSignal(ParamSpec, ObjectG obj) {
+        auto sender           = cast(WebView)obj;
         auto titleBox         = cast(HBox)getTabLabel(sender);
         auto titleBoxChildren = titleBox.getChildren().toArray!(Widget);
         auto titleBoxLabel    = cast(Label)titleBoxChildren[0];
-        titleBoxLabel.setText(sender.title);
+        titleBoxLabel.setText(sender.getTitle());
     }
 }
