@@ -10,6 +10,7 @@ import gtk.Label:                Label;
 import gtk.Button:               Button;
 import gtk.Image:                GtkIconSize;
 import gio.TlsCertificate:       TlsCertificate, TlsCertificateFlags;
+import glib.ErrorG:              ErrorG;
 import gobject.ObjectG:          ObjectG;
 import gobject.ParamSpec:        ParamSpec;
 import webkit2.CookieManager:    CookieManager, CookieAcceptPolicy, CookiePersistentStorage;
@@ -61,9 +62,9 @@ final class Tabs : Notebook {
         }
 
         view.addOnLoadChanged(&loadChangedSignal);
-        // view.addOnLoadFailed(&loadFailedSignal);
+        view.addOnLoadFailed(&loadFailedSignal);
         view.addOnCreate(&createSignal);
-        // view.addOnTitleChanged(&titleChangedSignal);
+        view.addOnNotify(&titleChangedSignal, "title");
         view.addOnInsecureContentDetected(&insecureContentSignal);
         view.addOnClose(&viewCloseSignal);
         viewcok.addOnChanged(&changedCookiesSignal);
@@ -108,7 +109,7 @@ final class Tabs : Notebook {
     // Called each time a load fails, that is, either internal error or
     // a call to `stopLoading`.
     // We will just check the reason for the stop and act accordingly.
-    private bool loadFailedSignal(WebView view, LoadEvent, string uri, void*) {
+    private bool loadFailedSignal(LoadEvent, string uri, ErrorG, WebView view) {
         TlsCertificate      tls;
         TlsCertificateFlags flags;
 
