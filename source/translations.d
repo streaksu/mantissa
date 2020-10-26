@@ -1,4 +1,4 @@
-module backend.translations;
+module translations;
 
 private immutable string[string] translationDictionary;
 

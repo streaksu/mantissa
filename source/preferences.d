@@ -1,4 +1,4 @@
-module frontend.preferences;
+module preferences;
 
 import gtk.Window:           Window;
 import gtk.Widget:           Widget;
@@ -15,7 +15,7 @@ import gtk.ComboBox:         ComboBox;
 import gtk.ListStore:        ListStore;
 import gobject.c.types:      GType;
 import gtk.CellRendererText: CellRendererText;
-import backend.translations: _;
+import translations:         _;
 import storage:              UserSettings;
 
 /**

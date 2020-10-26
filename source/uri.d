@@ -1,4 +1,4 @@
-module backend.uri;
+module uri;
 
 import std.file:   exists;
 import std.string: startsWith, indexOf;

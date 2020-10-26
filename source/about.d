@@ -1,4 +1,4 @@
-module frontend.about;
+module about;
 
 import gtk.AboutDialog: AboutDialog;
 import globals; // Everything really.

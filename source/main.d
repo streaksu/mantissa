@@ -7,7 +7,7 @@ import gio.Application:  gioApplication = Application;
 import gtk.Application:  Application;
 import gtk.Window:       Window;
 import globals:          programID;
-import frontend.browser: Browser;
+import browser:          Browser;
 import storage:          UserSettings;
 
 /**

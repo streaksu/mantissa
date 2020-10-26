@@ -1,4 +1,4 @@
-module frontend.browser;
+module browser;
 
 import gdk.Event:              Event;
 import gtk.Application:        Application;
@@ -20,9 +20,9 @@ import webkit2.WebView:        LoadEvent, WebView;
 import gio.TlsCertificate:     TlsCertificate, TlsCertificateFlags;
 import gobject.ObjectG:        ObjectG;
 import gobject.ParamSpec:      ParamSpec;
-import frontend.options:       Options;
-import frontend.searchbar:     SearchBar;
-import frontend.tabs:          Tabs;
+import options:                Options;
+import searchbar:              SearchBar;
+import tabs:                   Tabs;
 import storage:                HistoryStore, UserSettings;
 
 /**

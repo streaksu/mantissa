@@ -1,4 +1,4 @@
-module frontend.tabs;
+module tabs;
 
 import std.file:                 exists, mkdirRecurse, write;
 import glib.Util:                Util;

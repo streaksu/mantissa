@@ -1,4 +1,4 @@
-module frontend.options;
+module options;
 
 import std.datetime.systime:  Clock, SysTime;
 import gtk.MenuButton:        MenuButton;
@@ -7,9 +7,9 @@ import gtk.MenuItem:          MenuItem;
 import gtk.ImageMenuItem:     ImageMenuItem;
 import gtk.SeparatorMenuItem: SeparatorMenuItem;
 import gtk.Image:             Image, IconSize;
-import backend.translations:  _;
-import frontend.about:        About;
-import frontend.preferences:  Preferences;
+import translations:          _;
+import about:                 About;
+import preferences:           Preferences;
 import globals:               programName;
 import storage:               HistoryStore;
 
