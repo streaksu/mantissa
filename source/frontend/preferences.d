@@ -7,8 +7,10 @@ import gtk.Stack:            Stack;
 import gtk.VBox:             VBox;
 import gtk.HBox:             HBox;
 import gtk.CheckButton:      CheckButton;
+import gtk.Button:           Button;
 import gtk.Label:            Label;
 import gtk.Entry:            Entry;
+import gtk.EditableIF:       EditableIF;
 import gtk.ComboBox:         ComboBox;
 import gtk.ListStore:        ListStore;
 import gobject.c.types:      GType;
@@ -26,7 +28,7 @@ final class Preferences : Window {
     private CheckButton  smoothScrolling;
     private CheckButton  pageCache;
     private CheckButton  javascript;
-    private CheckButton  siteSpecificQuirks;
+    private CheckButton  sitequirks;
     private Entry        homepage;
     private Entry        searchEngine;
     private ComboBox     cookiePolicy;
@@ -50,35 +52,46 @@ final class Preferences : Window {
         add(mainBox);
 
         // Initialize inputs and set values.
-        smoothScrolling    = new CheckButton(_("Enable Smooth Scrolling"));
-        pageCache          = new CheckButton(_("Enable Page Caching"));
-        javascript         = new CheckButton(_("Enable JavaScript Support"));
-        siteSpecificQuirks = new CheckButton(_("Enable Site-Specific Quirks"));
-        homepage           = new Entry();
-        searchEngine       = new Entry();
-        cookiePolicy       = new ComboBox(false);
-        cookieKeep         = new CheckButton(_("Keep Cookies Between Sessions"));
-        forceHTTPS         = new CheckButton(_("Force HTTPS Navigation"));
-        insecureContent    = new CheckButton(_("Allow Insecure Content On HTTPS"));
-        useHeaderBar       = new CheckButton(_("Use GTK's Header Bar"));
+        smoothScrolling = new CheckButton(_("Enable Smooth Scrolling"));
+        pageCache       = new CheckButton(_("Enable Page Caching"));
+        javascript      = new CheckButton(_("Enable JavaScript Support"));
+        sitequirks      = new CheckButton(_("Enable Site-Specific Quirks"));
+        homepage        = new Entry();
+        searchEngine    = new Entry();
+        cookiePolicy    = new ComboBox(false);
+        cookieKeep      = new CheckButton(_("Keep Cookies Between Sessions"));
+        forceHTTPS      = new CheckButton(_("Force HTTPS Navigation"));
+        insecureContent = new CheckButton(_("Allow Insecure Content On HTTPS"));
+        useHeaderBar    = new CheckButton(_("Use GTK's Header Bar"));
         smoothScrolling.setActive(UserSettings.smoothScrolling);
+        smoothScrolling.addOnClicked(&checkButtonPressed);
         pageCache.setActive(UserSettings.pageCache);
+        pageCache.addOnClicked(&checkButtonPressed);
         javascript.setActive(UserSettings.javascript);
-        siteSpecificQuirks.setActive(UserSettings.sitequirks);
+        javascript.addOnClicked(&checkButtonPressed);
+        sitequirks.setActive(UserSettings.sitequirks);
+        sitequirks.addOnClicked(&checkButtonPressed);
         homepage.setText(UserSettings.homepage);
+        homepage.addOnChanged(&entryChanged);
         searchEngine.setText(UserSettings.searchEngine);
+        searchEngine.addOnChanged(&entryChanged);
         cookiePolicy.setActive(UserSettings.cookiePolicy);
+        cookiePolicy.addOnChanged(&comboBoxChanged);
         cookieKeep.setActive(UserSettings.cookieKeep);
+        cookieKeep.addOnClicked(&checkButtonPressed);
         forceHTTPS.setActive(UserSettings.forceHTTPS);
+        forceHTTPS.addOnClicked(&checkButtonPressed);
         insecureContent.setActive(UserSettings.insecureContent);
+        insecureContent.addOnClicked(&checkButtonPressed);
         useHeaderBar.setActive(UserSettings.useHeaderBar);
+        useHeaderBar.addOnClicked(&checkButtonPressed);
 
         // Pack the stack.
         auto engineSettings = new VBox(false, 10);
         engineSettings.packStart(smoothScrolling,    false, false, 10);
         engineSettings.packStart(pageCache,          false, false, 10);
         engineSettings.packStart(javascript,         false, false, 10);
-        engineSettings.packStart(siteSpecificQuirks, false, false, 10);
+        engineSettings.packStart(sitequirks, false, false, 10);
         stack.addTitled(engineSettings, "engineSettings", _("Engine Settings"));
 
         auto homepageBox   = new HBox(false, 10);
@@ -128,23 +141,33 @@ final class Preferences : Window {
         stack.addTitled(appearanceSettings, "appearanceSettings", _("Appearance"));
 
         // Wire signals and show all.
-        addOnDestroy(&closeSignal);
         showAll();
     }
 
-    // Called when the window is closed.
-    // We will use the signal to save the settings.
-    private void closeSignal(Widget) {
-        UserSettings.smoothScrolling = smoothScrolling.getActive();
-        UserSettings.pageCache       = pageCache.getActive();
-        UserSettings.javascript      = javascript.getActive();
-        UserSettings.sitequirks      = siteSpecificQuirks.getActive();
-        UserSettings.homepage        = homepage.getText();
-        UserSettings.searchEngine    = searchEngine.getText();
-        UserSettings.cookiePolicy    = cookiePolicy.getActive();
-        UserSettings.cookieKeep      = cookieKeep.getActive();
-        UserSettings.forceHTTPS      = forceHTTPS.getActive();
-        UserSettings.insecureContent = insecureContent.getActive();
-        UserSettings.useHeaderBar    = useHeaderBar.getActive();
+    // Called when a checkbutton is pressed.
+    private void checkButtonPressed(Button button) {
+        const auto set = (cast(CheckButton)button).getActive();
+        if      (button is smoothScrolling) UserSettings.smoothScrolling = set;
+        else if (button is pageCache)       UserSettings.pageCache       = set;
+        else if (button is javascript)      UserSettings.javascript      = set;
+        else if (button is sitequirks)      UserSettings.sitequirks      = set;
+        else if (button is cookieKeep)      UserSettings.cookieKeep      = set;
+        else if (button is forceHTTPS)      UserSettings.forceHTTPS      = set;
+        else if (button is insecureContent) UserSettings.insecureContent = set;
+        else if (button is useHeaderBar)    UserSettings.useHeaderBar    = set;
+        else assert(0, "Someone forgot an item!");
+    }
+
+    // Called when the user finishes an entry insertion.
+    private void entryChanged(EditableIF entry) {
+        const auto text = (cast(Entry)entry).getText();
+        if      (entry is homepage)     UserSettings.homepage     = text;
+        else if (entry is searchEngine) UserSettings.searchEngine = text;
+        else assert(0, "Someone forgot an item! Again!");
+    }
+
+    // Called when the user selects an option of a combobox.
+    private void comboBoxChanged(ComboBox) {
+        UserSettings.cookiePolicy = cookiePolicy.getActive();
     }
 }
