@@ -42,10 +42,10 @@ final class Options : MenuButton {
 
         clearTodayHistory.addOnActivate(&deleteTodayHistorySignal);
         clearAllHistory.addOnActivate(&deleteAllHistorySignal);
-        preferences.setImage(new Image("preferences-other", IconSize.MENU));
+        preferences.setImage(new Image("preferences-other-symbolic", IconSize.MENU));
         preferences.setAlwaysShowImage(true);
         preferences.addOnActivate(&preferencesSignal);
-        about.setImage(new Image("help-about", IconSize.MENU));
+        about.setImage(new Image("help-about-symbolic", IconSize.MENU));
         about.setAlwaysShowImage(true);
         about.addOnActivate(&aboutSignal);
 
