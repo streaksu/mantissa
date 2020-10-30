@@ -19,8 +19,8 @@ import translations:         _;
 import uri:                  URIType, guessURIType, normalizeURI;
 import storage:              HistoryStore;
 
-private immutable SAFE_ICON   = "system-lock-screen-symbolic";
-private immutable UNSAFE_ICON = "dialog-warning-symbolic";
+private immutable SAFE_ICON   = "security-high-symbolic";
+private immutable UNSAFE_ICON = "security-low-symbolic";
 
 /**
  * Search bar of the browser.

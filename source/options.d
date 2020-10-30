@@ -19,6 +19,7 @@ import storage:               HistoryStore;
 final class Options : MenuButton {
     private Menu     popup;
     private Menu     historyMenu;
+    private MenuItem privateBrowsing;
     private MenuItem clearTodayHistory;
     private MenuItem clearAllHistory;
     private ImageMenuItem preferences;
@@ -33,6 +34,7 @@ final class Options : MenuButton {
         // Initialize everything and signals.
         popup             = new Menu();
         historyMenu       = popup.appendSubmenu(_("History"));
+        privateBrowsing   = new MenuItem(_("New Private Tab"));
         clearTodayHistory = new MenuItem(_("Clear Today's History"));
         clearAllHistory   = new MenuItem(_("Clear All History"));
         preferences       = new ImageMenuItem(_("Preferences"));
@@ -52,6 +54,7 @@ final class Options : MenuButton {
         // Wire widgets.
         historyMenu.append(clearTodayHistory);
         historyMenu.append(clearAllHistory);
+        popup.append(privateBrowsing);
         popup.append(preferences);
         popup.append(about);
 
@@ -67,6 +70,15 @@ final class Options : MenuButton {
         historyMenu.showAll();
         popup.showAll();
         setPopup(popup);
+    }
+
+    /**
+     * Add callback for when the user requests a private tab.
+     */
+    void addOnPrivateTabRequest(void delegate() callback) {
+        privateBrowsing.addOnActivate((MenuItem) {
+            callback();
+        });
     }
 
     // Called when the user wants to delete the history of the day.

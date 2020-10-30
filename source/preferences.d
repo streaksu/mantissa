@@ -1,7 +1,7 @@
 module preferences;
 
 import gtk.Window:           Window;
-import gtk.Widget:           Widget;
+import gtk.Widget:           Widget, GdkEventFocus;
 import gtk.StackSidebar:     StackSidebar;
 import gtk.Stack:            Stack;
 import gtk.VBox:             VBox;
@@ -72,9 +72,9 @@ final class Preferences : Window {
         sitequirks.setActive(UserSettings.sitequirks);
         sitequirks.addOnClicked(&checkButtonPressed);
         homepage.setText(UserSettings.homepage);
-        homepage.addOnChanged(&entryChanged);
+        homepage.addOnFocusOut(&entryChanged);
         searchEngine.setText(UserSettings.searchEngine);
-        searchEngine.addOnChanged(&entryChanged);
+        searchEngine.addOnFocusOut(&entryChanged);
         cookiePolicy.setActive(UserSettings.cookiePolicy);
         cookiePolicy.addOnChanged(&comboBoxChanged);
         cookieKeep.setActive(UserSettings.cookieKeep);
@@ -159,11 +159,12 @@ final class Preferences : Window {
     }
 
     // Called when the user finishes an entry insertion.
-    private void entryChanged(EditableIF entry) {
+    private bool entryChanged(GdkEventFocus*, Widget entry) {
         const auto text = (cast(Entry)entry).getText();
         if      (entry is homepage)     UserSettings.homepage     = text;
         else if (entry is searchEngine) UserSettings.searchEngine = text;
         else assert(0, "Someone forgot an item! Again!");
+        return false;
     }
 
     // Called when the user selects an option of a combobox.

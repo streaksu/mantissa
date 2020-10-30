@@ -5,7 +5,7 @@ import gtk.Application:        Application;
 import gtk.ApplicationWindow:  ApplicationWindow;
 import gtk.AccelGroup:         AccelGroup;
 import gdk.c.types:            ModifierType;
-import gtk.c.types:            AccelFlags;
+import gtk.c.types:            AccelFlags, ReliefStyle;
 import gobject.DClosure:       DClosure;
 import gtk.HeaderBar:          HeaderBar;
 import gtk.Button:             Button;
@@ -20,6 +20,7 @@ import webkit2.WebView:        LoadEvent, WebView;
 import gio.TlsCertificate:     TlsCertificate, TlsCertificateFlags;
 import gobject.ObjectG:        ObjectG;
 import gobject.ParamSpec:      ParamSpec;
+import customview:             CustomView;
 import options:                Options;
 import searchbar:              SearchBar;
 import tabs:                   Tabs;
@@ -63,6 +64,7 @@ final class Browser : ApplicationWindow {
         urlBar.addOnActivate(&urlBarEnterSignal);
         urlBar.setHexpand(true);
         addTab.addOnClicked(&newTabSignal);
+        options.addOnPrivateTabRequest(&privateTabSignal);
         tabs.addOnSwitchPage(&tabChangedSignal);
 
         // Setup shortcuts.
@@ -84,6 +86,8 @@ final class Browser : ApplicationWindow {
         shortcuts.connect(key, mods, flags, new DClosure(&nextSignal));
         AccelGroup.acceleratorParse("<Control>t", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&newTabSignal));
+        AccelGroup.acceleratorParse("<Control><Shift>n", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&privateTabSignal));
 
         // Pack the window depending on appearance settings.
         if (UserSettings.useHeaderBar) {
@@ -100,6 +104,11 @@ final class Browser : ApplicationWindow {
         } else {
             auto mainBox   = new VBox(false, 0);
             auto headerBox = new HBox(false, 0);
+            previousPage.setRelief(ReliefStyle.NONE);
+            nextPage.setRelief(ReliefStyle.NONE);
+            refresh.setRelief(ReliefStyle.NONE);
+            addTab.setRelief(ReliefStyle.NONE);
+            options.setRelief(ReliefStyle.NONE);
             headerBox.packStart(previousPage, false, false, 0);
             headerBox.packStart(nextPage,     false, false, 0);
             headerBox.packStart(refresh,      false, false, 0);
@@ -119,12 +128,17 @@ final class Browser : ApplicationWindow {
     /**
      * Adds a new tab to the browser, processing the pertinent triggers.
      */
-    void newTab(string uri) {
-        auto view = new WebView();
+    void newTab(string uri, bool isPrivate = false) {
+        auto view = new CustomView(null, isPrivate);
         view.loadUri(uri);
         view.addOnLoadChanged(&loadChangedSignal);
         view.addOnNotify(&titleChangedSignal, "title");
         tabs.addTab(view);
+    }
+
+    // Called when the user requests a private browsing tab.
+    private void privateTabSignal() {
+        newTab(UserSettings.homepage, true);
     }
 
     // Called when the window closes, we will use it to save some settings.
