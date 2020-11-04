@@ -18,4 +18,4 @@ install -d "${DESTDIR}${PREFIX}/share/icons"
 
 install mantissa "${DESTDIR}${PREFIX}/bin"
 install -m 644 resources/entry.desktop "${DESTDIR}${PREFIX}/share/applications/org.streaksu.mantissa.desktop"
-install -m 644 resources/icon.png      "${DESTDIR}${PREFIX}/share/icons/mantissa.png"
+install -m 644 resources/icon.svg      "${DESTDIR}${PREFIX}/share/icons/mantissa.svg"
