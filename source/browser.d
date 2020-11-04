@@ -250,13 +250,14 @@ final class Browser : ApplicationWindow {
     // to the history.
     private void titleChangedSignal(ParamSpec, ObjectG obj) {
         auto sender = cast(WebView)obj;
+        auto title  = sender.getTitle();
 
-        if (sender.getTitle() != "") {
-            HistoryStore.updateOrAdd(sender.getTitle(), sender.getUri());
+        if (title != "" && !sender.isEphemeral()) {
+            HistoryStore.updateOrAdd(title, sender.getUri());
         }
 
         if (sender == tabs.getCurrentWebview()) {
-            setTitle(sender.getTitle());
+            setTitle(title);
             urlBar.setText(sender.getUri()); // for on-site navigation.
         }
     }
