@@ -42,7 +42,8 @@ shared static this() {
             "Appearance" : "Apariencia",
             "Your connection with this resource is secure, your data cannot be stolen"   : "La conexión con este recurso es segura, tus datos no pueden ser robados",
             "Your connection with this resource is unsecure, your data could be stolen!" : "La conexión con este recurso no es segura, tus datos podrían ser robados",
-            "Please search for secure alternatives, or contact the site's webmasters"    : "Por favor busca alternativas seguras, o contacta los dueños del sitio"
+            "Please search for secure alternatives, or contact the site's webmasters"    : "Por favor busca alternativas seguras, o contacta los dueños del sitio",
+            "Find" : "Buscar"
         ];
     } else if (startsWith(locale, "it")) {
         translationDictionary = [
@@ -78,7 +79,8 @@ shared static this() {
             "Appearance" : "Aspetto",
             "Your connection with this resource is secure, your data cannot be stolen"   : "La connessione è sicura, i tuoi dati sono protetti",
             "Your connection with this resource is unsecure, your data could be stolen!" : "La connessione non è sicura, i tuoi dati sono a rischio",
-            "Please search for secure alternatives, or contact the site's webmasters"    : "Cerca delle alternative o contatta l'amministratore del sito"
+            "Please search for secure alternatives, or contact the site's webmasters"    : "Cerca delle alternative o contatta l'amministratore del sito",
+            "Find" : "Trova"
         ];
     }
 }

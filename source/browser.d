@@ -16,11 +16,14 @@ import gtk.Notebook:           Notebook;
 import gtk.HBox:               HBox;
 import gtk.VBox:               VBox;
 import gtk.Image:              IconSize, Image;
+import gtk.EditableIF:         EditableIF;
 import webkit2.WebView:        LoadEvent, WebView;
+import webkit2.FindController: FindController, FindOptions;
 import gio.TlsCertificate:     TlsCertificate, TlsCertificateFlags;
 import gobject.ObjectG:        ObjectG;
 import gobject.ParamSpec:      ParamSpec;
 import customview:             CustomView;
+import findbar:                FindBar;
 import options:                Options;
 import searchbar:              SearchBar;
 import tabs:                   Tabs;
@@ -31,13 +34,14 @@ import storage:                HistoryStore, UserSettings;
  */
 final class Browser : ApplicationWindow {
     private AccelGroup shortcuts;
-    private Button previousPage;
-    private Button nextPage;
-    private Button refresh;
+    private Button     previousPage;
+    private Button     nextPage;
+    private Button     refresh;
     private SearchBar  urlBar;
-    private Button addTab;
+    private Button     addTab;
     private Options    options;
     private Tabs       tabs;
+    private FindBar    find;
 
     /**
      * Constructs the main window with the passed url as only one.
@@ -57,6 +61,7 @@ final class Browser : ApplicationWindow {
         addTab       = new Button("list-add-symbolic", IconSize.SMALL_TOOLBAR);
         options      = new Options(&historyTabSignal);
         tabs         = new Tabs();
+        find         = new FindBar();
 
         previousPage.addOnClicked(&previousSignal);
         nextPage.addOnClicked(&nextSignal);
@@ -65,7 +70,10 @@ final class Browser : ApplicationWindow {
         urlBar.setHexpand(true);
         addTab.addOnClicked(&newTabSignal);
         options.addOnPrivateTabRequest(&privateTabSignal);
+        options.addOnFindRequest(&startFindSignal);
         tabs.addOnSwitchPage(&tabChangedSignal);
+        find.addOnChangedSearch(&findSignal);
+        find.addOnNextRequested(&nextFindSignal);
 
         // Setup shortcuts.
         addAccelGroup(shortcuts);
@@ -88,8 +96,11 @@ final class Browser : ApplicationWindow {
         shortcuts.connect(key, mods, flags, new DClosure(&newTabSignal));
         AccelGroup.acceleratorParse("<Control><Shift>n", key, mods);
         shortcuts.connect(key, mods, flags, new DClosure(&privateTabSignal));
+        AccelGroup.acceleratorParse("<Control>f", key, mods);
+        shortcuts.connect(key, mods, flags, new DClosure(&startFindSignal));
 
         // Pack the window depending on appearance settings.
+        auto mainBox = new VBox(false, 0);
         if (UserSettings.useHeaderBar) {
             auto header = new HeaderBar();
             header.packStart(previousPage);
@@ -100,9 +111,9 @@ final class Browser : ApplicationWindow {
             header.packEnd(addTab);
             header.setShowCloseButton(true);
             setTitlebar(header);
-            add(tabs);
+            mainBox.packStart(tabs, true,  true,  0);
+            mainBox.packStart(find, false, false, 0);
         } else {
-            auto mainBox   = new VBox(false, 0);
             auto headerBox = new HBox(false, 0);
             previousPage.setRelief(ReliefStyle.NONE);
             nextPage.setRelief(ReliefStyle.NONE);
@@ -117,8 +128,9 @@ final class Browser : ApplicationWindow {
             headerBox.packEnd(addTab,         false, false, 0);
             mainBox.packStart(headerBox, false, false, 0);
             mainBox.packStart(tabs,      true,  true,  0);
-            add(mainBox);
+            mainBox.packStart(find,      false, false, 0);
         }
+        add(mainBox);
 
         // Make new tab, show all.
         showAll();
@@ -260,5 +272,26 @@ final class Browser : ApplicationWindow {
             setTitle(title);
             urlBar.setText(sender.getUri()); // for on-site navigation.
         }
+    }
+
+    // Called when the user requests to either open or close the find dialog.
+    private void startFindSignal() {
+        find.setSearchMode(!find.getSearchMode());
+    }
+
+    // Called when it comes to find text on a website.
+    private void findSignal(Entry entry) {
+        auto text = entry.getText();
+        if (text != null) {
+            auto findController = tabs.getCurrentWebview().getFindController();
+            findController.search(text, FindOptions.CASE_INSENSITIVE,
+                findController.getMaxMatchCount());
+        }
+    }
+
+    // Called when it comes to find the next text match on a website.
+    private void nextFindSignal() {
+        auto findController = tabs.getCurrentWebview().getFindController();
+        findController.searchNext();
     }
 }

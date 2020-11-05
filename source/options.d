@@ -20,6 +20,7 @@ final class Options : MenuButton {
     private Menu     popup;
     private Menu     historyMenu;
     private MenuItem privateBrowsing;
+    private MenuItem findText;
     private MenuItem clearTodayHistory;
     private MenuItem clearAllHistory;
     private ImageMenuItem preferences;
@@ -35,6 +36,7 @@ final class Options : MenuButton {
         popup             = new Menu();
         historyMenu       = popup.appendSubmenu(_("History"));
         privateBrowsing   = new MenuItem(_("New Private Tab"));
+        findText          = new MenuItem(_("Find in Website"));
         clearTodayHistory = new MenuItem(_("Clear Today's History"));
         clearAllHistory   = new MenuItem(_("Clear All History"));
         preferences       = new ImageMenuItem(_("Preferences"));
@@ -55,6 +57,7 @@ final class Options : MenuButton {
         historyMenu.append(clearTodayHistory);
         historyMenu.append(clearAllHistory);
         popup.append(privateBrowsing);
+        popup.append(findText);
         popup.append(preferences);
         popup.append(about);
 
@@ -77,6 +80,15 @@ final class Options : MenuButton {
      */
     void addOnPrivateTabRequest(void delegate() callback) {
         privateBrowsing.addOnActivate((MenuItem) {
+            callback();
+        });
+    }
+
+    /**
+     * Add callback for when the user requests find.
+     */
+    void addOnFindRequest(void delegate() callback) {
+        findText.addOnActivate((MenuItem) {
             callback();
         });
     }
