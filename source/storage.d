@@ -6,14 +6,13 @@ import std.file:             exists, mkdirRecurse;
 import std.datetime.systime: Clock, SysTime;
 import glib.Util:            Util;
 import d2sqlite3:            Database, Statement, ResultRange, Row;
-import globals:              programNameRaw;
+import globals:              programDir;
 
 // Database that holds all the settings and data.
 private Database database;
 
 shared static this() {
-    auto userdata  = Util.getUserDataDir();
-    auto storepath = Util.buildFilename([userdata, programNameRaw]);
+    auto storepath = Util.buildFilename([Util.getUserDataDir(), programDir]);
     auto store     = Util.buildFilename([storepath, "globaldata.sqlite"]);
     if (!exists(storepath)) {
         mkdirRecurse(storepath);

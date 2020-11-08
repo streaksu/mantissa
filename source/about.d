@@ -1,7 +1,13 @@
+/**
+ * Functions and utilities for the About dialog.
+ * Supposed to display information about the application
+ * in a user-readable UI item.
+ */
 module about;
 
 import gtk.AboutDialog: AboutDialog;
-import globals; // Everything really.
+import globals:         programIcon, programName, programVersion;
+import translations:    _, translator;
 
 /**
  * About window of the application, meant to show credits, website of the
@@ -10,25 +16,20 @@ import globals; // Everything really.
 final class About : AboutDialog {
     /// Creates a filled about window.
     this() {
-        setLogoIconName(programNameRaw);
-        setProgramName(programName);
+        setLogoIconName(programIcon);
+        setProgramName(_(programName));
         setVersion(programVersion);
-        setComments(programDescription);
-        setCopyright(programCopyright);
-        setWebsite(programWebsite);
-        setAuthors(programAuthors.dup);
-        setArtists(programArtists.dup);
+        setComments(_("A lightweight web browser made with GTK, D and love"));
+        setCopyright(_("Copyright © 2020 Streaksu"));
+        setWebsite("https://github.com/streaksu/mantissa");
+        setAuthors(["Streaksu https://github.com/streaksu"]);
+        setArtists(["Mintsuki https://github.com/mintsuki"]);
+        setTranslatorCredits(translator);
 
-        setLicense(
-            "Distributed under the " ~ programLicense ~ " license.\n" ~
-            "If a copy didn't come with your copy of the software you can\n" ~
-            "grab one at " ~ programLicenseLink
-        );
-
-        addCreditSection("Thanks to", [
-            "The D Foundation https://dlang.org for such a great language",
-            "The GtkD team https://gtkd.org for the useful framework",
-            "The d2sqlite3 team https://github.com/dlang-community/d2sqlite3 for the superb library"
+        addCreditSection(_("Thanks to"), [
+            _("The D Foundation https://dlang.org for such a great language"),
+            _("The GtkD team https://gtkd.org for the useful framework"),
+            _("The d2sqlite3 team https://github.com/dlang-community/d2sqlite3 for the superb library")
         ]);
 
         showAll();

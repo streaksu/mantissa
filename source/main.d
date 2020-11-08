@@ -1,14 +1,12 @@
+/**
+ * Main function and its most immediate utilities.
+ */
 module main;
 
-import std.algorithm:    remove;
-import gio.c.types:      GApplicationFlags;
-import gio.FileIF:       FileIF;
-import gio.Application:  gioApplication = Application;
-import gtk.Application:  Application;
-import gtk.Window:       Window;
-import globals:          programID;
-import browser:          Browser;
-import storage:          UserSettings;
+import gio.FileIF:      FileIF;
+import gio.Application: gioApplication = Application;
+import gtk.Application: Application;
+import browser:         Browser;
 
 /**
  * GTKApplication that represents the browser to the GTK ecosystem.
@@ -19,7 +17,10 @@ final class MainApplication : Application {
      * Will create the object and set up the proper signals.
      */
     this() {
-        super(programID, GApplicationFlags.HANDLES_OPEN); // Handle opening URLs
+        import gio.c.types: ApplicationFlags;
+        import globals:     programID;
+
+        super(programID, ApplicationFlags.HANDLES_OPEN);
         addOnActivate(&activateSignal);
         addOnOpen(&openTabsSignal);
     }
@@ -28,6 +29,8 @@ final class MainApplication : Application {
     // openTabsSignal.
     // In this case we are going to open a new main window.
     private void activateSignal(gioApplication) {
+        import storage: UserSettings;
+
         addWindow(new Browser(this, UserSettings.homepage));
     }
 
@@ -35,19 +38,23 @@ final class MainApplication : Application {
     // activateSignal.
     // In this case, we will want to append tabs to the active window.
     private void openTabsSignal(FileIF[] files, string, gioApplication) {
+        size_t i = 0;
         auto win = cast(Browser)getActiveWindow();
         if (win is null) {
             win = new Browser(this, files[0].getUri);
             addWindow(win);
-            files = files.remove(0);
+            i++;
         }
 
-        foreach (file; files) {
-            win.newTab(file.getUri());
+        for (; i < files.length; i++) {
+            win.newTab(files[i].getUri());
         }
     }
 }
 
+/**
+ * Main function of the program.
+ */
 void main(string[] args) {
     auto app = new MainApplication();
     app.run(args);

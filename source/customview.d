@@ -11,15 +11,14 @@ import webkit2.UserContentFilterStore: UserContentFilterStore, WebKitUserContent
 import storage:                        HistoryStore, UserSettings;
 
 shared static this() {
-    import core.atomic:           atomicLoad;
     import std.file:              exists, mkdirRecurse, write;
     import glib.Util:             Util;
     import glib.Bytes:            Bytes;
     import webkit2.CookieManager: CookieAcceptPolicy, CookiePersistentStorage;
-    import globals:               programNameRaw;
+    import globals:               programDir;
 
     // Path for data storage of the browser.
-    auto storepath = Util.buildFilename([Util.getUserDataDir(), programNameRaw]);
+    auto storepath = Util.buildFilename([Util.getUserDataDir(), programDir]);
 
     // Setup the default webcontext.
     auto cookies = WebContext.getDefault.getCookieManager();
@@ -48,7 +47,7 @@ shared static this() {
             "type": "css-display-none",
             "selector": "img, script"
         }
-    }]`), null, &saveFilter1, null);
+    }]`), null, &saveFilter, cast(void*)&insecureContentFilter);
     filters.save("forceHTTPS", new Bytes(cast(ubyte[])`[{
         "trigger": {
             "url-filter": "http\\:"
@@ -56,23 +55,16 @@ shared static this() {
         "action": {
             "type": "block"
         }
-    }]`), null, &saveFilter2, null);
+    }]`), null, &saveFilter, cast(void*)&forceHTTPSFilter);
 }
 
-private extern(C) void saveFilter1(GObject* obj, GAsyncResult* res, void*) {
+private extern (C) void saveFilter(GObject* obj, GAsyncResult* res, void* data) {
     import core.atomic: atomicStore;
 
+    auto filter = cast(shared(UserContentFilter)*)data;
     auto store  = new UserContentFilterStore(cast(WebKitUserContentFilterStore*)obj, false);
     auto result = new SimpleAsyncResult(cast(GSimpleAsyncResult*)res, false);
-    atomicStore(insecureContentFilter, cast(shared)store.saveFinish(result));
-}
-
-private extern(C) void saveFilter2(GObject* obj, GAsyncResult* res, void*) {
-    import core.atomic: atomicStore;
-
-    auto store  = new UserContentFilterStore(cast(WebKitUserContentFilterStore*)obj, false);
-    auto result = new SimpleAsyncResult(cast(GSimpleAsyncResult*)res, false);
-    atomicStore(forceHTTPSFilter, cast(shared)store.saveFinish(result));
+    atomicStore(*filter, cast(shared)store.saveFinish(result));
 }
 
 private shared UserContentFilter insecureContentFilter;

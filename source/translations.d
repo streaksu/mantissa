@@ -1,5 +1,6 @@
 module translations;
 
+immutable string translator; /// Translator of the app, or null if it was not translated.
 private immutable string[string] translationDictionary;
 
 shared static this() {
@@ -9,6 +10,7 @@ shared static this() {
     const auto locale = fromStringz(setlocale(LC_ALL, ""));
 
     if (startsWith(locale, "es")) {
+        translator = "Streaksu https://github.com/streaksu";
         translationDictionary = [
             "History"                       : "Historial",
             "Clear Today's History"         : "Borrar el historial de hoy",
@@ -46,6 +48,7 @@ shared static this() {
             "Find" : "Buscar"
         ];
     } else if (startsWith(locale, "it")) {
+        translator = "Mintsuki https://github.com/mintsuki";
         translationDictionary = [
             "History"                       : "Cronologia",
             "Clear Today's History"         : "Cancella la cronologia di oggi",
