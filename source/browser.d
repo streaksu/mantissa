@@ -1,3 +1,6 @@
+/**
+ * Main browser window and its utilities.
+ */
 module browser;
 
 import gdk.Event:              Event;
@@ -72,7 +75,8 @@ final class Browser : ApplicationWindow {
         options.addOnPrivateTabRequest(&privateTabSignal);
         options.addOnFindRequest(&startFindSignal);
         tabs.addOnSwitchPage(&tabChangedSignal);
-        find.addOnChangedSearch(&findSignal);
+        find.addOnSearchRequest(&findSignal);
+        find.addOnPreviousRequested(&previousFindSignal);
         find.addOnNextRequested(&nextFindSignal);
 
         // Setup shortcuts.
@@ -280,13 +284,16 @@ final class Browser : ApplicationWindow {
     }
 
     // Called when it comes to find text on a website.
-    private void findSignal(Entry entry) {
-        auto text = entry.getText();
-        if (text != null) {
-            auto findController = tabs.getCurrentWebview().getFindController();
-            findController.search(text, FindOptions.CASE_INSENSITIVE,
-                findController.getMaxMatchCount());
-        }
+    private void findSignal(string searchText) {
+        auto findController = tabs.getCurrentWebview().getFindController();
+        findController.search(searchText, FindOptions.CASE_INSENSITIVE,
+            findController.getMaxMatchCount());
+    }
+
+    // Called when it comes to find the next text match on a website.
+    private void previousFindSignal() {
+        auto findController = tabs.getCurrentWebview().getFindController();
+        findController.searchPrevious();
     }
 
     // Called when it comes to find the next text match on a website.

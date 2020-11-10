@@ -20,7 +20,7 @@ final class Options : MenuButton {
     private Menu     popup;
     private Menu     historyMenu;
     private MenuItem privateBrowsing;
-    private MenuItem findText;
+    private ImageMenuItem findText;
     private MenuItem clearTodayHistory;
     private MenuItem clearAllHistory;
     private ImageMenuItem preferences;
@@ -36,7 +36,7 @@ final class Options : MenuButton {
         popup             = new Menu();
         historyMenu       = popup.appendSubmenu(_("History"));
         privateBrowsing   = new MenuItem(_("New Private Tab"));
-        findText          = new MenuItem(_("Find in Website"));
+        findText          = new ImageMenuItem(_("Find in Website"));
         clearTodayHistory = new MenuItem(_("Clear Today's History"));
         clearAllHistory   = new MenuItem(_("Clear All History"));
         preferences       = new ImageMenuItem(_("Preferences"));
@@ -44,6 +44,8 @@ final class Options : MenuButton {
         historyCallback   = historyChose;
         history           = HistoryStore.history;
 
+        findText.setImage(new Image("edit-find-symbolic", IconSize.MENU));
+        findText.setAlwaysShowImage(true);
         clearTodayHistory.addOnActivate(&deleteTodayHistorySignal);
         clearAllHistory.addOnActivate(&deleteAllHistorySignal);
         preferences.setImage(new Image("preferences-other-symbolic", IconSize.MENU));
