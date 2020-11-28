@@ -235,10 +235,6 @@ final class Browser : ApplicationWindow {
             return;
         }
 
-        urlBar.setText(sender.getUri());
-        previousPage.setSensitive(sender.canGoBack());
-        nextPage.setSensitive(sender.canGoForward());
-
         final switch (event) {
             case LoadEvent.STARTED:
                 urlBar.removeIcon();
@@ -248,6 +244,9 @@ final class Browser : ApplicationWindow {
                 urlBar.setProgressFraction(0.5);
                 break;
             case LoadEvent.COMMITTED:
+                urlBar.setText(sender.getUri());
+                previousPage.setSensitive(sender.canGoBack());
+                nextPage.setSensitive(sender.canGoForward());
                 urlBar.setProgressFraction(0.75);
                 break;
             case LoadEvent.FINISHED:
@@ -274,7 +273,11 @@ final class Browser : ApplicationWindow {
 
         if (sender == tabs.getCurrentWebview()) {
             setTitle(title);
-            urlBar.setText(sender.getUri()); // for on-site navigation.
+
+            // for on-site navigation.
+            previousPage.setSensitive(sender.canGoBack());
+            nextPage.setSensitive(sender.canGoForward());
+            urlBar.setText(sender.getUri());
         }
     }
 

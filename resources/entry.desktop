@@ -15,3 +15,8 @@ Terminal=false
 Type=Application
 Categories=Network;WebBrowser;
 MimeType=text/html;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;application/x-mimearchive;
+Actions=new-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=mantissa

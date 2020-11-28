@@ -20,7 +20,7 @@ final class MainApplication : Application {
         import gio.c.types: ApplicationFlags;
         import globals:     programID;
 
-        super(programID, ApplicationFlags.HANDLES_OPEN);
+        super(programID, ApplicationFlags.HANDLES_OPEN | ApplicationFlags.NON_UNIQUE);
         addOnActivate(&activateSignal);
         addOnOpen(&openTabsSignal);
     }
