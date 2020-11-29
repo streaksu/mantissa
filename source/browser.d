@@ -149,6 +149,8 @@ final class Browser : ApplicationWindow {
         view.loadUri(uri);
         view.addOnLoadChanged(&loadChangedSignal);
         view.addOnNotify(&titleChangedSignal, "title");
+        view.addOnEnterFullscreen(&enterFullscreenSignal);
+        view.addOnLeaveFullscreen(&leaveFullscreenSignal);
         tabs.addTab(view);
     }
 
@@ -259,6 +261,48 @@ final class Browser : ApplicationWindow {
 
         const string id = sender.isLoading ? "process-stop-symbolic" : "view-refresh-symbolic";
         refresh.setImage(new Image(id, IconSize.SMALL_TOOLBAR));
+    }
+
+    // Called when a view request fullscreen.
+    private bool enterFullscreenSignal(WebView view) {
+        import gtk.Dialog:   Dialog, DialogFlags, ResponseType;
+        import gtk.Label:    Label;
+        import translations: _;
+
+        // See if its a main one or not.
+        if (tabs.getCurrentWebview() == view) {
+            tabs.setShowTabs(false);
+            return false;
+        }
+
+        // Ask the user if a non main tab can go fullscreen.
+        auto dialog = new Dialog(
+            _("Tab requested fullscreen"),
+            this,
+            DialogFlags.DESTROY_WITH_PARENT,
+            [_("Allow"), _("Deny permission")],
+            [ResponseType.ACCEPT, ResponseType.CLOSE]
+        );
+        auto cont = dialog.getContentArea();
+        cont.add(new Label(_("A tab different than the active one asked for permission to go fullscreen")));
+        cont.add(new Label(_("Do you want to switch to it and allow it? Or block the request")));
+        dialog.showAll();
+
+        const auto response = dialog.run();
+        dialog.destroy();
+        if (response == ResponseType.ACCEPT) {
+            tabs.setCurrentPage(view);
+            tabs.setShowTabs(false);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    // Called when a view request to exit fullscreen.
+    private bool leaveFullscreenSignal(WebView) {
+        tabs.setShowTabs(tabs.getNPages() != 0);
+        return false;
     }
 
     // Called when the title changes, that we will use as signal to add

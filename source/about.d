@@ -6,8 +6,6 @@
 module about;
 
 import gtk.AboutDialog: AboutDialog;
-import globals:         programIcon, programName, programVersion;
-import translations:    _, translator;
 
 /**
  * About window of the application, meant to show credits, website of the
@@ -16,6 +14,9 @@ import translations:    _, translator;
 final class About : AboutDialog {
     /// Creates a filled about window.
     this() {
+        import globals:      programIcon, programName, programVersion;
+        import translations: _, translator;
+
         setLogoIconName(programIcon);
         setProgramName(_(programName));
         setVersion(programVersion);
