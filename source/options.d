@@ -1,6 +1,6 @@
 module options;
 
-import std.algorithm.mutation: remove;
+import std.algorithm.mutation: arrRemove = remove;
 import std.datetime.systime:   Clock, SysTime;
 import gtk.MenuButton:         MenuButton;
 import gtk.Menu:               Menu;
@@ -98,8 +98,9 @@ final class Options : MenuButton {
     private void deleteTodayHistorySignal(MenuItem) {
         const auto curr = Clock.currTime;
         for (size_t i = 0; i < history.length; i++) {
-            if (curr.day == history[i].time.day) {
-                history = history.remove(i);
+            const HistoryURI item = history[i];
+            if (curr.day == item.time.day) {
+                history = cast(shared)arrRemove(cast(HistoryURI[])history, i);
                 i--;
             }
         }

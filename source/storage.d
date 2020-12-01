@@ -23,6 +23,7 @@ shared bool   useSiteQuirks;    /// Whether the user enables sitequirks.
 shared string homepage;         /// URI of the homepage.
 shared int    cookiePolicy;     /// Cookie policy of the browser.
 shared string searchEngine;     /// URI of the search engine to use.
+shared string userAgent;        /// User agent of the browser.
 shared bool   keepCookies;      /// Whether the user wants to keep cookies.
 shared bool   forceHTTPS;       /// Force HTTPs or not.
 shared bool   insecureContent;  /// Allow insecure content or not.
@@ -30,7 +31,7 @@ shared bool   useHeaderBar;     /// Use the GTK header bar for the UI.
 shared int    mainWindowWidth;  /// Expected width of the main window.
 shared int    mainWindowHeight; /// Expected height of the main window.
 
-__gshared HistoryURI[] history; /// History of the browser.
+shared HistoryURI[] history; /// History of the browser.
 
 private Database database; // Holds all the settings and data.
 
@@ -76,6 +77,8 @@ shared static this() {
     cookiePolicy = !items.empty ? to!int(items.front()["extra"].as!string) : 2;
     items = database.execute("SELECT * FROM usersettings WHERE setting == 'searchEngine'");
     searchEngine = !items.empty ? items.front()["extra"].as!string : "https://duckduckgo.com/search?q=";
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'userAgent'");
+    userAgent = !items.empty ? items.front()["extra"].as!string : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15";
     items = database.execute("SELECT * FROM usersettings WHERE setting == 'cookieKeep'");
     keepCookies = !items.empty ? items.front()["enabled"].as!bool : true;
     items = database.execute("SELECT * FROM usersettings WHERE setting == 'forceHTTPS'");
@@ -100,7 +103,7 @@ shared static this() {
         result.put(HistoryURI(title, uri, bookmark, time));
     }
 
-    history = result.data;
+    history = cast(shared)result.data;
 }
 
 shared static ~this() {
@@ -117,6 +120,7 @@ shared static ~this() {
     stmt.inject("homepage",         false,           homepage);
     stmt.inject("cookiePolicy",     false,           to!string(cookiePolicy));
     stmt.inject("searchEngine",     false,           searchEngine);
+    stmt.inject("userAgent",        false,           userAgent);
     stmt.inject("cookieKeep",       keepCookies,     "Placeholder");
     stmt.inject("forceHTTPS",       forceHTTPS,      "Placeholder");
     stmt.inject("insecureContent",  insecureContent, "Placeholder");

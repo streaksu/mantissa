@@ -101,6 +101,8 @@ class CustomView : WebView {
         settings.setEnablePageCache(storage.pageCache);
         settings.setEnableJavascript(storage.useJavaScript);
         settings.setEnableSiteSpecificQuirks(storage.useSiteQuirks);
+        settings.setUserAgent(storage.userAgent);
+
         if (!storage.insecureContent) {
             content.addFilter(cast()insecureContentFilter);
         }

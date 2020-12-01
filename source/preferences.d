@@ -11,10 +11,7 @@ import gtk.Button:           Button;
 import gtk.Label:            Label;
 import gtk.Entry:            Entry, InputPurpose;
 import gtk.EditableIF:       EditableIF;
-import gtk.ComboBox:         ComboBox;
-import gtk.ListStore:        ListStore;
-import gobject.c.types:      GType;
-import gtk.CellRendererText: CellRendererText;
+import gtk.ComboBoxText:     ComboBoxText;
 import translations:         _;
 import storage; // Almost everything really.
 
@@ -31,7 +28,8 @@ final class Preferences : Window {
     private CheckButton  sitequirks;
     private Entry        homepage;
     private Entry        searchEngine;
-    private ComboBox     cookiePolicy;
+    private ComboBoxText userAgent;
+    private ComboBoxText cookiePolicy;
     private CheckButton  cookieKeep;
     private CheckButton  forceHTTPS;
     private CheckButton  insecureContent;
@@ -58,7 +56,8 @@ final class Preferences : Window {
         sitequirks      = new CheckButton(_("Enable Site-Specific Quirks"));
         homepage        = new Entry();
         searchEngine    = new Entry();
-        cookiePolicy    = new ComboBox(false);
+        userAgent       = new ComboBoxText(true);
+        cookiePolicy    = new ComboBoxText(false);
         cookieKeep      = new CheckButton(_("Keep Cookies Between Sessions"));
         forceHTTPS      = new CheckButton(_("Force HTTPS Navigation"));
         insecureContent = new CheckButton(_("Allow Insecure Content On HTTPS"));
@@ -75,7 +74,7 @@ final class Preferences : Window {
         homepage.addOnFocusOut(&entryChanged);
         searchEngine.setText(storage.searchEngine);
         searchEngine.addOnFocusOut(&entryChanged);
-        cookiePolicy.setActive(storage.cookiePolicy);
+        userAgent.addOnChanged(&comboBoxChanged);
         cookiePolicy.addOnChanged(&comboBoxChanged);
         cookieKeep.setActive(storage.keepCookies);
         cookieKeep.addOnClicked(&checkButtonPressed);
@@ -116,22 +115,34 @@ final class Preferences : Window {
         cookiePolicyLabel.setXalign(0);
         cookiePolicyBox.packStart(cookiePolicyLabel, false, false, 0);
         cookiePolicyBox.packStart(cookiePolicy,      true,  true,  0);
-        auto store = new ListStore([GType.STRING]);
-        auto iter1 = store.createIter();
-        auto iter2 = store.createIter();
-        auto iter3 = store.createIter();
-        store.setValue(iter1, 0, _("Accept all cookies"));
-        store.setValue(iter2, 0, _("Reject all cookies"));
-        store.setValue(iter3, 0, _("Accept only cookies set by the main site"));
-        cookiePolicy.setModel(store);
+        cookiePolicy.appendText(_("Accept all cookies"));
+        cookiePolicy.appendText(_("Reject all cookies"));
+        cookiePolicy.appendText(_("Accept only cookies set by the main site"));
+        cookiePolicy.setActive(storage.cookiePolicy);
         cookiePolicy.showAll();
-        auto col = new CellRendererText();
-        cookiePolicy.packStart(col, true);
-        cookiePolicy.addAttribute(col, "text", 0);
+
+        auto userAgentBox   = new HBox(false, 10);
+        auto userAgentLabel = new Label(_("Cookie Policy"));
+        userAgentLabel.setWidthChars(15);
+        userAgentLabel.setXalign(0);
+        userAgentBox.packStart(userAgentLabel, false, false, 0);
+        userAgentBox.packStart(userAgent,      true,  true,  0);
+        userAgent.appendText("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15");
+        userAgent.appendText("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+        userAgent.appendText("Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)");
+        auto entry = cast(Entry)userAgent.getChild();
+        entry.addOnFocusOut((GdkEventFocus*, Widget entry) {
+            auto ent = cast(Entry)entry;
+            storage.userAgent = ent.getText();
+            return false;
+        });
+        entry.setText(storage.userAgent);
+        userAgent.showAll();
 
         auto browserSettings = new VBox(false, 10);
         browserSettings.packStart(homepageBox,     false, false, 10);
         browserSettings.packStart(searchEngineBox, false, false, 10);
+        browserSettings.packStart(userAgentBox,    false, false, 10);
         browserSettings.packStart(cookiePolicyBox, false, false, 10);
         browserSettings.packStart(cookieKeep,      false, false, 10);
         browserSettings.packStart(forceHTTPS,      false, false, 10);
@@ -165,12 +176,21 @@ final class Preferences : Window {
         const auto text = (cast(Entry)entry).getText();
         if      (entry is homepage)     storage.homepage     = text;
         else if (entry is searchEngine) storage.searchEngine = text;
+        else if (entry is userAgent)    storage.userAgent    = text;
         else assert(0, "Someone forgot an item! Again!");
         return false;
     }
 
     // Called when the user selects an option of a combobox.
-    private void comboBoxChanged(ComboBox) {
-        storage.cookiePolicy = cookiePolicy.getActive();
+    private void comboBoxChanged(ComboBoxText box) {
+        if (box is userAgent) {
+            auto entry = cast(Entry)userAgent.getChild();
+            entry.setText(userAgent.getActiveText());
+            storage.userAgent = entry.getText();
+        } else if (box is cookiePolicy) { 
+            storage.cookiePolicy = cookiePolicy.getActive();
+        } else {
+            assert(0, "Someone forgot an item!");
+        }
     }
 }
