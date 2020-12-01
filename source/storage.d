@@ -76,7 +76,7 @@ shared static this() {
     items = database.execute("SELECT * FROM usersettings WHERE setting == 'cookiePolicy'");
     cookiePolicy = !items.empty ? to!int(items.front()["extra"].as!string) : 2;
     items = database.execute("SELECT * FROM usersettings WHERE setting == 'searchEngine'");
-    searchEngine = !items.empty ? items.front()["extra"].as!string : "https://duckduckgo.com/search?q=";
+    searchEngine = !items.empty ? items.front()["extra"].as!string : "https://duckduckgo.com/?q=";
     items = database.execute("SELECT * FROM usersettings WHERE setting == 'userAgent'");
     userAgent = !items.empty ? items.front()["extra"].as!string : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15";
     items = database.execute("SELECT * FROM usersettings WHERE setting == 'cookieKeep'");
@@ -130,7 +130,7 @@ shared static ~this() {
 
     database.execute("DELETE FROM history");
     stmt = database.prepare(
-        "INSERT INTO history (title, uri, bookmark, time)
+        "REPLACE INTO history (title, uri, bookmark, time)
         VALUES (:title, :uri, :bookmark, :time)"
     );
     foreach (item; history) {
