@@ -4,7 +4,7 @@ import std.string:           fromStringz, indexOf;
 import std.typecons:         No;
 import gtk.c.types:          EntryIconPosition, DialogFlags, ResponseType;
 import gobject.c.types:      GType;
-import gtk.Entry:            Entry;
+import gtk.Entry:            Entry, InputPurpose;
 import gtk.EntryCompletion:  GtkEntryCompletion, EntryCompletion;
 import gtk.Window:           Window;
 import gtk.EditableIF:       EditableIF;
@@ -17,7 +17,7 @@ import gtk.Label:            Label;
 import gtk.Image:            Image, IconSize;
 import translations:         _;
 import uri:                  URIType, guessURIType, normalizeURI;
-import storage:              HistoryStore;
+import storage:              history;
 
 private immutable SAFE_ICON   = "security-high-symbolic";
 private immutable UNSAFE_ICON = "security-low-symbolic";
@@ -45,8 +45,7 @@ final class SearchBar : Entry {
         completion.setTextColumn(0);
         completion.setMatchFunc(&match, cast(void*)this, null);
 
-        const auto history = HistoryStore.history;
-        foreach (item; history) {
+        foreach_reverse (item; history) {
             auto iter = completionList.createIter();
             completionList.setValue(iter, 0, item.title);
             completionList.setValue(iter, 1, item.uri);
@@ -56,6 +55,7 @@ final class SearchBar : Entry {
         setCompletion(completion);
         addOnChanged(&preeditChangedSignal);
         addOnIconPress(&iconPressSignal);
+        setInputPurpose(InputPurpose.URL);
     }
 
     /**

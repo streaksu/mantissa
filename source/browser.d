@@ -3,6 +3,7 @@
  */
 module browser;
 
+import std.datetime.systime:   Clock;
 import gdk.Event:              Event;
 import gtk.Application:        Application;
 import gtk.ApplicationWindow:  ApplicationWindow;
@@ -30,7 +31,7 @@ import findbar:                FindBar;
 import options:                Options;
 import searchbar:              SearchBar;
 import tabs:                   Tabs;
-import storage:                HistoryStore, UserSettings;
+import storage; // Almost everything really.
 
 /**
  * Main browser window.
@@ -53,7 +54,7 @@ final class Browser : ApplicationWindow {
         // Init ourselves.
         super(app);
         addOnDelete(&closeSignal);
-        setDefaultSize(UserSettings.mainWindowWidth, UserSettings.mainWindowHeight);
+        setDefaultSize(mainWindowWidth, mainWindowHeight);
 
         // Initialize buttons and data.
         shortcuts    = new AccelGroup();
@@ -105,7 +106,7 @@ final class Browser : ApplicationWindow {
 
         // Pack the window depending on appearance settings.
         auto mainBox = new VBox(false, 0);
-        if (UserSettings.useHeaderBar) {
+        if (useHeaderBar) {
             auto header = new HeaderBar();
             header.packStart(previousPage);
             header.packStart(nextPage);
@@ -156,15 +157,15 @@ final class Browser : ApplicationWindow {
 
     // Called when the user requests a private browsing tab.
     private void privateTabSignal() {
-        newTab(UserSettings.homepage, true);
+        newTab(homepage, true);
     }
 
     // Called when the window closes, we will use it to save some settings.
     private bool closeSignal(Event, Widget) {
         int width, height; // @suppress(dscanner.suspicious.unmodified)
         getSize(width, height);
-        UserSettings.mainWindowWidth  = width;
-        UserSettings.mainWindowHeight = height;
+        mainWindowWidth  = width;
+        mainWindowHeight = height;
         destroy();
         return true;
     }
@@ -212,7 +213,7 @@ final class Browser : ApplicationWindow {
 
     // New tab button signal.
     private void newTabSignal(Button) {
-        newTab(UserSettings.homepage);
+        newTab(homepage);
     }
 
     // What happens when the main browser tab is changed.
@@ -312,9 +313,19 @@ final class Browser : ApplicationWindow {
         auto title  = sender.getTitle();
 
         if (title != "" && !sender.isEphemeral()) {
-            HistoryStore.updateOrAdd(title, sender.getUri());
+            for (size_t i = 0; i < history.length; i++) {
+                if (history[i].title == title) {
+                    history[i].title      = title;
+                    history[i].uri        = sender.getUri();
+                    history[i].isBookmark = false;
+                    cast()history[i].time = Clock.currTime;
+                    goto doneAdding;
+                }
+            }
+            history ~= HistoryURI(title, sender.getUri(), false, Clock.currTime);
         }
 
+doneAdding:
         if (sender == tabs.getCurrentWebview()) {
             setTitle(title);
 

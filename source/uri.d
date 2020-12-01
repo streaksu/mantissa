@@ -1,8 +1,6 @@
 module uri;
 
-import std.file:   exists;
 import std.string: startsWith, indexOf;
-import storage:    UserSettings;
 
 /// Types a URI can be.
 enum URIType {
@@ -20,6 +18,8 @@ enum URIType {
  * `normalizeURI`.
  */
 URIType guessURIType(string uri) {
+    import std.file: exists;
+
     if (exists(uri) || startsWith(uri, "file://")) {
         return URIType.LocalFile;
     } else if (startsWith(uri, "http://") || startsWith(uri, "https://") ||
@@ -43,13 +43,15 @@ unittest {
  * type.
  */
 string normalizeURI(string uri, URIType type) {
+    import storage: searchEngine;
+
     final switch (type) {
         case URIType.LocalFile:
             return "file://" ~ uri;
         case URIType.WebResource:
             return startsWith(uri, "http") ? uri : "https://" ~ uri;
         case URIType.Search:
-            return UserSettings.searchEngine ~ uri;
+            return searchEngine ~ uri;
     }
 }
 

@@ -8,7 +8,7 @@ import webkit2.WebView:                WebView;
 import webkit2.WebContext:             WebContext;
 import webkit2.UserContentFilter:      UserContentFilter;
 import webkit2.UserContentFilterStore: UserContentFilterStore, WebKitUserContentFilterStore;
-import storage:                        HistoryStore, UserSettings;
+import storage;
 
 shared static this() {
     import std.file:              exists, mkdirRecurse, write;
@@ -22,8 +22,8 @@ shared static this() {
 
     // Setup the default webcontext.
     auto cookies = WebContext.getDefault.getCookieManager();
-    cookies.setAcceptPolicy(cast(CookieAcceptPolicy)UserSettings.cookiePolicy);
-    if (UserSettings.cookieKeep) {
+    cookies.setAcceptPolicy(cast(CookieAcceptPolicy)storage.cookiePolicy);
+    if (storage.keepCookies) {
         auto store = Util.buildFilename([storepath, "cookies.sqlite"]);
 
         if (!exists(store)) {
@@ -97,14 +97,14 @@ class CustomView : WebView {
         // Wire the user settings.
         auto settings = getSettings();
         auto content  = getUserContentManager();
-        settings.setEnableSmoothScrolling(UserSettings.smoothScrolling);
-        settings.setEnablePageCache(UserSettings.pageCache);
-        settings.setEnableJavascript(UserSettings.javascript);
-        settings.setEnableSiteSpecificQuirks(UserSettings.sitequirks);
-        if (!UserSettings.insecureContent) {
+        settings.setEnableSmoothScrolling(storage.smoothScrolling);
+        settings.setEnablePageCache(storage.pageCache);
+        settings.setEnableJavascript(storage.useJavaScript);
+        settings.setEnableSiteSpecificQuirks(storage.useSiteQuirks);
+        if (!storage.insecureContent) {
             content.addFilter(cast()insecureContentFilter);
         }
-        if (UserSettings.forceHTTPS) {
+        if (storage.forceHTTPS) {
             content.addFilter(cast()forceHTTPSFilter);
         }
     }

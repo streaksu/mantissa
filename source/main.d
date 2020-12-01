@@ -29,9 +29,9 @@ final class MainApplication : Application {
     // openTabsSignal.
     // In this case we are going to open a new main window.
     private void activateSignal(gioApplication) {
-        import storage: UserSettings;
+        import storage: homepage;
 
-        addWindow(new Browser(this, UserSettings.homepage));
+        addWindow(new Browser(this, homepage));
     }
 
     // When some URLs are to be opened, this is called instead of

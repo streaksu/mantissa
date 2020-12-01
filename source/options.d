@@ -1,17 +1,18 @@
 module options;
 
-import std.datetime.systime:  Clock, SysTime;
-import gtk.MenuButton:        MenuButton;
-import gtk.Menu:              Menu;
-import gtk.MenuItem:          MenuItem;
-import gtk.ImageMenuItem:     ImageMenuItem;
-import gtk.SeparatorMenuItem: SeparatorMenuItem;
-import gtk.Image:             Image, IconSize;
-import translations:          _;
-import about:                 About;
-import preferences:           Preferences;
-import globals:               programName;
-import storage:               HistoryStore;
+import std.algorithm.mutation: remove;
+import std.datetime.systime:   Clock, SysTime;
+import gtk.MenuButton:         MenuButton;
+import gtk.Menu:               Menu;
+import gtk.MenuItem:           MenuItem;
+import gtk.ImageMenuItem:      ImageMenuItem;
+import gtk.SeparatorMenuItem:  SeparatorMenuItem;
+import gtk.Image:              Image, IconSize;
+import translations:           _;
+import about:                  About;
+import preferences:            Preferences;
+import globals:                programName;
+import storage:                HistoryURI, history;
 
 /**
  * Options button for the headerbar.
@@ -26,7 +27,6 @@ final class Options : MenuButton {
     private ImageMenuItem preferences;
     private ImageMenuItem about;
     private void delegate(string) historyCallback;
-    private HistoryStore.HistoryURI[] history;
 
     /**
      * Constructs the widget.
@@ -42,7 +42,6 @@ final class Options : MenuButton {
         preferences       = new ImageMenuItem(_("Preferences"));
         about             = new ImageMenuItem(_("About Mantissa"));    
         historyCallback   = historyChose;
-        history           = HistoryStore.history;
 
         findText.setImage(new Image("edit-find-symbolic", IconSize.MENU));
         findText.setAlwaysShowImage(true);
@@ -98,18 +97,17 @@ final class Options : MenuButton {
     // Called when the user wants to delete the history of the day.
     private void deleteTodayHistorySignal(MenuItem) {
         const auto curr = Clock.currTime;
-        foreach (uri; history) {
-            if (curr.day == uri.time.day) {
-                HistoryStore.deleteEntry(uri);
+        for (size_t i = 0; i < history.length; i++) {
+            if (curr.day == history[i].time.day) {
+                history = history.remove(i);
+                i--;
             }
         }
     }
 
     // Called when the user wants to delete ALL history.
     private void deleteAllHistorySignal(MenuItem) {
-        foreach (uri; history) {
-            HistoryStore.deleteEntry(uri);
-        }
+        history = [];
     }
 
     // Called when the preferences item is deemed active.

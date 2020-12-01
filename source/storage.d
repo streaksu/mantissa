@@ -8,16 +8,39 @@ import glib.Util:            Util;
 import d2sqlite3:            Database, Statement, ResultRange, Row;
 import globals:              programDir;
 
-// Database that holds all the settings and data.
-private Database database;
+/// Struct representing item of the history.
+struct HistoryURI {
+    string  title;      /// Title of the resource.
+    string  uri;        /// URI of the resource.
+    bool    isBookmark; /// Whether the resource is bookmarked.
+    SysTime time;       /// Time of visit (given by SysTime.toSimpleString).
+}
+
+shared bool   smoothScrolling;  /// Whether the user wants smooth scrolling.
+shared bool   pageCache;        /// Whether the user wants page caching.
+shared bool   useJavaScript;    /// Whether the user wants to enable js.
+shared bool   useSiteQuirks;    /// Whether the user enables sitequirks.
+shared string homepage;         /// URI of the homepage.
+shared int    cookiePolicy;     /// Cookie policy of the browser.
+shared string searchEngine;     /// URI of the search engine to use.
+shared bool   keepCookies;      /// Whether the user wants to keep cookies.
+shared bool   forceHTTPS;       /// Force HTTPs or not.
+shared bool   insecureContent;  /// Allow insecure content or not.
+shared bool   useHeaderBar;     /// Use the GTK header bar for the UI.
+shared int    mainWindowWidth;  /// Expected width of the main window.
+shared int    mainWindowHeight; /// Expected height of the main window.
+
+__gshared HistoryURI[] history; /// History of the browser.
+
+private Database database; // Holds all the settings and data.
 
 shared static this() {
+    // Open database and prepare it.
     auto storepath = Util.buildFilename([Util.getUserDataDir(), programDir]);
     auto store     = Util.buildFilename([storepath, "globaldata.sqlite"]);
     if (!exists(storepath)) {
         mkdirRecurse(storepath);
     }
-
     database = Database(store);
 
     database.run(
@@ -36,153 +59,82 @@ shared static this() {
             time     TEXT NOT NULL
         )"
     );
+
+    // Fill the properties.
+    ResultRange items;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'smoothScrolling'");
+    smoothScrolling = !items.empty ? items.front()["enabled"].as!bool : true;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'pageCache'");
+    pageCache = !items.empty ? items.front()["enabled"].as!bool : true;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'javascript'");
+    useJavaScript = !items.empty ? items.front()["enabled"].as!bool : true;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'sitequirks'");
+    useSiteQuirks = !items.empty ? items.front()["enabled"].as!bool : true;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'homepage'");
+    homepage = !items.empty ? items.front()["extra"].as!string : "https://dlang.org";
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'cookiePolicy'");
+    cookiePolicy = !items.empty ? to!int(items.front()["extra"].as!string) : 2;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'searchEngine'");
+    searchEngine = !items.empty ? items.front()["extra"].as!string : "https://duckduckgo.com/search?q=";
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'cookieKeep'");
+    keepCookies = !items.empty ? items.front()["enabled"].as!bool : true;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'forceHTTPS'");
+    forceHTTPS = !items.empty ? items.front()["enabled"].as!bool : true;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'insecureContent'");
+    insecureContent = !items.empty ? items.front()["enabled"].as!bool : false;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'useHeaderBar'");
+    useHeaderBar = !items.empty ? items.front()["enabled"].as!bool : true;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'mainWindowWidth'");
+    mainWindowWidth = !items.empty ? to!int(items.front()["extra"].as!string) : 1366;
+    items = database.execute("SELECT * FROM usersettings WHERE setting == 'mainWindowHeight'");
+    mainWindowHeight = !items.empty ? to!int(items.front()["extra"].as!string) : 768;
+
+    auto result = appender!(HistoryURI[]);
+    items = database.execute("SELECT * FROM history");
+
+    foreach (Row row; items) {
+        const auto title    = row["title"].as!string;
+        const auto uri      = row["uri"].as!string;
+        const auto bookmark = row["bookmark"].as!bool;
+        const auto time     = SysTime.fromSimpleString(row["time"].as!string);
+        result.put(HistoryURI(title, uri, bookmark, time));
+    }
+
+    history = result.data;
 }
 
 shared static ~this() {
+    // Save user settings and history.
+    Statement stmt;
+    stmt = database.prepare(
+        "REPLACE INTO usersettings (setting, enabled, extra)
+        VALUES (:settings, :enabled, :extra)"
+    );
+    stmt.inject("smoothScrolling",  smoothScrolling, "Placeholder");
+    stmt.inject("pageCache",        pageCache,       "Placeholder");
+    stmt.inject("javascript",       useJavaScript,   "Placeholder");
+    stmt.inject("sitequirks",       useSiteQuirks,   "Placeholder");
+    stmt.inject("homepage",         false,           homepage);
+    stmt.inject("cookiePolicy",     false,           to!string(cookiePolicy));
+    stmt.inject("searchEngine",     false,           searchEngine);
+    stmt.inject("cookieKeep",       keepCookies,     "Placeholder");
+    stmt.inject("forceHTTPS",       forceHTTPS,      "Placeholder");
+    stmt.inject("insecureContent",  insecureContent, "Placeholder");
+    stmt.inject("useHeaderBar",     useHeaderBar,    "Placeholder");
+    stmt.inject("mainWindowWidth",  false,           to!string(mainWindowWidth));
+    stmt.inject("mainWindowHeight", false,           to!string(mainWindowHeight));
+
+    database.execute("DELETE FROM history");
+    stmt = database.prepare(
+        "INSERT INTO history (title, uri, bookmark, time)
+        VALUES (:title, :uri, :bookmark, :time)"
+    );
+    foreach (item; history) {
+        auto time = (cast()item.time).toSimpleString();
+        stmt.inject(item.title, item.uri, item.isBookmark, time);
+    }
+
+    // Close database.
+    stmt.finalize();
     database.close();
-}
-
-// Creates a field for UserSettings with a getter and setter.
-private mixin template UserSetting(string setting, T, string defaultValue) {
-    static if (is(T == bool)) {
-        mixin("static @property bool " ~ setting ~ "() {
-            auto items = database.execute(
-                \"SELECT * FROM usersettings WHERE setting == '" ~ setting ~ "'\"
-            );
-            if (!items.empty) {
-                return items.front()[\"enabled\"].as!bool;
-            }
-
-            return " ~ defaultValue ~ ";
-        }");
-        mixin("static @property void " ~ setting ~ "(bool value) {
-            auto statement = database.prepare(
-                \"REPLACE INTO usersettings (setting, enabled, extra)
-                VALUES (:settings, :enabled, :extra)\"
-            );
-            statement.inject(\"" ~ setting ~ "\", value, \"Placeholder\");
-        }");
-    } else static if (is(T == string)) {
-        mixin("static @property string " ~ setting ~ "() {
-            auto items = database.execute(
-                \"SELECT * FROM usersettings WHERE setting == '" ~ setting ~ "'\"
-            );
-            if (!items.empty) {
-                return items.front()[\"extra\"].as!string;
-            }
-
-            return \"" ~ defaultValue ~ "\";
-        }");
-        mixin("static @property void " ~ setting ~ "(string value) {
-            auto statement = database.prepare(
-                \"REPLACE INTO usersettings (setting, enabled, extra)
-                VALUES (:settings, :enabled, :extra)\"
-            );
-            statement.inject(\"" ~ setting ~ "\", false, value);
-        }");
-    } else static if (is(T == int)) {
-        mixin("static @property int " ~ setting ~ "() {
-            auto items = database.execute(
-                \"SELECT * FROM usersettings WHERE setting == '" ~ setting ~ "'\"
-            );
-            if (!items.empty) {
-                return to!int(items.front()[\"extra\"].as!string);
-            }
-
-            return " ~ defaultValue ~ ";
-        }");
-        mixin("static @property void " ~ setting ~ "(int value) {
-            auto statement = database.prepare(
-                \"REPLACE INTO usersettings (setting, enabled, extra)
-                VALUES (:settings, :enabled, :extra)\"
-            );
-            statement.inject(\"" ~ setting ~ "\", false, to!string(value));
-        }");
-    } else {
-        static assert (0, "Invalid UserSetting type");
-    }
-}
-
-/**
- * Static class that wraps the user settings.
- */
-struct UserSettings {
-    mixin UserSetting!("smoothScrolling",  bool,   "true");
-    mixin UserSetting!("pageCache",        bool,   "true");
-    mixin UserSetting!("javascript",       bool,   "true");
-    mixin UserSetting!("sitequirks",       bool,   "true");
-    mixin UserSetting!("homepage",         string, "https://dlang.org");
-    mixin UserSetting!("cookiePolicy",     int,    "2");
-    mixin UserSetting!("searchEngine",     string, "https://duckduckgo.com/search?q=");
-    mixin UserSetting!("cookieKeep",       bool,   "true");
-    mixin UserSetting!("forceHTTPS",       bool,   "true");
-    mixin UserSetting!("insecureContent",  bool,   "true");
-    mixin UserSetting!("useHeaderBar",     bool,   "true");
-    mixin UserSetting!("mainWindowWidth",  int,    "1366");
-    mixin UserSetting!("mainWindowHeight", int,    "768");
-}
-
-/**
- * Methods to retrieve and manipulate history data.
- */
-struct HistoryStore {
-    /// Data that represents a URI in the history.
-    struct HistoryURI {
-        string  title;      /// Title of the resource.
-        string  uri;        /// URI of the resource.
-        bool    isBookmark; /// Whether the resource is bookmarked.
-        SysTime time;       /// Time of visit (given by SysTime.toSimpleString).
-    }
-
-    /**
-     * Retrieves the history stored by the browser.
-     */
-    @property static HistoryURI[] history() {
-        auto result = appender!(HistoryURI[]);
-        auto items  = database.execute("SELECT * FROM history");
-
-        foreach (Row row; items) {
-            const auto title    = row["title"].as!string;
-            const auto uri      = row["uri"].as!string;
-            const auto bookmark = row["bookmark"].as!bool;
-            const auto time     = SysTime.fromSimpleString(row["time"].as!string);
-            result.put(HistoryURI(title, uri, bookmark, time));
-        }
-
-        return result.data;
-    }
-
-    /**
-     * Update the contents of a given history element.
-     * If not present, the element will be added.
-     *
-     * This call assumes the access time of the resource to be Clock.currTime.
-     */
-    static void updateOrAdd(string title, string uri) {
-        updateOrAdd(HistoryURI(title, uri, false, Clock.currTime));
-    }
-
-    /**
-     * Update the contents of a given history element.
-     * If not present, the element will be added.
-     */
-    static void updateOrAdd(HistoryURI item) {
-        auto statement = database.prepare(
-            "REPLACE INTO history (title, uri, bookmark, time)
-            VALUES (:title, :uri, :bookmark, :time)"
-        );
-        auto time = item.time.toSimpleString();
-        statement.inject(item.title, item.uri, item.isBookmark, time);
-    }
-
-    /**
-     * Remove the requested entry.
-     */
-    static void deleteEntry(HistoryURI item) {
-        auto statement = database.prepare(
-            "DELETE FROM history
-            WHERE uri = :uri"
-        );
-        statement.inject(item.uri);
-    }
 }
