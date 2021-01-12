@@ -17,7 +17,7 @@ import gtk.Label:            Label;
 import gtk.Image:            Image, IconSize;
 import translations:         _;
 import uri:                  URIType, guessURIType, normalizeURI;
-import storage.history:      history;
+import storage.history:      getHistory;
 
 private immutable SAFE_ICON   = "security-high-symbolic";
 private immutable UNSAFE_ICON = "security-low-symbolic";
@@ -45,6 +45,7 @@ final class SearchBar : Entry {
         completion.setTextColumn(0);
         completion.setMatchFunc(&match, cast(void*)this, null);
 
+        auto history = getHistory();
         foreach_reverse (item; history) {
             auto iter = completionList.createIter();
             completionList.setValue(iter, 0, item.title);

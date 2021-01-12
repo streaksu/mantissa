@@ -31,8 +31,8 @@ import findbar:                FindBar;
 import options:                Options;
 import searchbar:              SearchBar;
 import tabs:                   Tabs;
-import storage.history:        history, HistoryURI;
 import storage.usersettings;   // A lot, might as well all.
+import storage.history:        addToHistory;
 
 /**
  * Main browser window.
@@ -314,19 +314,9 @@ final class Browser : ApplicationWindow {
         auto title  = sender.getTitle();
 
         if (title != "" && !sender.isEphemeral()) {
-            for (size_t i = 0; i < history.length; i++) {
-                if (history[i].title == title) {
-                    history[i].title      = title;
-                    history[i].uri        = sender.getUri();
-                    history[i].isBookmark = false;
-                    cast()history[i].time = Clock.currTime;
-                    goto doneAdding;
-                }
-            }
-            history ~= HistoryURI(title, sender.getUri(), false, Clock.currTime);
+            addToHistory(sender.getUri(), title, false);
         }
 
-doneAdding:
         if (sender == tabs.getCurrentWebview()) {
             setTitle(title);
 

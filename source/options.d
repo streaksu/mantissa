@@ -2,6 +2,7 @@ module options;
 
 import std.algorithm.mutation: arrRemove = remove;
 import std.datetime.systime:   Clock, SysTime;
+import std.datetime.date:      DateTime;
 import gtk.MenuButton:         MenuButton;
 import gtk.Menu:               Menu;
 import gtk.MenuItem:           MenuItem;
@@ -12,7 +13,7 @@ import translations:           _;
 import about:                  About;
 import preferences:            Preferences;
 import globals:                programName;
-import storage.history:        HistoryURI, history;
+import storage.history:        removeIntervalFromHistory, getHistory, removeAllHistory;
 
 /**
  * Options button for the headerbar.
@@ -64,6 +65,8 @@ final class Options : MenuButton {
 
         // Fill history and bookmarks listing.
         historyMenu.append(new SeparatorMenuItem());
+
+        auto history = getHistory();
         foreach_reverse (uri; history) {
             auto item = new MenuItem(uri.title);
             item.addOnActivate(&historyChosenSignal);
@@ -96,19 +99,14 @@ final class Options : MenuButton {
 
     // Called when the user wants to delete the history of the day.
     private void deleteTodayHistorySignal(MenuItem) {
-        const auto curr = Clock.currTime;
-        for (size_t i = 0; i < history.length; i++) {
-            const HistoryURI item = history[i];
-            if (curr.day == item.time.day) {
-                history = cast(shared)arrRemove(cast(HistoryURI[])history, i);
-                i--;
-            }
-        }
+        const auto end   = Clock.currTime;
+        const auto start = SysTime(DateTime(end.year, end.month, end.day));
+        removeIntervalFromHistory(start, end);
     }
 
     // Called when the user wants to delete ALL history.
     private void deleteAllHistorySignal(MenuItem) {
-        history = [];
+        removeAllHistory();
     }
 
     // Called when the preferences item is deemed active.
@@ -123,6 +121,7 @@ final class Options : MenuButton {
 
     // Activated when a history item is chosen.
     private void historyChosenSignal(MenuItem item) {
+        auto history = getHistory();
         foreach (uri; history) {
             if (item.getLabel() == uri.title) {
                 historyCallback(uri.uri);
