@@ -12,7 +12,7 @@ import translations:           _;
 import about:                  About;
 import preferences:            Preferences;
 import globals:                programName;
-import storage:                HistoryURI, history;
+import storage.history:        HistoryURI, history;
 
 /**
  * Options button for the headerbar.

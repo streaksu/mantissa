@@ -13,7 +13,7 @@ import gtk.Entry:            Entry, InputPurpose;
 import gtk.EditableIF:       EditableIF;
 import gtk.ComboBoxText:     ComboBoxText;
 import translations:         _;
-import storage; // Almost everything really.
+import storage.usersettings; // Almost everything really.
 
 /**
  * Preferences window.
@@ -62,27 +62,27 @@ final class Preferences : Window {
         forceHTTPS      = new CheckButton(_("Force HTTPS Navigation"));
         insecureContent = new CheckButton(_("Allow Insecure Content On HTTPS"));
         useHeaderBar    = new CheckButton(_("Use GTK's Header Bar"));
-        smoothScrolling.setActive(storage.smoothScrolling);
+        smoothScrolling.setActive(getUseSmoothScrolling());
         smoothScrolling.addOnClicked(&checkButtonPressed);
-        pageCache.setActive(storage.pageCache);
+        pageCache.setActive(getUsePageCache());
         pageCache.addOnClicked(&checkButtonPressed);
-        javascript.setActive(storage.useJavaScript);
+        javascript.setActive(getUseJavascript());
         javascript.addOnClicked(&checkButtonPressed);
-        sitequirks.setActive(storage.useSiteQuirks);
+        sitequirks.setActive(getUseSiteQuirks());
         sitequirks.addOnClicked(&checkButtonPressed);
-        homepage.setText(storage.homepage);
+        homepage.setText(getHomepage());
         homepage.addOnFocusOut(&entryChanged);
-        searchEngine.setText(storage.searchEngine);
+        searchEngine.setText(getSearchEngineURL());
         searchEngine.addOnFocusOut(&entryChanged);
         userAgent.addOnChanged(&comboBoxChanged);
         cookiePolicy.addOnChanged(&comboBoxChanged);
-        cookieKeep.setActive(storage.keepCookies);
+        cookieKeep.setActive(getKeepSessionCookies());
         cookieKeep.addOnClicked(&checkButtonPressed);
-        forceHTTPS.setActive(storage.forceHTTPS);
+        forceHTTPS.setActive(getForceHTTPS());
         forceHTTPS.addOnClicked(&checkButtonPressed);
-        insecureContent.setActive(storage.insecureContent);
+        insecureContent.setActive(getAllowInsecureContent());
         insecureContent.addOnClicked(&checkButtonPressed);
-        useHeaderBar.setActive(storage.useHeaderBar);
+        useHeaderBar.setActive(getUseUIHeaderBar());
         useHeaderBar.addOnClicked(&checkButtonPressed);
         homepage.setInputPurpose(InputPurpose.URL);
         searchEngine.setInputPurpose(InputPurpose.URL);
@@ -118,7 +118,7 @@ final class Preferences : Window {
         cookiePolicy.appendText(_("Accept all cookies"));
         cookiePolicy.appendText(_("Reject all cookies"));
         cookiePolicy.appendText(_("Accept only cookies set by the main site"));
-        cookiePolicy.setActive(storage.cookiePolicy);
+        cookiePolicy.setActive(getIncomingCookiePolicy());
         cookiePolicy.showAll();
 
         auto userAgentBox   = new HBox(false, 10);
@@ -133,10 +133,10 @@ final class Preferences : Window {
         auto entry = cast(Entry)userAgent.getChild();
         entry.addOnFocusOut((GdkEventFocus*, Widget entry) {
             auto ent = cast(Entry)entry;
-            storage.userAgent = ent.getText();
+            setUserAgent(ent.getText());
             return false;
         });
-        entry.setText(storage.userAgent);
+        entry.setText(getUserAgent());
         userAgent.showAll();
 
         auto browserSettings = new VBox(false, 10);
@@ -160,23 +160,23 @@ final class Preferences : Window {
     // Called when a checkbutton is pressed.
     private void checkButtonPressed(Button button) {
         const auto set = (cast(CheckButton)button).getActive();
-        if      (button is smoothScrolling) storage.smoothScrolling = set;
-        else if (button is pageCache)       storage.pageCache       = set;
-        else if (button is javascript)      storage.useJavaScript   = set;
-        else if (button is sitequirks)      storage.useSiteQuirks   = set;
-        else if (button is cookieKeep)      storage.keepCookies     = set;
-        else if (button is forceHTTPS)      storage.forceHTTPS      = set;
-        else if (button is insecureContent) storage.insecureContent = set;
-        else if (button is useHeaderBar)    storage.useHeaderBar    = set;
+        if      (button is smoothScrolling) setUseSmoothScrolling(set);
+        else if (button is pageCache)       setUsePageCache(set);
+        else if (button is javascript)      setUseJavascript(set);
+        else if (button is sitequirks)      setUseSiteQuirks(set);
+        else if (button is cookieKeep)      setKeepSessionCookies(set);
+        else if (button is forceHTTPS)      setForceHTTPS(set);
+        else if (button is insecureContent) setAllowInsecureContent(set);
+        else if (button is useHeaderBar)    setUseUIHeaderBar(set);
         else assert(0, "Someone forgot an item!");
     }
 
     // Called when the user finishes an entry insertion.
     private bool entryChanged(GdkEventFocus*, Widget entry) {
         const auto text = (cast(Entry)entry).getText();
-        if      (entry is homepage)     storage.homepage     = text;
-        else if (entry is searchEngine) storage.searchEngine = text;
-        else if (entry is userAgent)    storage.userAgent    = text;
+        if      (entry is homepage)     setHomepage(text);
+        else if (entry is searchEngine) setSearchEngineURL(text);
+        else if (entry is userAgent)    setUserAgent(text);
         else assert(0, "Someone forgot an item! Again!");
         return false;
     }
@@ -186,9 +186,9 @@ final class Preferences : Window {
         if (box is userAgent) {
             auto entry = cast(Entry)userAgent.getChild();
             entry.setText(userAgent.getActiveText());
-            storage.userAgent = entry.getText();
+            setUserAgent(entry.getText());
         } else if (box is cookiePolicy) { 
-            storage.cookiePolicy = cookiePolicy.getActive();
+            setIncomingCookiePolicy(cookiePolicy.getActive());
         } else {
             assert(0, "Someone forgot an item!");
         }

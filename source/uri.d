@@ -43,7 +43,7 @@ unittest {
  * type.
  */
 string normalizeURI(string uri, URIType type) {
-    import storage: searchEngine;
+    import storage.usersettings: getSearchEngineURL;
 
     final switch (type) {
         case URIType.LocalFile:
@@ -51,7 +51,7 @@ string normalizeURI(string uri, URIType type) {
         case URIType.WebResource:
             return startsWith(uri, "http") ? uri : "https://" ~ uri;
         case URIType.Search:
-            return searchEngine ~ uri;
+            return getSearchEngineURL() ~ uri;
     }
 }
 

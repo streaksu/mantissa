@@ -17,7 +17,7 @@ import gtk.Label:            Label;
 import gtk.Image:            Image, IconSize;
 import translations:         _;
 import uri:                  URIType, guessURIType, normalizeURI;
-import storage:              history;
+import storage.history:      history;
 
 private immutable SAFE_ICON   = "security-high-symbolic";
 private immutable UNSAFE_ICON = "security-low-symbolic";

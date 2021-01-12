@@ -1,7 +1,6 @@
 #!/bin/sh
 
-set -e
-set -x
+set -ex
 
 # Defaults
 if [ -z "$PREFIX" ]; then

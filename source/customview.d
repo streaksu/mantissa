@@ -8,7 +8,7 @@ import webkit2.WebView:                WebView;
 import webkit2.WebContext:             WebContext;
 import webkit2.UserContentFilter:      UserContentFilter;
 import webkit2.UserContentFilterStore: UserContentFilterStore, WebKitUserContentFilterStore;
-import storage;
+import storage.usersettings;           // A whole bunch, might as well be all.
 
 shared static this() {
     import std.file:              exists, mkdirRecurse, write;
@@ -16,27 +16,19 @@ shared static this() {
     import glib.Bytes:            Bytes;
     import webkit2.CookieManager: CookieAcceptPolicy, CookiePersistentStorage;
     import globals:               programDir;
-
-    // Path for data storage of the browser.
-    auto storepath = Util.buildFilename([Util.getUserDataDir(), programDir]);
+    import storage.configdir:     findConfigFile;
 
     // Setup the default webcontext.
     auto cookies = WebContext.getDefault.getCookieManager();
-    cookies.setAcceptPolicy(cast(CookieAcceptPolicy)storage.cookiePolicy);
-    if (storage.keepCookies) {
-        auto store = Util.buildFilename([storepath, "cookies.sqlite"]);
-
-        if (!exists(store)) {
-            mkdirRecurse(storepath);
-            write(store, "");
-        }
-
-        cookies.setPersistentStorage(store, CookiePersistentStorage.SQLITE);
+    cookies.setAcceptPolicy(cast(CookieAcceptPolicy)getIncomingCookiePolicy());
+    if (getKeepSessionCookies()) {
+        auto cookieStore = findConfigFile("cookies.sqlite", true);
+        cookies.setPersistentStorage(cookieStore, CookiePersistentStorage.SQLITE);
         cookies.addOnChanged((CookieManager){}); // If not added, it wont work.
     }
 
     // Create the user filters.
-    auto filterpath = Util.buildFilename([storepath, "filters"]);
+    auto filterpath = findConfigFile("filters");
     auto filters    = new UserContentFilterStore(filterpath);
     filters.save("insecureContent", new Bytes(cast(ubyte[])`[{
         "trigger": {
@@ -97,16 +89,16 @@ class CustomView : WebView {
         // Wire the user settings.
         auto settings = getSettings();
         auto content  = getUserContentManager();
-        settings.setEnableSmoothScrolling(storage.smoothScrolling);
-        settings.setEnablePageCache(storage.pageCache);
-        settings.setEnableJavascript(storage.useJavaScript);
-        settings.setEnableSiteSpecificQuirks(storage.useSiteQuirks);
-        settings.setUserAgent(storage.userAgent);
+        settings.setEnableSmoothScrolling(getUseSmoothScrolling());
+        settings.setEnablePageCache(getUsePageCache());
+        settings.setEnableJavascript(getUseJavascript());
+        settings.setEnableSiteSpecificQuirks(getUseSiteQuirks());
+        settings.setUserAgent(getUserAgent());
 
-        if (!storage.insecureContent) {
+        if (!getAllowInsecureContent()) {
             content.addFilter(cast()insecureContentFilter);
         }
-        if (storage.forceHTTPS) {
+        if (getForceHTTPS()) {
             content.addFilter(cast()forceHTTPSFilter);
         }
     }

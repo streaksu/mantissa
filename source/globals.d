@@ -5,8 +5,17 @@
  */
 module globals;
 
-immutable programID      = "org.streaksu.mantissa"; /// ID of the program for GTK.
-immutable programDir     = "mantissa"; /// Raw name of the program's data dir.
-immutable programIcon    = "mantissa"; /// Name of the program icon.
-immutable programName    = "Mantissa"; /// Name of the application the user will see on display.
-immutable programVersion = "1.3.0";    /// Version of the application. // @suppress(dscanner.style.undocumented_declaration)
+/// ID of the program for GTK.
+immutable programID = "org.streaksu.mantissa";
+
+/// Raw name of the program's data dir.
+immutable programDir = "mantissa";
+
+/// Name of the program icon.
+immutable programIcon = "mantissa";
+
+/// Name of the application the user will see on display.
+immutable programName = "Mantissa";
+
+/// Version of the application.
+immutable programVersion = "1.3.0";

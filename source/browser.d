@@ -31,7 +31,8 @@ import findbar:                FindBar;
 import options:                Options;
 import searchbar:              SearchBar;
 import tabs:                   Tabs;
-import storage; // Almost everything really.
+import storage.history:        history, HistoryURI;
+import storage.usersettings;   // A lot, might as well all.
 
 /**
  * Main browser window.
@@ -54,7 +55,7 @@ final class Browser : ApplicationWindow {
         // Init ourselves.
         super(app);
         addOnDelete(&closeSignal);
-        setDefaultSize(mainWindowWidth, mainWindowHeight);
+        setDefaultSize(getMainWindowWidth(), getMainWindowHeight());
 
         // Initialize buttons and data.
         shortcuts    = new AccelGroup();
@@ -106,7 +107,7 @@ final class Browser : ApplicationWindow {
 
         // Pack the window depending on appearance settings.
         auto mainBox = new VBox(false, 0);
-        if (useHeaderBar) {
+        if (getUseUIHeaderBar()) {
             auto header = new HeaderBar();
             header.packStart(previousPage);
             header.packStart(nextPage);
@@ -157,15 +158,15 @@ final class Browser : ApplicationWindow {
 
     // Called when the user requests a private browsing tab.
     private void privateTabSignal() {
-        newTab(homepage, true);
+        newTab(getHomepage(), true);
     }
 
     // Called when the window closes, we will use it to save some settings.
     private bool closeSignal(Event, Widget) {
         int width, height; // @suppress(dscanner.suspicious.unmodified)
         getSize(width, height);
-        mainWindowWidth  = width;
-        mainWindowHeight = height;
+        setMainWindowWidth(width);
+        setMainWindowHeight(height);
         destroy();
         return true;
     }
@@ -213,7 +214,7 @@ final class Browser : ApplicationWindow {
 
     // New tab button signal.
     private void newTabSignal(Button) {
-        newTab(homepage);
+        newTab(getHomepage());
     }
 
     // What happens when the main browser tab is changed.
