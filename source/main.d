@@ -6,7 +6,7 @@ module main;
 import gio.FileIF:      FileIF;
 import gio.Application: gioApplication = Application;
 import gtk.Application: Application;
-import browser:         Browser;
+import ui.browser:      Browser;
 
 /**
  * GTKApplication that represents the browser to the GTK ecosystem.

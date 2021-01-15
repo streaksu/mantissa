@@ -1,4 +1,4 @@
-module findbar;
+module ui.findbar;
 
 import gtk.SearchBar:  SearchBar;
 import gtk.Entry:      Entry, EntryIconPosition;

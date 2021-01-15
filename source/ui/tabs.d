@@ -1,4 +1,4 @@
-module tabs;
+module ui.tabs;
 
 import gtk.Main:                 Main;
 import gtk.Widget:               Widget;
@@ -13,7 +13,7 @@ import gobject.ObjectG:          ObjectG;
 import gobject.ParamSpec:        ParamSpec;
 import webkit2.NavigationAction: NavigationAction;
 import webkit2.WebView:          LoadEvent, WebView;
-import customview:               CustomView;
+import engine.customview:        CustomView;
 
 /**
  * Widget that represents the tabs of the browser.

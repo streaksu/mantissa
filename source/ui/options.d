@@ -1,4 +1,4 @@
-module options;
+module ui.options;
 
 import std.algorithm.mutation: arrRemove = remove;
 import std.datetime.systime:   Clock, SysTime;
@@ -9,9 +9,9 @@ import gtk.MenuItem:           MenuItem;
 import gtk.ImageMenuItem:      ImageMenuItem;
 import gtk.SeparatorMenuItem:  SeparatorMenuItem;
 import gtk.Image:              Image, IconSize;
-import translations:           _;
-import about:                  About;
-import preferences:            Preferences;
+import ui.translations:        _;
+import ui.about:               About;
+import ui.preferences:         Preferences;
 import globals:                programName;
 import storage.history:        removeIntervalFromHistory, getHistory, removeAllHistory;
 

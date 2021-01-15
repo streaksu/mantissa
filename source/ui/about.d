@@ -3,7 +3,7 @@
  * Supposed to display information about the application
  * in a user-readable UI item.
  */
-module about;
+module ui.about;
 
 import gtk.AboutDialog: AboutDialog;
 
@@ -14,8 +14,8 @@ import gtk.AboutDialog: AboutDialog;
 final class About : AboutDialog {
     /// Creates a filled about window.
     this() {
-        import globals:      programIcon, programName, programVersion;
-        import translations: _, translator;
+        import globals:         programIcon, programName, programVersion;
+        import ui.translations: _, translator;
 
         setLogoIconName(programIcon);
         setProgramName(_(programName));

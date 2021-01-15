@@ -1,7 +1,7 @@
 /**
  * Main browser window and its utilities.
  */
-module browser;
+module ui.browser;
 
 import std.datetime.systime:   Clock;
 import gdk.Event:              Event;
@@ -26,11 +26,11 @@ import webkit2.FindController: FindController, FindOptions;
 import gio.TlsCertificate:     TlsCertificate, TlsCertificateFlags;
 import gobject.ObjectG:        ObjectG;
 import gobject.ParamSpec:      ParamSpec;
-import customview:             CustomView;
-import findbar:                FindBar;
-import options:                Options;
-import searchbar:              SearchBar;
-import tabs:                   Tabs;
+import engine.customview:      CustomView;
+import ui.findbar:             FindBar;
+import ui.options:             Options;
+import ui.searchbar:           SearchBar;
+import ui.tabs:                Tabs;
 import storage.usersettings;   // A lot, might as well all.
 import storage.history:        addToHistory;
 
@@ -267,9 +267,9 @@ final class Browser : ApplicationWindow {
 
     // Called when a view request fullscreen.
     private bool enterFullscreenSignal(WebView view) {
-        import gtk.Dialog:   Dialog, DialogFlags, ResponseType;
-        import gtk.Label:    Label;
-        import translations: _;
+        import gtk.Dialog:      Dialog, DialogFlags, ResponseType;
+        import gtk.Label:       Label;
+        import ui.translations: _;
 
         // See if its a main one or not.
         if (tabs.getCurrentWebview() == view) {

@@ -1,4 +1,4 @@
-module translations;
+module ui.translations;
 
 immutable string translator; /// Translator of the app, or null if it was not translated.
 private immutable string[string] translationDictionary;

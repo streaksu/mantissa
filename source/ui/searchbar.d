@@ -1,4 +1,4 @@
-module searchbar;
+module ui.searchbar;
 
 import std.string:           fromStringz, indexOf;
 import std.typecons:         No;
@@ -15,8 +15,8 @@ import gtk.TreeIter:         GtkTreeIter, TreeIter;
 import gtk.Dialog:           Dialog;
 import gtk.Label:            Label;
 import gtk.Image:            Image, IconSize;
-import translations:         _;
-import uri:                  URIType, guessURIType, normalizeURI;
+import ui.translations:      _;
+import ui.uri:               URIType, guessURIType, normalizeURI;
 import storage.history:      getHistory;
 
 private immutable SAFE_ICON   = "security-high-symbolic";

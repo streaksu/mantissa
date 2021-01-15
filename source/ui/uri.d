@@ -1,4 +1,4 @@
-module uri;
+module ui.uri;
 
 import std.string: startsWith, indexOf;
 

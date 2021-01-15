@@ -1,4 +1,4 @@
-module preferences;
+module ui.preferences;
 
 import gtk.Window:           Window;
 import gtk.Widget:           Widget, GdkEventFocus;
@@ -12,7 +12,7 @@ import gtk.Label:            Label;
 import gtk.Entry:            Entry, InputPurpose;
 import gtk.EditableIF:       EditableIF;
 import gtk.ComboBoxText:     ComboBoxText;
-import translations:         _;
+import ui.translations:      _;
 import storage.usersettings; // Almost everything really.
 
 /**

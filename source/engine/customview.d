@@ -1,4 +1,4 @@
-module customview;
+module engine.customview;
 
 import gobject.ObjectG:                ObjectG;
 import gobject.ParamSpec:              ParamSpec;
