@@ -1,3 +1,4 @@
+/// Utilities for translating UI-displayed string.
 module ui.translations;
 
 immutable string translator; /// Translator of the app, or null if it was not translated.
@@ -42,9 +43,9 @@ shared static this() {
             "Accept only cookies set by the main site" : "Solo aceptar cookies del sitio principal",
             "Browser Settings" : "Ajustes del navegador",
             "Appearance" : "Apariencia",
-            "Your connection with this resource is secure, your data cannot be stolen"   : "La conexión con este recurso es segura, tus datos no pueden ser robados",
-            "Your connection with this resource is unsecure, your data could be stolen!" : "La conexión con este recurso no es segura, tus datos podrían ser robados",
-            "Please search for secure alternatives, or contact the site's webmasters"    : "Por favor busca alternativas seguras, o contacta los dueños del sitio",
+            "Your connection with this resource is secure, your data cannot be stolen"   : "La conexión con este recurso es segura, tus datos no pueden ser robados", // @suppress(dscanner.style.long_line)
+            "Your connection with this resource is unsecure, your data could be stolen!" : "La conexión con este recurso no es segura, tus datos podrían ser robados", // @suppress(dscanner.style.long_line)
+            "Please search for secure alternatives, or contact the site's webmasters"    : "Por favor busca alternativas seguras, o contacta los dueños del sitio", // @suppress(dscanner.style.long_line)
             "Find" : "Buscar"
         ];
     } else if (startsWith(locale, "it")) {
@@ -80,17 +81,15 @@ shared static this() {
             "Accept only cookies set by the main site" : "Accetta solo cookie dal sito principale",
             "Browser Settings" : "Impostazioni del browser",
             "Appearance" : "Aspetto",
-            "Your connection with this resource is secure, your data cannot be stolen"   : "La connessione è sicura, i tuoi dati sono protetti",
-            "Your connection with this resource is unsecure, your data could be stolen!" : "La connessione non è sicura, i tuoi dati sono a rischio",
-            "Please search for secure alternatives, or contact the site's webmasters"    : "Cerca delle alternative o contatta l'amministratore del sito",
+            "Your connection with this resource is secure, your data cannot be stolen"   : "La connessione è sicura, i tuoi dati sono protetti", // @suppress(dscanner.style.long_line)
+            "Your connection with this resource is unsecure, your data could be stolen!" : "La connessione non è sicura, i tuoi dati sono a rischio", // @suppress(dscanner.style.long_line)
+            "Please search for secure alternatives, or contact the site's webmasters"    : "Cerca delle alternative o contatta l'amministratore del sito", // @suppress(dscanner.style.long_line)
             "Find" : "Trova"
         ];
     }
 }
 
-/**
- * Get translation for the argument.
- */
+/// Get translation for the argument.
 string _(string msg) {
     if (msg in translationDictionary) {
         return translationDictionary[msg];

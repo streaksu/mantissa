@@ -1,3 +1,4 @@
+/// Preferences dialog.
 module ui.preferences;
 
 import gtk.Window:           Window;
@@ -15,9 +16,7 @@ import gtk.ComboBoxText:     ComboBoxText;
 import ui.translations:      _;
 import storage.usersettings; // Almost everything really.
 
-/**
- * Preferences window.
- */
+/// Preferences window.
 final class Preferences : Window {
     private HBox         mainBox;
     private StackSidebar sidebar;
@@ -35,9 +34,7 @@ final class Preferences : Window {
     private CheckButton  insecureContent;
     private CheckButton  useHeaderBar;
 
-    /**
-     * Creates the object.
-     */
+    /// Creates the object.
     this() {
         // Initialize ourselves and pack the window.
         super(_("Preferences"));
@@ -127,8 +124,8 @@ final class Preferences : Window {
         userAgentLabel.setXalign(0);
         userAgentBox.packStart(userAgentLabel, false, false, 0);
         userAgentBox.packStart(userAgent,      true,  true,  0);
-        userAgent.appendText("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15");
-        userAgent.appendText("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+        userAgent.appendText("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15"); // @suppress(dscanner.style.long_line)
+        userAgent.appendText("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");  // @suppress(dscanner.style.long_line)
         userAgent.appendText("Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)");
         auto entry = cast(Entry)userAgent.getChild();
         entry.addOnFocusOut((GdkEventFocus*, Widget entry) {

@@ -1,3 +1,4 @@
+/// Tab widget.
 module ui.tabs;
 
 import gtk.Main:                 Main;
@@ -15,22 +16,16 @@ import webkit2.NavigationAction: NavigationAction;
 import webkit2.WebView:          LoadEvent, WebView;
 import engine.customview:        CustomView;
 
-/**
- * Widget that represents the tabs of the browser.
- */
+/// Widget that represents the tabs of the browser.
 final class Tabs : Notebook {
-    /**
-     * Pack the structure and initialize all the pertitent locals.
-     * It does not add any tabs.
-     */
+    /// Pack the structure and initialize all the pertitent locals.
+    /// It does not add any tabs.
     this() {
         setScrollable(true);
     }
 
-    /**
-     * Adds a tab featuring the passed webview.
-     * It will put it on focus, so it will be accessible with `getActive`.
-     */
+    /// Adds a tab featuring the passed webview.
+    /// It will put it on focus, so it will be accessible with `getActive`.
     void addTab(CustomView view) {
         // Wire signals.
         view.addOnCreate(&createSignal);
@@ -59,9 +54,7 @@ final class Tabs : Notebook {
         setShowTabs(index != 0);
     }
 
-    /**
-     * Returns the current active webview.
-     */
+    /// Returns the current active webview.
     WebView getCurrentWebview() {
         return cast(WebView)getNthPage(getCurrentPage());
     }
@@ -110,10 +103,16 @@ final class Tabs : Notebook {
 
     // Called when the title of a webview changes.
     private void titleChangedSignal(ParamSpec, ObjectG obj) {
+        immutable titleLengthLimit = 55;
+
         auto sender           = cast(WebView)obj;
         auto titleBox         = cast(HBox)getTabLabel(sender);
         auto titleBoxChildren = titleBox.getChildren().toArray!(Widget);
         auto titleBoxLabel    = cast(Label)titleBoxChildren[sender.isEphemeral() ? 1 : 0];
-        titleBoxLabel.setText(sender.getTitle());
+        auto senderTitle      = sender.getTitle();
+        if (senderTitle.length > titleLengthLimit) {
+            senderTitle = senderTitle[0..titleLengthLimit] ~ "...";
+        }
+        titleBoxLabel.setText(senderTitle);
     }
 }

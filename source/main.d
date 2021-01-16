@@ -1,6 +1,4 @@
-/**
- * Main function and its most immediate utilities.
- */
+/// Main function and its most immediate utilities.
 module main;
 
 import gio.FileIF:      FileIF;
@@ -8,14 +6,10 @@ import gio.Application: gioApplication = Application;
 import gtk.Application: Application;
 import ui.browser:      Browser;
 
-/**
- * GTKApplication that represents the browser to the GTK ecosystem.
- * It handles everything from opening commandline files to main windows.
- */
+/// GTKApplication that represents the browser to the GTK ecosystem.
+/// It handles everything from opening commandline files to main windows.
 final class MainApplication : Application {
-    /**
-     * Will create the object and set up the proper signals.
-     */
+    /// Will create the object and set up the proper signals.
     this() {
         import gio.c.types: ApplicationFlags;
         import globals:     programID;
@@ -51,9 +45,7 @@ final class MainApplication : Application {
     }
 }
 
-/**
- * Main function of the program.
- */
+/// Main function of the program.
 void main(string[] args) {
     auto app = new MainApplication();
     app.run(args);

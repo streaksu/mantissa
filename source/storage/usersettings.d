@@ -1,3 +1,4 @@
+/// Options for managing general user settings.
 module storage.usersettings;
 
 import d2sqlite3: Database;

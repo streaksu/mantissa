@@ -1,6 +1,4 @@
-/**
- * Main browser window and its utilities.
- */
+/// Main browser window and its utilities.
 module ui.browser;
 
 import std.datetime.systime:   Clock;
@@ -34,9 +32,7 @@ import ui.tabs:                Tabs;
 import storage.usersettings;   // A lot, might as well all.
 import storage.history:        addToHistory;
 
-/**
- * Main browser window.
- */
+/// Main browser window.
 final class Browser : ApplicationWindow {
     private AccelGroup shortcuts;
     private Button     previousPage;
@@ -48,9 +44,7 @@ final class Browser : ApplicationWindow {
     private Tabs       tabs;
     private FindBar    find;
 
-    /**
-     * Constructs the main window with the passed url as only one.
-     */
+    /// Constructs the main window with the passed url as only one.
     this(Application app, string openurl) {
         // Init ourselves.
         super(app);
@@ -143,9 +137,7 @@ final class Browser : ApplicationWindow {
         newTab(openurl);
     }
 
-    /**
-     * Adds a new tab to the browser, processing the pertinent triggers.
-     */
+    /// Adds a new tab to the browser, processing the pertinent triggers.
     void newTab(string uri, bool isPrivate = false) {
         auto view = new CustomView(null, isPrivate);
         view.loadUri(uri);

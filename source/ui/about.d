@@ -1,16 +1,12 @@
-/**
- * Functions and utilities for the About dialog.
- * Supposed to display information about the application
- * in a user-readable UI item.
- */
+/// Functions and utilities for the About dialog.
+/// Supposed to display information about the application
+/// in a user-readable UI item.
 module ui.about;
 
 import gtk.AboutDialog: AboutDialog;
 
-/**
- * About window of the application, meant to show credits, website of the
- * project, all that stuff.
- */
+/// About window of the application, meant to show credits, website of the
+/// project, all that stuff.
 final class About : AboutDialog {
     /// Creates a filled about window.
     this() {

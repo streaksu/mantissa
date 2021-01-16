@@ -1,3 +1,4 @@
+/// Searchbar for URLs.
 module ui.searchbar;
 
 import std.string:           fromStringz, indexOf;
@@ -22,20 +23,16 @@ import storage.history:      getHistory;
 private immutable SAFE_ICON   = "security-high-symbolic";
 private immutable UNSAFE_ICON = "security-low-symbolic";
 
-/**
- * Search bar of the browser.
- * Text for webviews is requested using the same methods as a normal entry.
- * That is, `getText` and `addOnActivate`.
- */
+/// Search bar of the browser.
+/// Text for webviews is requested using the same methods as a normal entry.
+/// That is, `getText` and `addOnActivate`.
 final class SearchBar : Entry {
     private Window          parent;
     private EntryCompletion completion;
     private ListStore       completionList;
     private TreeIter        mainOption;
 
-    /**
-     * Create the search bar and process some triggers.
-     */
+    /// Create the search bar and process some triggers.
     this(Window p) {
         parent         = p;
         completion     = new EntryCompletion();
@@ -59,17 +56,13 @@ final class SearchBar : Entry {
         setInputPurpose(InputPurpose.URL);
     }
 
-    /**
-     * Set the icon to mark a secure or not secure website.
-     */
+    /// Set the icon to mark a secure or not secure website.
     void setSecureIcon(bool isSecure) {
         auto icon = isSecure ? SAFE_ICON : UNSAFE_ICON;
         setIconFromIconName(EntryIconPosition.PRIMARY, icon);
     }
 
-    /**
-     * Removes the resource security icon.
-     */
+    /// Removes the resource security icon.
     void removeIcon() {
         setIconFromIconName(EntryIconPosition.PRIMARY, null);
     }

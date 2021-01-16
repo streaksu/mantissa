@@ -1,3 +1,4 @@
+/// Our modifications to the base webkit webview.
 module engine.customview;
 
 import gobject.ObjectG:                ObjectG;
@@ -62,18 +63,14 @@ private extern (C) void saveFilter(GObject* obj, GAsyncResult* res, void* data) 
 private shared UserContentFilter insecureContentFilter;
 private shared UserContentFilter forceHTTPSFilter;
 
-/**
- * A webview-derived class made with the specific needs of the browser
- * in mind, it's recommended to always use this version instead of the
- * default webview.
- */
+/// A webview-derived class made with the specific needs of the browser
+/// in mind, it's recommended to always use this version instead of the
+/// default webview.
 class CustomView : WebView {
-    /**
-     * Construct the object.
-     * It takes whether the new webview will use private browsing or not, or
-     * a related webview.
-     * A webview cannot be initialized as related and private at once.
-     */
+    /// Construct the object.
+    /// It takes whether the new webview will use private browsing or not, or
+    /// a related webview.
+    /// A webview cannot be initialized as related and private at once.
     this(WebView related = null, bool isPrivate = false) {
         assert(!(related !is null && isPrivate != false));
 

@@ -1,3 +1,4 @@
+/// Options menu.
 module ui.options;
 
 import std.algorithm.mutation: arrRemove = remove;
@@ -15,9 +16,7 @@ import ui.preferences:         Preferences;
 import globals:                programName;
 import storage.history:        removeIntervalFromHistory, getHistory, removeAllHistory;
 
-/**
- * Options button for the headerbar.
- */
+/// Options button for the headerbar.
 final class Options : MenuButton {
     private Menu     popup;
     private Menu     historyMenu;
@@ -29,9 +28,7 @@ final class Options : MenuButton {
     private ImageMenuItem about;
     private void delegate(string) historyCallback;
 
-    /**
-     * Constructs the widget.
-     */
+    /// Constructs the widget.
     this(void delegate(string) historyChose) {
         // Initialize everything and signals.
         popup             = new Menu();
@@ -79,18 +76,14 @@ final class Options : MenuButton {
         setPopup(popup);
     }
 
-    /**
-     * Add callback for when the user requests a private tab.
-     */
+    /// Add callback for when the user requests a private tab.
     void addOnPrivateTabRequest(void delegate() callback) {
         privateBrowsing.addOnActivate((MenuItem) {
             callback();
         });
     }
 
-    /**
-     * Add callback for when the user requests find.
-     */
+    /// Add callback for when the user requests find.
     void addOnFindRequest(void delegate() callback) {
         findText.addOnActivate((MenuItem) {
             callback();

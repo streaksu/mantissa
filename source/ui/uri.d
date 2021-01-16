@@ -1,3 +1,4 @@
+/// Classify and analyze URIs.
 module ui.uri;
 
 import std.string: startsWith, indexOf;
@@ -9,14 +10,12 @@ enum URIType {
     Search,      /// Phrase for search using a search engine.
 }
 
-/**
- * Guess the nature of a URI.
- *
- * The guessed type can be guessed upon a malformed URI, or things that simply
- * wont work when passed to webkit, therefore, this guessed type is meant
- * to be used as an indicative for further refinement, using for example
- * `normalizeURI`.
- */
+/// Guess the nature of a URI.
+///
+/// The guessed type can be guessed upon a malformed URI, or things that simply
+/// wont work when passed to webkit, therefore, this guessed type is meant
+/// to be used as an indicative for further refinement, using for example
+/// `normalizeURI`.
 URIType guessURIType(string uri) {
     import std.file: exists;
 
@@ -38,10 +37,8 @@ unittest {
     assert(guessURIType("https what is")      == URIType.Search);
 }
 
-/**
- * Take a URI and try to adjust it for standard compliance with the passed
- * type.
- */
+/// Take a URI and try to adjust it for standard compliance with the passed
+/// type.
 string normalizeURI(string uri, URIType type) {
     import storage.usersettings: getSearchEngineURL;
 

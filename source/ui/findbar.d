@@ -1,3 +1,4 @@
+/// Findbar of the browser.
 module ui.findbar;
 
 import gtk.SearchBar:  SearchBar;
@@ -5,18 +6,14 @@ import gtk.Entry:      Entry, EntryIconPosition;
 import gtk.Button:     Button, IconSize;
 import gtk.EditableIF: EditableIF;
 
-/**
- * Implements the "find on website" bar.
- */
+/// Implements the "find on website" bar.
 class FindBar : SearchBar {
     private Entry  entry;
     private Button previousButton;
     private Button nextButton;
     private Button closeButton;
 
-    /**
-     * Constructs the object.
-     */
+    /// Constructs the object.
     this() {
         import gtk.HBox: HBox;
         auto box       = new HBox(false, 0);
@@ -35,10 +32,8 @@ class FindBar : SearchBar {
         showAll();
     }
 
-    /**
-     * Add a callback for when the search of a string is requested.
-     * The callback will be called
-     */
+    /// Add a callback for when the search of a string is requested.
+    /// The callback will be called
     void addOnSearchRequest(void delegate(string) callback) {
         entry.addOnChanged((EditableIF e) {
             auto text = (cast(Entry)e).getText;
@@ -48,16 +43,12 @@ class FindBar : SearchBar {
         });
     }
 
-    /**
-     * Add a callback for when the previous item of the search is requested.
-     */
+    /// Add a callback for when the previous item of the search is requested.
     void addOnPreviousRequested(void delegate() callback) {
         previousButton.addOnPressed((Button) { callback(); });
     }
 
-    /**
-     * Add a callback for when the next item of the search is requested.
-     */
+    /// Add a callback for when the next item of the search is requested.
     void addOnNextRequested(void delegate() callback) {
         entry.addOnActivate((Entry)      { callback(); });
         nextButton.addOnPressed((Button) { callback(); });
