@@ -18,7 +18,7 @@ import gtk.Label:            Label;
 import gtk.Image:            Image, IconSize;
 import ui.translations:      _;
 import ui.uri:               URIType, guessURIType, normalizeURI;
-import storage.history:      getHistory;
+import storage.history:      HistoryURI, HistoryOperation, getHistory, trackHistory;
 
 private immutable SAFE_ICON   = "security-high-symbolic";
 private immutable UNSAFE_ICON = "security-low-symbolic";
@@ -31,6 +31,7 @@ final class SearchBar : Entry {
     private EntryCompletion completion;
     private ListStore       completionList;
     private TreeIter        mainOption;
+    private HistoryURI[]    history;
 
     /// Create the search bar and process some triggers.
     this(Window p) {
@@ -38,11 +39,11 @@ final class SearchBar : Entry {
         completion     = new EntryCompletion();
         completionList = new ListStore([GType.STRING, GType.STRING]);
         mainOption     = completionList.createIter();
+        history        = getHistory();
         completion.setModel(completionList);
         completion.setTextColumn(0);
         completion.setMatchFunc(&match, cast(void*)this, null);
 
-        auto history = getHistory();
         foreach_reverse (item; history) {
             auto iter = completionList.createIter();
             completionList.setValue(iter, 0, item.title);
@@ -54,6 +55,7 @@ final class SearchBar : Entry {
         addOnChanged(&preeditChangedSignal);
         addOnIconPress(&iconPressSignal);
         setInputPurpose(InputPurpose.URL);
+        trackHistory(&historySignal);
     }
 
     /// Set the icon to mark a secure or not secure website.
@@ -65,6 +67,61 @@ final class SearchBar : Entry {
     /// Removes the resource security icon.
     void removeIcon() {
         setIconFromIconName(EntryIconPosition.PRIMARY, null);
+    }
+
+    // Update history signal.
+    private void historySignal(HistoryOperation op, HistoryURI item) {
+        import std.algorithm: remove;
+
+        final switch (op) {
+            case HistoryOperation.AddOrModify:
+                foreach (i; 0..history.length) {
+                    if (history[i].uri == item.uri) {
+                        history.remove(i);
+                        break;
+                    }
+                }
+                TreeIter iter;
+                completionList.iterNthChild(iter, null, 1);
+                while (iter !is null) {
+                    if (completionList.getValue(iter, 1).getString == item.uri) {
+                        completionList.remove(iter);
+                        break;
+                    }
+                    if (!completionList.iterNext(iter)) {
+                        iter = null;
+                    }
+                }
+                iter = completionList.createIter();
+                completionList.setValue(iter, 0, item.title);
+                completionList.setValue(iter, 1, item.uri);
+                history ~= [item];
+                break;
+            case HistoryOperation.Remove:
+                foreach (i; 0..history.length) {
+                    if (history[i].uri == item.uri) {
+                        history.remove(i);
+                        break;
+                    }
+                }
+                TreeIter iter;
+                completionList.iterNthChild(iter, null, 1);
+                while (iter !is null) {
+                    if (completionList.getValue(iter, 1).getString == item.uri) {
+                        completionList.remove(iter);
+                        break;
+                    }
+                    if (!completionList.iterNext(iter)) {
+                        iter = null;
+                    }
+                }
+                break;
+            case HistoryOperation.RemoveAll:
+                completionList.clear();
+                mainOption = completionList.createIter();
+                break;
+        }
+        showAll();
     }
 
     // Called when the icon of the search bar is pressed.

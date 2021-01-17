@@ -14,7 +14,7 @@ import ui.translations:        _;
 import ui.about:               About;
 import ui.preferences:         Preferences;
 import globals:                programName;
-import storage.history:        removeIntervalFromHistory, getHistory, removeAllHistory;
+import storage.history;        // A lot, might as well be all.
 
 /// Options button for the headerbar.
 final class Options : MenuButton {
@@ -27,6 +27,7 @@ final class Options : MenuButton {
     private ImageMenuItem preferences;
     private ImageMenuItem about;
     private void delegate(string) historyCallback;
+    private HistoryURI[] history;
 
     /// Constructs the widget.
     this(void delegate(string) historyChose) {
@@ -40,6 +41,7 @@ final class Options : MenuButton {
         preferences       = new ImageMenuItem(_("Preferences"));
         about             = new ImageMenuItem(_("About Mantissa"));    
         historyCallback   = historyChose;
+        history           = getHistory();
 
         findText.setImage(new Image("edit-find-symbolic", IconSize.MENU));
         findText.setAlwaysShowImage(true);
@@ -73,6 +75,7 @@ final class Options : MenuButton {
         // Set popup.
         historyMenu.showAll();
         popup.showAll();
+        trackHistory(&historyTrack);
         setPopup(popup);
     }
 
@@ -88,6 +91,49 @@ final class Options : MenuButton {
         findText.addOnActivate((MenuItem) {
             callback();
         });
+    }
+
+    // Called when the history is updated.
+    private void historyTrack(HistoryOperation op, HistoryURI item) {
+        import std.algorithm: remove;
+
+        final switch (op) {
+            case HistoryOperation.AddOrModify:
+                foreach (i; 0..history.length) {
+                    if (history[i].uri == item.uri) {
+                        history.remove(i);
+                        break;
+                    }
+                }
+                foreach (i; historyMenu.getChildren.toArray!MenuItem) {
+                    if (item.title == i.getLabel()) {
+                        historyMenu.remove(i);
+                    }
+                }
+
+                auto menu = new MenuItem(item.title);
+                menu.addOnActivate(&historyChosenSignal);
+                historyMenu.insert(menu, 3);
+                history ~= [item];
+                break;
+            case HistoryOperation.Remove:
+                foreach (i; 0..history.length) {
+                    if (history[i].uri == item.uri) {
+                        history.remove(i);
+                        break;
+                    }
+                }
+                break;
+            case HistoryOperation.RemoveAll:
+                auto children = historyMenu.getChildren(); // @suppress(dscanner.suspicious.unmodified)
+                auto arrchild = children.toArray!MenuItem;
+                foreach (i; 3..children.length) {
+                    historyMenu.remove(arrchild[i]);
+                }
+                break;
+        }
+
+        historyMenu.showAll();
     }
 
     // Called when the user wants to delete the history of the day.
@@ -114,7 +160,6 @@ final class Options : MenuButton {
 
     // Activated when a history item is chosen.
     private void historyChosenSignal(MenuItem item) {
-        auto history = getHistory();
         foreach (uri; history) {
             if (item.getLabel() == uri.title) {
                 historyCallback(uri.uri);

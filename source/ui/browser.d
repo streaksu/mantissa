@@ -30,7 +30,7 @@ import ui.options:             Options;
 import ui.searchbar:           SearchBar;
 import ui.tabs:                Tabs;
 import storage.usersettings;   // A lot, might as well all.
-import storage.history:        addToHistory;
+import storage.history:        HistoryURI, addToHistory;
 
 /// Main browser window.
 final class Browser : ApplicationWindow {
@@ -306,7 +306,7 @@ final class Browser : ApplicationWindow {
         auto title  = sender.getTitle();
 
         if (title != "" && !sender.isEphemeral()) {
-            addToHistory(sender.getUri(), title, false);
+            addToHistory(HistoryURI(sender.getUri(), title, false, Clock.currTime));
         }
 
         if (sender == tabs.getCurrentWebview()) {
