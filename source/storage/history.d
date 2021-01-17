@@ -1,7 +1,6 @@
 /// Utilities for reading and modifying the global history.
 module storage.history;
 
-import std.parallelism:      parallel;
 import std.conv:             to;
 import std.array:            appender;
 import std.file:             exists, mkdirRecurse;
@@ -145,7 +144,7 @@ void removeAllHistory() {
 }
 
 private void callCallbacks(HistoryOperation op, HistoryURI uri) {
-    foreach (call; callbacks.parallel) {
+    foreach (call; callbacks) {
         call(op, uri);
     }
 }
