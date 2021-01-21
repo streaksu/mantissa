@@ -3,24 +3,30 @@ module ui.tabs;
 
 import gtk.Main:                 Main;
 import gtk.Widget:               Widget;
+import gtk.Window:               Window;
 import gtk.HBox:                 HBox;
 import gtk.Notebook:             Notebook;
 import gtk.Label:                Label;
 import gtk.Button:               Button;
 import gtk.Image:                Image, IconSize;
+import gtk.Dialog:               Dialog, DialogFlags, ResponseType;
 import gio.TlsCertificate:       TlsCertificate, TlsCertificateFlags;
 import glib.ErrorG:              ErrorG;
 import gobject.ObjectG:          ObjectG;
 import gobject.ParamSpec:        ParamSpec;
 import webkit2.NavigationAction: NavigationAction;
-import webkit2.WebView:          LoadEvent, WebView;
+import webkit2.WebView:          LoadEvent, WebProcessTerminationReason, WebView;
 import engine.customview:        CustomView;
+import ui.translations:          _;
 
 /// Widget that represents the tabs of the browser.
 final class Tabs : Notebook {
+    private Window parent;
+
     /// Pack the structure and initialize all the pertitent locals.
     /// It does not add any tabs.
-    this() {
+    this(Window w) {
+        parent = w;
         setScrollable(true);
     }
 
@@ -31,6 +37,7 @@ final class Tabs : Notebook {
         view.addOnCreate(&createSignal);
         view.addOnNotify(&titleChangedSignal, "title");
         view.addOnClose(&viewCloseSignal);
+        view.addOnWebProcessTerminated(&viewTerminatedSignal);
 
         // Finally, pack the UI.
         auto title  = new Label("");
@@ -84,18 +91,7 @@ final class Tabs : Notebook {
             auto titleBoxButton   = cast(Button)titleBoxChildren[view.isEphemeral() ? 2 : 1];
 
             if (titleBoxButton is b) {
-                detachTab(view);
-                view.tryClose();
-                switch (getNPages()) {
-                    case 1:
-                        setShowTabs(false);
-                        break;
-                    case 0:
-                        Main.quit();
-                        break;
-                    default:
-                        break;
-                }
+                removeView(view);
                 break;
             }
         }
@@ -114,5 +110,52 @@ final class Tabs : Notebook {
             senderTitle = senderTitle[0..titleLengthLimit] ~ "...";
         }
         titleBoxLabel.setText(senderTitle);
+    }
+
+    private void viewTerminatedSignal(WebProcessTerminationReason reason, WebView view) {
+        const auto title = view.getTitle();
+        const auto uri   = view.getUri();
+
+        auto dialog = new Dialog(
+            _("A tab just crashed"),
+            parent,
+            DialogFlags.DESTROY_WITH_PARENT,
+            [_("Close")],
+            [ResponseType.CLOSE]
+        );
+
+        auto cont = dialog.getContentArea();
+        cont.packStart(new Image("dialog-error", IconSize.DIALOG), true, true, 10);
+        cont.add(new Label("The tab opening " ~ title ~ "(" ~ uri ~ ")  unexpectedly crashed"));
+        Label label;
+        final switch (reason) {
+            case WebProcessTerminationReason.CRASHED:
+                label = new Label("Reason: WebKit internal crash");                
+                break;
+            case WebProcessTerminationReason.EXCEEDED_MEMORY_LIMIT:
+                label = new Label("Reason: Exceeded memory limit");
+                break;
+        }
+        cont.add(label);
+
+        dialog.showAll();
+        dialog.run();
+        dialog.destroy();
+        removeView(view);
+    }
+
+    private void removeView(WebView view) {
+        detachTab(view);
+        view.tryClose();
+        switch (getNPages()) {
+            case 1:
+                setShowTabs(false);
+                break;
+            case 0:
+                Main.quit();
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -59,7 +59,7 @@ final class Browser : ApplicationWindow {
         urlBar       = new SearchBar(this);
         addTab       = new Button("list-add-symbolic", IconSize.SMALL_TOOLBAR);
         options      = new Options(&historyTabSignal);
-        tabs         = new Tabs();
+        tabs         = new Tabs(this);
         find         = new FindBar();
 
         previousPage.addOnClicked(&previousSignal);
