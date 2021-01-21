@@ -6,6 +6,7 @@ import std.string: startsWith, indexOf;
 /// Types a URI can be.
 enum URIType {
     LocalFile,   /// A local file or directory.
+    XDGOpen,     /// External apps and links to be opened with xdgopen.
     WebResource, /// Points to an online site.
     Search,      /// Phrase for search using a search engine.
 }
@@ -21,6 +22,8 @@ URIType guessURIType(string uri) {
 
     if (exists(uri) || startsWith(uri, "file://")) {
         return URIType.LocalFile;
+    } else if (startsWith(uri, "magnet:")) {
+        return URIType.XDGOpen;
     } else if (startsWith(uri, "http://") || startsWith(uri, "https://") ||
                startsWith(uri, "ftp://")  || indexOf(uri, '.') != -1) {
         return URIType.WebResource;
@@ -45,6 +48,8 @@ string normalizeURI(string uri, URIType type) {
     final switch (type) {
         case URIType.LocalFile:
             return "file://" ~ uri;
+        case URIType.XDGOpen:
+            return uri;
         case URIType.WebResource:
             return startsWith(uri, "http") ? uri : "https://" ~ uri;
         case URIType.Search:

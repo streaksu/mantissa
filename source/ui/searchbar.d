@@ -160,6 +160,9 @@ final class SearchBar : Entry {
             case URIType.LocalFile:
                 mainOptionMessage = uri ~ " - " ~ _("Open File");
                 break;
+            case URIType.XDGOpen:
+                mainOptionMessage = uri ~ " - " ~ _("Open program");
+                break;
             case URIType.WebResource:
                 mainOptionMessage = uri ~ " - " ~ _("Visit");
                 break;

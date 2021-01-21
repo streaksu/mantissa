@@ -15,6 +15,7 @@ import glib.ErrorG:              ErrorG;
 import gobject.ObjectG:          ObjectG;
 import gobject.ParamSpec:        ParamSpec;
 import webkit2.NavigationAction: NavigationAction;
+import webkit2.PolicyDecision:   PolicyDecisionType, PolicyDecision;
 import webkit2.WebView:          LoadEvent, WebProcessTerminationReason, WebView;
 import engine.customview:        CustomView;
 import ui.translations:          _;
@@ -35,6 +36,7 @@ final class Tabs : Notebook {
     void addTab(CustomView view) {
         // Wire signals.
         view.addOnCreate(&createSignal);
+        view.addOnDecidePolicy(&policySignal);
         view.addOnNotify(&titleChangedSignal, "title");
         view.addOnClose(&viewCloseSignal);
         view.addOnWebProcessTerminated(&viewTerminatedSignal);
@@ -79,6 +81,24 @@ final class Tabs : Notebook {
         view.loadUri(action.getRequest.getUri);
         addTab(view);
         return view;
+    }
+
+    private bool policySignal(PolicyDecision decision, PolicyDecisionType type, WebView view) {
+        import webkit2.NavigationPolicyDecision: NavigationPolicyDecision;
+        import gio.AppInfoIF:                    AppInfoIF;
+        import ui.uri:                           guessURIType, URIType;
+
+        if (type == PolicyDecisionType.NAVIGATION_ACTION || type == PolicyDecisionType.NEW_WINDOW_ACTION) {
+            auto  nav     = cast(NavigationPolicyDecision)decision;
+            const uri     = nav.getRequest.getUri();
+            const uritype = guessURIType(uri);
+            if (uritype == URIType.XDGOpen) {
+                AppInfoIF.launchDefaultForUri(uri, null);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Called when a close button of a tab is pressed.
