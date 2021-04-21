@@ -14,7 +14,7 @@ import gio.TlsCertificate:       TlsCertificate, TlsCertificateFlags;
 import glib.ErrorG:              ErrorG;
 import gobject.ObjectG:          ObjectG;
 import gobject.ParamSpec:        ParamSpec;
-import webkit2.NavigationAction: NavigationAction;
+import webkit2.NavigationAction: NavigationAction, WebKitNavigationPolicyDecision;
 import webkit2.PolicyDecision:   PolicyDecisionType, PolicyDecision;
 import webkit2.WebView:          LoadEvent, WebProcessTerminationReason, WebView;
 import engine.customview:        CustomView;
@@ -89,7 +89,8 @@ final class Tabs : Notebook {
         import ui.uri:                           guessURIType, URIType;
 
         if (type == PolicyDecisionType.NAVIGATION_ACTION || type == PolicyDecisionType.NEW_WINDOW_ACTION) {
-            auto  nav     = cast(NavigationPolicyDecision)decision;
+            auto  ptr     = cast(WebKitNavigationPolicyDecision*)decision.getPolicyDecisionStruct(false);
+            auto  nav     = new NavigationPolicyDecision(ptr, false);
             const uri     = nav.getRequest.getUri();
             const uritype = guessURIType(uri);
             if (uritype == URIType.XDGOpen) {
