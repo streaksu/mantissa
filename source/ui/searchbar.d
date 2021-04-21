@@ -199,16 +199,10 @@ private extern(C) int match(GtkEntryCompletion*, const(char)* k, GtkTreeIter* it
     // Netting the variables from C.
     auto searchbar = cast(SearchBar)t;
     auto key       = fromStringz(k);
-    auto iter      = new TreeIter(it);
+    auto iter      = new TreeIter(it, false);
 
-    // Modify the entry.
     iter.setModel(searchbar.completionList);
-    searchbar.mainOption.setModel(searchbar.completionList);
-
-    if (iter.getValueString(0) == searchbar.mainOption.getValueString(0)) {
-        return 1;
-    } else {
-        const auto index = indexOf(iter.getValueString(1), key, No.caseSensitive);
-        return index != -1 ? 1 : 0;
-    }
+    auto title = iter.getValueString(0);
+    auto uri   = iter.getValueString(1);
+    return indexOf(title, key) != -1 || indexOf(uri, key) != -1;
 }
