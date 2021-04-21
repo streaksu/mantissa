@@ -29,6 +29,6 @@ final class About : AboutDialog {
             _("The d2sqlite3 team https://github.com/dlang-community/d2sqlite3 for the superb library")
         ]);
 
-        showAll();
+        show();
     }
 }

@@ -155,7 +155,9 @@ final class Options : MenuButton {
 
     // Called when the about item is deemed active.
     private void aboutSignal(MenuItem) {
-        new About();
+        auto a = new About();
+        a.run();
+        a.destroy();
     }
 
     // Activated when a history item is chosen.
