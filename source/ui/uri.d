@@ -8,7 +8,7 @@ enum URIType {
     LocalFile,   /// A local file or directory.
     XDGOpen,     /// External apps and links to be opened with xdgopen.
     WebResource, /// Points to an online site.
-    Search,      /// Phrase for search using a search engine.
+    Search       /// Phrase for search using a search engine.
 }
 
 /// Guess the nature of a URI.

@@ -37,7 +37,7 @@ For more information on `dub`'s command-line options one can go
 The recommended procedure to build Mantissa in a linux system would be:
 
 ```bash
-dub build --build=release
-dub test
+dub build --build=release-nobounds
+dub test # If you feel so inclined to test.
 ./linux-install.sh # Accepts PREFIX and DESTDIR as environment variables.
 ```

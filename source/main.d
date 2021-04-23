@@ -34,7 +34,7 @@ final class MainApplication : Application {
         size_t i = 0;
         auto win = cast(Browser)getActiveWindow();
         if (win is null) {
-            win = new Browser(this, files[0].getUri);
+            win = new Browser(this, files[0].getUri());
             addWindow(win);
             i++;
         }
