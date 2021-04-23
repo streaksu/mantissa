@@ -16,4 +16,4 @@ immutable programIcon = "mantissa";
 immutable programName = "Mantissa";
 
 /// Version of the application.
-immutable programVersion = "1.3.0";
+immutable programVersion = "1.4.0";

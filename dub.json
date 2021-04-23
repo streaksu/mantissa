@@ -10,7 +10,7 @@
 	},
 	"description": "A wrapper for the webkit2gtk library using GtkD",
 	"homepage": "https://github.com/streaksu/mantissa",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"license": "BSL-1.0",
 	"name": "mantissa",
 	"targetType": "executable"
