@@ -13,7 +13,7 @@ import gtk.Image:              Image, IconSize;
 import ui.translations:        _;
 import ui.about:               About;
 import ui.preferences:         Preferences;
-import globals:                programName;
+import config:                 programName;
 import storage.history;        // A lot, might as well be all.
 
 /// Options button for the headerbar.

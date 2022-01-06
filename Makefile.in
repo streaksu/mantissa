@@ -1,0 +1,38 @@
+# Some useful constants.
+CMAGENTA      := $(shell tput setaf 5)
+CRESET        := $(shell tput sgr0)
+TARGET        := mantissa
+RESOURCES_DIR := resources
+
+# Directories for install.
+DESTDIR ?=
+PREFIX  ?= @prefix@
+
+# Where the fun begins!
+.PHONY: all test clean distclean install
+
+all: $(TARGET)
+
+$(TARGET):
+	@echo "$(CMAGENTA)Building$(CRESET) $@"
+	@dub build
+
+clean:
+	@rm -rf mantissa
+
+distclean: clean
+	@rm -rf configure Makefile config.log config.status autom4te* \
+		$(SOURCEDIR)/config.d .dub dub.selections.json
+
+install: $(TARGET)
+	@install -d "${DESTDIR}${PREFIX}/bin"
+	@install -d "${DESTDIR}${PREFIX}/share/applications"
+	@install -d "${DESTDIR}${PREFIX}/share/icons/hicolor/scalable/apps"
+	@install $(TARGET) "${DESTDIR}${PREFIX}/bin"
+	@install -m 644 $(RESOURCES_DIR)/entry.desktop "${DESTDIR}${PREFIX}/share/applications/org.streaksu.mantissa.desktop"
+	@install -m 644 $(RESOURCES_DIR)/icon.svg      "${DESTDIR}${PREFIX}/share/icons/hicolor/scalable/apps/mantissa.svg"
+
+uninstall:
+	@rm -rf "${DESTDIR}${PREFIX}/bin/mantissa"
+	@rm -rf "${DESTDIR}${PREFIX}/share/applications/org.streaksu.mantissa.desktop"
+	@rm -rf "${DESTDIR}${PREFIX}/share/icons/hicolor/scalable/apps/mantissa.svg"

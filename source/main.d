@@ -12,7 +12,7 @@ final class MainApplication : Application {
     /// Will create the object and set up the proper signals.
     this() {
         import gio.c.types: ApplicationFlags;
-        import globals:     programID;
+        import config:      programID;
 
         super(programID, ApplicationFlags.HANDLES_OPEN | ApplicationFlags.NON_UNIQUE);
         addOnActivate(&activateSignal);

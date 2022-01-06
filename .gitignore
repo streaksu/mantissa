@@ -14,3 +14,9 @@ mantissa-test-*
 *.obj
 *.lst
 dub.selections.json
+config.log
+config.status
+configure
+dub.json
+Makefile
+autom4te.cache

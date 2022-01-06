@@ -16,7 +16,7 @@ shared static this() {
     import glib.Util:             Util;
     import glib.Bytes:            Bytes;
     import webkit2.CookieManager: CookieAcceptPolicy, CookiePersistentStorage;
-    import globals:               programDir;
+    import config:                programDir;
     import storage.configdir:     findConfigFile;
 
     // Setup the default webcontext.

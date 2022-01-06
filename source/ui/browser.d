@@ -11,7 +11,7 @@ import gtk.c.types:            AccelFlags, ReliefStyle;
 import gobject.DClosure:       DClosure;
 import gtk.HeaderBar:          HeaderBar;
 import gtk.Button:             Button;
-import globals:                programName;
+import config:                 programName;
 import gtk.Entry:              Entry;
 import gtk.Widget:             Widget;
 import gtk.Notebook:           Notebook;

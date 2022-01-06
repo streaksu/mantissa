@@ -8,7 +8,7 @@ import std.file:  exists, mkdirRecurse, write;
 private shared string configPath;
 
 shared static this() {
-    import globals: programDir;
+    import config: programDir;
 
     auto path = Util.buildFilename([Util.getUserDataDir(), programDir]);
     if (!exists(path)) {
