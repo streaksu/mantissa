@@ -119,7 +119,7 @@ final class Preferences : Window {
         cookiePolicy.showAll();
 
         auto userAgentBox   = new HBox(false, 10);
-        auto userAgentLabel = new Label(_("Cookie Policy"));
+        auto userAgentLabel = new Label(_("User Agent"));
         userAgentLabel.setWidthChars(15);
         userAgentLabel.setXalign(0);
         userAgentBox.packStart(userAgentLabel, false, false, 0);
